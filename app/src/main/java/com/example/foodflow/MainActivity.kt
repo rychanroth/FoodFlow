@@ -19,7 +19,9 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             FoodFlowTheme {
-
+                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                    Text("Here I am", modifier = Modifier.padding(innerPadding))
+                }
             }
         }
     }
