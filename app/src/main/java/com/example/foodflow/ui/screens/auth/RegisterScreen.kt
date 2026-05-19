@@ -24,10 +24,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.foodflow.data.model.AuthState
+import com.example.foodflow.data.model.UserRole
 import com.example.foodflow.ui.viewmodel.AuthViewModel
 
 @Composable
@@ -44,16 +46,20 @@ fun RegisterScreen(
     )
 }
 
+// Fix: Rendering Problem
+// Problem: You can't preview a function if it has viewModel as the parameter
+// because viewModel.Firebase related instances are not initialized yet
+
 @Composable
 fun RegisterContent(
     authState: AuthState,
-    onRegister: (String, String, String) -> Unit
+    onRegister: (String, String, UserRole) -> Unit
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var selectedRole by remember { mutableStateOf("CUSTOMER") }
+    var selectedRole by remember { mutableStateOf(UserRole.CUSTOMER) }
 
-    val roles = listOf("CUSTOMER", "RESTAURANT", "DRIVER")
+    val roles = UserRole.entries
 
     Column(
         modifier = Modifier
@@ -103,7 +109,7 @@ fun RegisterContent(
                         (selectedRole == role), null
                         // Null because the Row handles the click
                     )
-                    Text(role)
+                    Text(role.name)
                 }
             }
         }

@@ -4,6 +4,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.foodflow.data.model.AuthState
+import com.example.foodflow.data.model.UserRole
 import com.example.foodflow.data.repository.AuthRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,7 +17,7 @@ class AuthViewModel: ViewModel() {
     private val _authState = MutableStateFlow<AuthState>(AuthState.Idle)
     val authState: StateFlow<AuthState> = _authState.asStateFlow()
 
-    fun register(email: String, password: String, role: String) {
+    fun register(email: String, password: String, role: UserRole) {
         if (email.isBlank() || password.isBlank()) {
             _authState.value = AuthState.Error("Fields cannot be empty!")
             return

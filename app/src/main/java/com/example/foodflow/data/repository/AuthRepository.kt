@@ -9,7 +9,7 @@ class AuthRepository {
     private val auth = FirebaseAuth.getInstance()
     private val firestore = FirebaseFirestore.getInstance()
 
-    suspend fun registerUser(email: String, password: String, role: String): Result<AppUser> {
+    suspend fun registerUser(email: String, password: String, role: UserRole): Result<AppUser> {
         return try {
             val authResult = auth.createUserWithEmailAndPassword(email, password).await()
             val uid = authResult?.user?.uid ?: throw Exception("User creation failed!")
