@@ -3,6 +3,7 @@ package com.example.foodflow.ui.viewmodel
 import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.foodflow.data.model.AuthState
 import com.example.foodflow.data.repository.AuthRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -12,24 +13,24 @@ import kotlinx.coroutines.launch
 class AuthViewModel: ViewModel() {
     private val repository = AuthRepository()
 
-    private val _authState = MutableStateFlow<String>("idle")
-    val authState: StateFlow<String> = _authState.asStateFlow()
+    private val _authState = MutableStateFlow<AuthState>(AuthState.Idle)
+    val authState: StateFlow<AuthState> = _authState.asStateFlow()
 
     fun register(email: String, password: String, role: String) {
         if (email.isBlank() || password.isBlank()) {
-            _authState.value =  "error_empty_fields"
+            _authState.value = AuthState.Error("Fields cannot be empty!")
             return
         }
 
-        _authState.value = "loading"
+        _authState.value = AuthState.Loading
 
         viewModelScope.launch {
             val result = repository.registerUser(email, password, role)
 
             if (result.isSuccess) {
-                _authState.value = "success"
+                _authState.value = AuthState.Success(role)
             } else {
-                _authState.value = "error: ${result.exceptionOrNull()?.message}"
+                _authState.value = AuthState.Error(result.exceptionOrNull()?.message ?: "Unknown Error")
             }
         }
     }
