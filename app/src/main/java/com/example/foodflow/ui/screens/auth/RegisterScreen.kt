@@ -17,6 +17,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -31,6 +32,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.foodflow.data.model.AuthState
 import com.example.foodflow.data.model.UserRole
+import com.example.foodflow.ui.Route
 import com.example.foodflow.ui.viewmodel.AuthViewModel
 
 @Composable
@@ -39,6 +41,21 @@ fun RegisterScreen(
     authViewModel: AuthViewModel = viewModel()
 ) {
     val authState by authViewModel.authState.collectAsState()
+
+    LaunchedEffect(authState) {
+        if (authState is AuthState.Success) {
+            val successState = authState as AuthState.Success
+            val destination = when (successState.role) {
+                UserRole.CUSTOMER -> Route.CustomerHome.route
+                UserRole.RESTAURANT -> Route.RestaurantHome.route
+                UserRole.DRIVER -> Route.DriverHome.route
+            }
+
+            navController.navigate(destination) {
+                popUpTo(Route.Register.route) { inclusive = true }
+            }
+        }
+    }
 
     RegisterContent(
         authState = authState,

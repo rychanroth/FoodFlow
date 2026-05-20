@@ -1,6 +1,7 @@
 package com.example.foodflow.data.repository
 
 import com.example.foodflow.data.model.AppUser
+import com.example.foodflow.data.model.UserRole
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await

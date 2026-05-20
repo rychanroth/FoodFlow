@@ -20,7 +20,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             FoodFlowTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Text("Here I am", modifier = Modifier.padding(innerPadding))
+                    AppNavigation(modifier = Modifier.padding(innerPadding))
                 }
             }
         }
