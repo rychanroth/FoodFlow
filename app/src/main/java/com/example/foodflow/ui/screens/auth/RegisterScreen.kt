@@ -39,7 +39,7 @@ import com.example.foodflow.ui.viewmodel.AuthViewModel
 @Composable
 fun RegisterScreen(
     navController: NavController,
-    authViewModel: AuthViewModel = viewModel()
+    authViewModel: AuthViewModel
 ) {
     val authState by authViewModel.authState.collectAsState()
 

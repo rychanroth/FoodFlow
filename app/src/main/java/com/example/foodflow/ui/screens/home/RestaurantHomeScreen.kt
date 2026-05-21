@@ -17,28 +17,42 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import com.example.foodflow.data.model.AuthState
 import com.example.foodflow.data.model.MenuItem
+import com.example.foodflow.ui.Route
 import com.example.foodflow.ui.viewmodel.AuthViewModel
 import com.example.foodflow.ui.viewmodel.MenuViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RestaurantHomeScreen(
-    menuViewModel: MenuViewModel = viewModel(),
-    authViewModel: AuthViewModel = viewModel()
+    menuViewModel: MenuViewModel,
+    authViewModel: AuthViewModel,
+    navController: NavController
 ) {
     // Collect the real-time menu state from the ViewModel
     val menuItems by menuViewModel.menuItems.collectAsState()
 
+    val authState by authViewModel.authState.collectAsState()
+
+    LaunchedEffect(authState) {
+        if (authState is AuthState.Idle) {
+            navController.navigate(Route.Login.route) {
+                popUpTo(0) { inclusive = true }
+            }
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Restaurant Dashboard") },
+                title = { Text("Restaurant Dashboard 🍳", style = MaterialTheme.typography.headlineMedium) },
                 actions = {
                     IconButton(onClick = {
                         authViewModel.logout()
                     }) {
-                        Icon(Icons.Default.Logout, contentDescription = "Logout")
+                        Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Logout")
                     }
                 }
             )
@@ -57,12 +71,6 @@ fun RestaurantHomeScreen(
                 .padding(innerPadding)
                 .padding(16.dp)
         ) {
-            Text(
-                text = "Restaurant Dashboard 🍳",
-                style = MaterialTheme.typography.headlineMedium
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-
             if (menuItems.isEmpty()) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
