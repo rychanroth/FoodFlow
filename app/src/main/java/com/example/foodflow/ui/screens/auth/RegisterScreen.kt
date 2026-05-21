@@ -16,6 +16,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -61,7 +62,8 @@ fun RegisterScreen(
         authState = authState,
         onRegister = { email, password, role ->
             authViewModel.register(email, password, role)
-        }
+        },
+        onNavigateToLogin = { navController.navigate(Route.Login.route) }
     )
 }
 
@@ -72,7 +74,8 @@ fun RegisterScreen(
 @Composable
 fun RegisterContent(
     authState: AuthState,
-    onRegister: (String, String, UserRole) -> Unit
+    onRegister: (String, String, UserRole) -> Unit,
+    onNavigateToLogin: () -> Unit
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -151,6 +154,11 @@ fun RegisterContent(
             }
         }
 
+        Spacer(modifier = Modifier.height(16.dp))
+        TextButton(onClick = onNavigateToLogin ) {
+            Text("Already have an account? Login")
+        }
+
         // Error Handling
         if (authState is AuthState.Error) {
             Spacer(modifier = Modifier.height(8.dp))
@@ -167,6 +175,7 @@ fun RegisterContent(
 fun RegisterScreenPreview() {
     RegisterContent(
         authState = AuthState.Idle,
-        onRegister = { _, _, _ -> }
+        onRegister = { _, _, _ -> },
+        onNavigateToLogin = {}
     )
 }
