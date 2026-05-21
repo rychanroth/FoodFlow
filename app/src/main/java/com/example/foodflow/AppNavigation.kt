@@ -8,6 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.foodflow.ui.Route
+import com.example.foodflow.ui.screens.auth.ForgotPasswordScreen
 import com.example.foodflow.ui.screens.auth.LoginScreen
 import com.example.foodflow.ui.screens.auth.RegisterScreen
 import com.example.foodflow.ui.screens.home.CustomerHomeScreen
@@ -34,6 +35,10 @@ fun AppNavigation(
 
         composable(Route.Register.route) {
             RegisterScreen(navController, authViewModel)
+        }
+
+        composable(Route.ForgotPassword.route) {
+            ForgotPasswordScreen(navController, authViewModel)
         }
 
         composable(Route.CustomerHome.route) {

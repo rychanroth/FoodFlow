@@ -88,8 +88,7 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Forgot Password (Simple implementation: triggers email reset)
-        TextButton(onClick = { authViewModel.sendPasswordReset(email) }) {
+        TextButton(onClick = { navController.navigate(Route.ForgotPassword.route) }) {
             Text("Forgot Password?")
         }
 
