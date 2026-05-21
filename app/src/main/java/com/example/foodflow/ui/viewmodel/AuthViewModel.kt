@@ -11,15 +11,16 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class AuthViewModel: ViewModel() {
+class AuthViewModel : ViewModel() {
+
     private val repository = AuthRepository()
 
     private val _authState = MutableStateFlow<AuthState>(AuthState.Idle)
-    val authState: StateFlow<AuthState> = _authState.asStateFlow()
+    val authState: StateFlow<AuthState> = _authState
 
     fun register(email: String, password: String, role: UserRole) {
         if (email.isBlank() || password.isBlank()) {
-            _authState.value = AuthState.Error("Fields cannot be empty!")
+            _authState.value = AuthState.Error("Fields cannot be empty")
             return
         }
 
@@ -27,12 +28,53 @@ class AuthViewModel: ViewModel() {
 
         viewModelScope.launch {
             val result = repository.registerUser(email, password, role)
-
             if (result.isSuccess) {
                 _authState.value = AuthState.Success(role)
             } else {
-                _authState.value = AuthState.Error(result.exceptionOrNull()?.message ?: "Unknown Error")
+                _authState.value = AuthState.Error(result.exceptionOrNull()?.message ?: "Unknown error")
             }
         }
+    }
+
+    fun login(email: String, password: String) {
+        if (email.isBlank() || password.isBlank()) {
+            _authState.value = AuthState.Error("Fields cannot be empty")
+            return
+        }
+
+        _authState.value = AuthState.Loading
+
+        viewModelScope.launch {
+            val result = repository.login(email, password)
+            if (result.isSuccess) {
+                val role = result.getOrNull() ?: UserRole.CUSTOMER
+                _authState.value = AuthState.Success(role)
+            } else {
+                _authState.value = AuthState.Error(result.exceptionOrNull()?.message ?: "Unknown error")
+            }
+        }
+    }
+
+    fun sendPasswordReset(email: String) {
+        if (email.isBlank()) {
+            _authState.value = AuthState.Error("Please enter your email")
+            return
+        }
+
+        _authState.value = AuthState.Loading
+
+        viewModelScope.launch {
+            val result = repository.sendPasswordResetEmail(email)
+            if (result.isSuccess) {
+                _authState.value = AuthState.PasswordResetSent
+            } else {
+                _authState.value = AuthState.Error(result.exceptionOrNull()?.message ?: "Unknown error")
+            }
+        }
+    }
+
+    fun logout() {
+        repository.logout()
+        _authState.value = AuthState.Idle // Reset state so they go back to login
     }
 }
