@@ -46,7 +46,7 @@ fun AppNavigation(
         }
 
         composable(Route.RestaurantHome.route) {
-            RestaurantHomeScreen(menuViewModel, authViewModel, navController)
+            RestaurantHomeScreen(navController, menuViewModel, authViewModel)
         }
 
         composable(Route.DriverHome.route) {

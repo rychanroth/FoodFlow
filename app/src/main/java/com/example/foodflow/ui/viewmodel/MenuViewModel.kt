@@ -38,15 +38,14 @@ class MenuViewModel : ViewModel() {
         return auth.currentUser?.uid
     }
 
-    // Add a dummy item for now (we'll build the UI form next)
-    fun addDummyItem() {
+    fun addNewItem(name: String, description: String, price: Double) {
         val restaurantId = getCurrentUserId() ?: return
         viewModelScope.launch {
             val newItem = MenuItem(
                 restaurantId = restaurantId,
-                name = "Test Burger",
-                description = "A delicious test burger",
-                price = 9.99
+                name = name,
+                description = description,
+                price = price
             )
             repository.addMenuItem(newItem)
         }
