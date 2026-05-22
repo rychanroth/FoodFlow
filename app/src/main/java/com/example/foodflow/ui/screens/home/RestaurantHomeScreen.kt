@@ -223,11 +223,28 @@ fun MenuItemCard(item: MenuItem, onEditClick: () -> Unit, onDeleteClick: () -> U
 @Composable
 fun RestauarntHomeContentPreview() {
     RestaurantHomeContent(
-        menuItems = TODO(),
-        onLogoutClick = TODO(),
-        onAddItemClick = TODO(),
-        onEditItemClick = TODO(),
-        onDeleteItemClick = TODO()
+        menuItems = listOf(
+            MenuItem(id = "1", name = "Pizza", description = "Delicious cheese pizza", price = 12.99),
+            MenuItem(id = "2", name = "Burger", description = "Juicy beef burger", price = 8.99)
+        ),
+        onLogoutClick = {},
+        onAddItemClick = {},
+        onEditItemClick = {},
+        onDeleteItemClick = {}
     )
 }
 
+@Preview(showBackground = true)
+@Composable
+fun MenuItemCardPreview() {
+    MenuItemCard(
+        item = MenuItem(
+            id = "1",
+            name = "Sample Item",
+            description = "This is a sample description",
+            price = 9.99
+        ),
+        onEditClick = {},
+        onDeleteClick = {}
+    ) 
+}
