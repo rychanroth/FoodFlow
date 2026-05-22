@@ -1,5 +1,8 @@
 package com.example.foodflow.ui.screens.home
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -12,10 +15,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.foodflow.data.model.AuthState
 import com.example.foodflow.data.model.MenuItem
 import com.example.foodflow.ui.Route
@@ -32,13 +37,23 @@ fun RestaurantHomeScreen(
     val menuItems by menuViewModel.menuItems.collectAsState()
     val authState by authViewModel.authState.collectAsState()
 
-    // Hoisted Dialog State
+    // Dialog State
     var isDialogOpen by remember { mutableStateOf(false) }
-    var editingItem by remember { mutableStateOf<MenuItem?>(null) } // Null = Add Mode, Not Null = Edit Mode
-
+    var editingItem by remember { mutableStateOf<MenuItem?>(null) }
     var itemName by remember { mutableStateOf("") }
     var itemDescription by remember { mutableStateOf("") }
     var itemPrice by remember { mutableStateOf("") }
+
+    // NEW: Image URI State
+    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+
+    // NEW: The Activity Result Launcher for picking images
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        // When the user picks an image, update our hoisted state
+        selectedImageUri = uri
+    }
 
     LaunchedEffect(authState) {
         if (authState is AuthState.Idle) {
@@ -48,16 +63,15 @@ fun RestaurantHomeScreen(
         }
     }
 
-    // Helper function to clear dialog state
     fun clearDialogState() {
         isDialogOpen = false
         editingItem = null
         itemName = ""
         itemDescription = ""
         itemPrice = ""
+        selectedImageUri = null // Clear image too
     }
 
-    // Show Dialog when triggered
     if (isDialogOpen) {
         MenuItemDialog(
             isEditMode = editingItem != null,
@@ -67,20 +81,18 @@ fun RestaurantHomeScreen(
             onDescriptionChange = { itemDescription = it },
             price = itemPrice,
             onPriceChange = { itemPrice = it },
+            imageUri = selectedImageUri,
+            onPickImageClick = { galleryLauncher.launch("image/*") }, // Triggers the gallery
             onDismiss = { clearDialogState() },
             onConfirm = {
                 val priceDouble = itemPrice.toDoubleOrNull() ?: 0.0
                 if (editingItem == null) {
-                    // Add Mode
-                    menuViewModel.addNewItem(itemName, itemDescription, priceDouble)
+                    menuViewModel.addNewItem(itemName, itemDescription, priceDouble, selectedImageUri)
                 } else {
-                    // Edit Mode
-                    val updatedItem = editingItem!!.copy(
-                        name = itemName,
-                        description = itemDescription,
-                        price = priceDouble
+                    menuViewModel.updateItem(
+                        updatedItem = editingItem!!.copy(name = itemName, description = itemDescription, price = priceDouble),
+                        newImageUri = selectedImageUri // Pass new URI if they changed it
                     )
-                    menuViewModel.updateItem(updatedItem)
                 }
                 clearDialogState()
             }
@@ -91,15 +103,17 @@ fun RestaurantHomeScreen(
         menuItems = menuItems,
         onLogoutClick = { authViewModel.logout() },
         onAddItemClick = {
-            clearDialogState() // Ensure clean state
+            clearDialogState()
             isDialogOpen = true
         },
         onEditItemClick = { item ->
-            // Populate state with existing item data
             editingItem = item
             itemName = item.name
             itemDescription = item.description
             itemPrice = item.price.toString()
+            // If the item already has an image, you could convert the URL back to a URI for the preview,
+            // but Coil's AsyncImage handles URLs too! Let's just pass the existing URL as a URI.
+            selectedImageUri = item.imageUrl?.let { Uri.parse(it) }
             isDialogOpen = true
         },
         onDeleteItemClick = { menuViewModel.deleteItem(it) }
@@ -175,6 +189,17 @@ fun MenuItemCard(item: MenuItem, onEditClick: () -> Unit, onDeleteClick: () -> U
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // Show Image from URL if it exists
+            if (item.imageUrl.isNotEmpty()) {
+                AsyncImage(
+                    model = item.imageUrl,
+                    contentDescription = item.name,
+                    modifier = Modifier.size(60.dp),
+                    contentScale = ContentScale.Crop
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+            }
+
             Column(modifier = Modifier.weight(1f)) {
                 Text(item.name, style = MaterialTheme.typography.titleLarge)
                 Text(item.description, style = MaterialTheme.typography.bodyMedium)
@@ -183,18 +208,10 @@ fun MenuItemCard(item: MenuItem, onEditClick: () -> Unit, onDeleteClick: () -> U
 
             Row {
                 IconButton(onClick = onEditClick) {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = "Edit",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
+                    Icon(Icons.Default.Edit, "Edit", tint = MaterialTheme.colorScheme.primary)
                 }
                 IconButton(onClick = onDeleteClick) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Delete",
-                        tint = MaterialTheme.colorScheme.error
-                    )
+                    Icon(Icons.Default.Delete, "Delete", tint = MaterialTheme.colorScheme.error)
                 }
             }
         }
@@ -213,3 +230,4 @@ fun RestauarntHomeContentPreview() {
         onDeleteItemClick = TODO()
     )
 }
+
