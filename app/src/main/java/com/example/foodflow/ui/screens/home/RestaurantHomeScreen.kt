@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -18,11 +19,10 @@ import androidx.navigation.NavController
 import com.example.foodflow.data.model.AuthState
 import com.example.foodflow.data.model.MenuItem
 import com.example.foodflow.ui.Route
-import com.example.foodflow.ui.components.AddMenuItemDialog
+import com.example.foodflow.ui.components.MenuItemDialog
 import com.example.foodflow.ui.viewmodel.AuthViewModel
 import com.example.foodflow.ui.viewmodel.MenuViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RestaurantHomeScreen(
     navController: NavController,
@@ -32,13 +32,14 @@ fun RestaurantHomeScreen(
     val menuItems by menuViewModel.menuItems.collectAsState()
     val authState by authViewModel.authState.collectAsState()
 
-    // Dialog state
-    var showDialog by remember { mutableStateOf(false) }
+    // Hoisted Dialog State
+    var isDialogOpen by remember { mutableStateOf(false) }
+    var editingItem by remember { mutableStateOf<MenuItem?>(null) } // Null = Add Mode, Not Null = Edit Mode
+
     var itemName by remember { mutableStateOf("") }
     var itemDescription by remember { mutableStateOf("") }
     var itemPrice by remember { mutableStateOf("") }
 
-    // Auth navigation logic
     LaunchedEffect(authState) {
         if (authState is AuthState.Idle) {
             navController.navigate(Route.Login.route) {
@@ -47,51 +48,77 @@ fun RestaurantHomeScreen(
         }
     }
 
+    // Helper function to clear dialog state
+    fun clearDialogState() {
+        isDialogOpen = false
+        editingItem = null
+        itemName = ""
+        itemDescription = ""
+        itemPrice = ""
+    }
+
     // Show Dialog when triggered
-    if (showDialog) {
-        AddMenuItemDialog(
+    if (isDialogOpen) {
+        MenuItemDialog(
+            isEditMode = editingItem != null,
             name = itemName,
             onNameChange = { itemName = it },
             description = itemDescription,
             onDescriptionChange = { itemDescription = it },
             price = itemPrice,
             onPriceChange = { itemPrice = it },
-            onDismiss = {
-                showDialog = false
-                // Clear fields on dismiss
-                itemName = ""; itemDescription = ""; itemPrice = ""
-            },
+            onDismiss = { clearDialogState() },
             onConfirm = {
                 val priceDouble = itemPrice.toDoubleOrNull() ?: 0.0
-                menuViewModel.addNewItem(itemName, itemDescription, priceDouble)
-                showDialog = false
-                // Clear fields on confirm
-                itemName = ""; itemDescription = ""; itemPrice = ""
+                if (editingItem == null) {
+                    // Add Mode
+                    menuViewModel.addNewItem(itemName, itemDescription, priceDouble)
+                } else {
+                    // Edit Mode
+                    val updatedItem = editingItem!!.copy(
+                        name = itemName,
+                        description = itemDescription,
+                        price = priceDouble
+                    )
+                    menuViewModel.updateItem(updatedItem)
+                }
+                clearDialogState()
             }
         )
     }
 
-    // Pass state and events down to the stateless UI
     RestaurantHomeContent(
         menuItems = menuItems,
         onLogoutClick = { authViewModel.logout() },
-        onAddItemClick = { showDialog = true },
+        onAddItemClick = {
+            clearDialogState() // Ensure clean state
+            isDialogOpen = true
+        },
+        onEditItemClick = { item ->
+            // Populate state with existing item data
+            editingItem = item
+            itemName = item.name
+            itemDescription = item.description
+            itemPrice = item.price.toString()
+            isDialogOpen = true
+        },
         onDeleteItemClick = { menuViewModel.deleteItem(it) }
     )
 }
 
-@ExperimentalMaterial3Api
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RestaurantHomeContent(
     menuItems: List<MenuItem>,
     onLogoutClick: () -> Unit,
     onAddItemClick: () -> Unit,
+    onEditItemClick: (MenuItem) -> Unit,
     onDeleteItemClick: (String) -> Unit
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Restaurant Dashboard 🍳") },
+                title = { Text("Restaurant Dashboard") },
                 actions = {
                     IconButton(onClick = onLogoutClick) {
                         Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Logout")
@@ -125,6 +152,7 @@ fun RestaurantHomeContent(
                     items(menuItems, key = { it.id }) { item ->
                         MenuItemCard(
                             item = item,
+                            onEditClick = { onEditItemClick(item) },
                             onDeleteClick = { onDeleteItemClick(item.id) }
                         )
                     }
@@ -135,7 +163,7 @@ fun RestaurantHomeContent(
 }
 
 @Composable
-fun MenuItemCard(item: MenuItem, onDeleteClick: () -> Unit) {
+fun MenuItemCard(item: MenuItem, onEditClick: () -> Unit, onDeleteClick: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -153,12 +181,21 @@ fun MenuItemCard(item: MenuItem, onDeleteClick: () -> Unit) {
                 Text("$${item.price}", style = MaterialTheme.typography.bodyLarge)
             }
 
-            IconButton(onClick = onDeleteClick) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = "Delete",
-                    tint = MaterialTheme.colorScheme.error
-                )
+            Row {
+                IconButton(onClick = onEditClick) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Edit",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+                IconButton(onClick = onDeleteClick) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Delete",
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
             }
         }
     }
@@ -169,9 +206,10 @@ fun MenuItemCard(item: MenuItem, onDeleteClick: () -> Unit) {
 @Composable
 fun RestauarntHomeContentPreview() {
     RestaurantHomeContent(
-        emptyList(),
-        onLogoutClick = {},
-        onAddItemClick = {},
-        onDeleteItemClick = {}
+        menuItems = TODO(),
+        onLogoutClick = TODO(),
+        onAddItemClick = TODO(),
+        onEditItemClick = TODO(),
+        onDeleteItemClick = TODO()
     )
 }

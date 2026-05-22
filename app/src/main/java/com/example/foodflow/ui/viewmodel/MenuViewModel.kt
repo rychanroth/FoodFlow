@@ -51,6 +51,13 @@ class MenuViewModel : ViewModel() {
         }
     }
 
+    // Update an item
+    fun updateItem(updatedItem: MenuItem) {
+        viewModelScope.launch {
+            repository.updateMenuItem(updatedItem)
+        }
+    }
+
     // Delete an item
     fun deleteItem(itemId: String) {
         viewModelScope.launch {

@@ -10,7 +10,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun AddMenuItemDialog(
+fun MenuItemDialog(
+    isEditMode: Boolean,
     name: String,
     onNameChange: (String) -> Unit,
     description: String,
@@ -22,7 +23,9 @@ fun AddMenuItemDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Add New Menu Item") },
+        title = {
+            Text(if (isEditMode) "Edit Menu Item" else "Add New Menu Item")
+        },
         text = {
             Column {
                 OutlinedTextField(
@@ -51,9 +54,9 @@ fun AddMenuItemDialog(
         confirmButton = {
             TextButton(
                 onClick = onConfirm,
-                enabled = name.isNotBlank() // Basic validation
+                enabled = name.isNotBlank()
             ) {
-                Text("Add")
+                Text(if (isEditMode) "Save" else "Add")
             }
         },
         dismissButton = {
@@ -67,5 +70,15 @@ fun AddMenuItemDialog(
 @Preview(showBackground = true)
 @Composable
 fun AddMenuItemDialogPreview() {
-    AddMenuItemDialog("", { s -> }, "", { s -> }, "", { s -> }, {}, {})
+    MenuItemDialog(
+        isEditMode = TODO(),
+        name = TODO(),
+        onNameChange = TODO(),
+        description = TODO(),
+        onDescriptionChange = TODO(),
+        price = TODO(),
+        onPriceChange = TODO(),
+        onDismiss = TODO(),
+        onConfirm = TODO()
+    )
 }
