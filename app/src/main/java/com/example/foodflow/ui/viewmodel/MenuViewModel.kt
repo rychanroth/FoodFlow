@@ -1,10 +1,10 @@
 package com.example.foodflow.ui.viewmodel
 
+import android.net.Uri // ADD THIS IMPORT
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.foodflow.data.model.MenuItem
 import com.example.foodflow.data.repository.MenuRepository
-import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,52 +13,56 @@ import kotlinx.coroutines.launch
 class MenuViewModel : ViewModel() {
 
     private val repository = MenuRepository()
-    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 
-    // State for the list of menu items
     private val _menuItems = MutableStateFlow<List<MenuItem>>(emptyList())
     val menuItems: StateFlow<List<MenuItem>> = _menuItems.asStateFlow()
 
+    private val currentUserId: String?
+        get() = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
+
     init {
-        // For MVP, we are assuming the logged-in Restaurant's UID is their restaurantId.
-        // We will fetch the actual UID from Firebase Auth.
-        val currentRestaurantId = getCurrentUserId()
-        if (currentRestaurantId != null) {
-            // Start listening to the menu items in real-time
+        currentUserId?.let { restaurantId ->
             viewModelScope.launch {
-                repository.getMenuItems(currentRestaurantId).collect { items ->
+                repository.getMenuItems(restaurantId).collect { items ->
                     _menuItems.value = items
                 }
             }
         }
     }
 
-    // Helper to get current user ID
-    private fun getCurrentUserId(): String? {
-        return auth.currentUser?.uid
-    }
-
-    fun addNewItem(name: String, description: String, price: Double) {
-        val restaurantId = getCurrentUserId() ?: return
+    fun addNewItem(name: String, description: String, price: Double, imageUri: Uri?) {
+        val restaurantId = currentUserId ?: return
         viewModelScope.launch {
+            // 1. Upload image if provided
+            val imageUrl = imageUri?.let {
+                repository.uploadImage(it).getOrNull() // Get URL if success, null if fail
+            } ?: "" // Default to empty string if no image
+
+            // 2. Create and save the menu item
             val newItem = MenuItem(
                 restaurantId = restaurantId,
                 name = name,
                 description = description,
-                price = price
+                price = price,
+                imageUrl = imageUrl
             )
             repository.addMenuItem(newItem)
         }
     }
 
-    // Update an item
-    fun updateItem(updatedItem: MenuItem) {
+
+    fun updateItem(updatedItem: MenuItem, newImageUri: Uri?) {
         viewModelScope.launch {
-            repository.updateMenuItem(updatedItem)
+            // If user picked a new image, upload it. Otherwise, keep the existing URL.
+            val finalImageUrl = newImageUri?.let {
+                repository.uploadImage(it).getOrNull()
+            } ?: updatedItem.imageUrl
+
+            val itemToSave = updatedItem.copy(imageUrl = finalImageUrl)
+            repository.updateMenuItem(itemToSave)
         }
     }
 
-    // Delete an item
     fun deleteItem(itemId: String) {
         viewModelScope.launch {
             repository.deleteMenuItem(itemId)
