@@ -8,9 +8,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.ReceiptLong
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -116,7 +118,8 @@ fun RestaurantHomeScreen(
             selectedImageUri = null
             isDialogOpen = true
         },
-        onDeleteItemClick = { menuViewModel.deleteMenuItem(it) }
+        onDeleteItemClick = { menuViewModel.deleteMenuItem(it) },
+        onNavigateToRestaurantOrders = { navController.navigate(Route.RestaurantOrders.route) }
     )
 }
 
@@ -127,13 +130,17 @@ fun RestaurantHomeContent(
     onLogoutClick: () -> Unit,
     onAddItemClick: () -> Unit,
     onEditItemClick: (MenuItem) -> Unit,
-    onDeleteItemClick: (String) -> Unit
+    onDeleteItemClick: (String) -> Unit,
+    onNavigateToRestaurantOrders: () -> Unit
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Restaurant Dashboard") },
                 actions = {
+                    IconButton(onClick = onNavigateToRestaurantOrders) {
+                        Icon(Icons.AutoMirrored.Filled.ReceiptLong, contentDescription = "Orders")
+                    }
                     IconButton(onClick = onLogoutClick) {
                         Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Logout")
                     }
@@ -230,7 +237,8 @@ fun RestauarntHomeContentPreview() {
         onLogoutClick = {},
         onAddItemClick = {},
         onEditItemClick = {},
-        onDeleteItemClick = {}
+        onDeleteItemClick = {},
+        onNavigateToRestaurantOrders = {}
     )
 }
 
