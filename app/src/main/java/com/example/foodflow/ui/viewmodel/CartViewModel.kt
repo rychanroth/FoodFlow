@@ -72,10 +72,11 @@ class CartViewModel : ViewModel() {
 
         viewModelScope.launch {
             val restaurantId = currentItems.first().menuItem.restaurantId
+            val itemNames = currentItems.map { it.menuItem.name }
             val newOrder = Order(
                 customerId = currentUserId,
                 restaurantId = restaurantId,
-                items = currentItems,
+                items = itemNames,
                 totalAmount = getTotalPrice()
             )
             val result = repository.placeOrder(newOrder)
