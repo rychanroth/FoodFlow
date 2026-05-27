@@ -89,7 +89,7 @@ fun RestaurantHomeScreen(
                 if (editingItem == null) {
                     menuViewModel.addNewItem(itemName, itemDescription, priceDouble, selectedImageUri)
                 } else {
-                    menuViewModel.updateItem(
+                    menuViewModel.updateMenuItem(
                         updatedItem = editingItem!!.copy(name = itemName, description = itemDescription, price = priceDouble),
                         newImageUri = selectedImageUri // Pass new URI if they changed it
                     )
@@ -116,7 +116,7 @@ fun RestaurantHomeScreen(
             selectedImageUri = item.imageUrl?.let { Uri.parse(it) }
             isDialogOpen = true
         },
-        onDeleteItemClick = { menuViewModel.deleteItem(it) }
+        onDeleteItemClick = { menuViewModel.deleteMenuItem(it) }
     )
 }
 

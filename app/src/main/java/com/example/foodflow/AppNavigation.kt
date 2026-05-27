@@ -9,9 +9,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.navArgument
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.foodflow.data.model.AuthState
+import com.example.foodflow.data.model.UserRole
 import com.example.foodflow.ui.Route
 import com.example.foodflow.ui.screens.auth.ForgotPasswordScreen
 import com.example.foodflow.ui.screens.auth.LoginScreen
@@ -27,6 +28,7 @@ import com.example.foodflow.ui.viewmodel.CustomerHomeViewModel
 import com.example.foodflow.ui.viewmodel.MenuViewModel
 import com.example.foodflow.ui.viewmodel.RestaurantDetailViewModel
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.pipeline.Expression.Companion.type
 
 @Composable
 fun AppNavigation(
@@ -40,10 +42,10 @@ fun AppNavigation(
     val authState by authViewModel.authState.collectAsState()
 
     val startDestination = when {
-        authState is AuthState.Authenticated -> {
-            when ((authState as AuthState.Authenticated).role) {
-                "RESTAURANT" -> Route.RestaurantHome.route
-                "DRIVER" -> Route.DriverHome.route
+        authState is AuthState.Success -> {
+            when ((authState as AuthState.Success).role) {
+                UserRole.RESTAURANT -> Route.RestaurantHome.route
+                UserRole.DRIVER -> Route.DriverHome.route
                 else -> Route.CustomerHome.route
             }
         }
@@ -73,10 +75,15 @@ fun AppNavigation(
             )
         }
         composable(Route.RestaurantHome.route) {
-            RestaurantHomeScreen(navController, authViewModel, menuViewModel)
+            RestaurantHomeScreen(
+                navController = navController,
+                authViewModel = authViewModel,
+                menuViewModel = menuViewModel
+            )
         }
         composable(Route.DriverHome.route) {
-            DriverHomeScreen(navController, authViewModel)
+            DriverHomeScreen(
+            )
         }
         composable(
             route = Route.RestaurantDetail.route,
