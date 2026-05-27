@@ -31,7 +31,7 @@ class MenuViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun addNewItem(name: String, description: String, price: Double, imageUri: Uri?) {
+    fun addNewMenuItem(name: String, description: String, price: Double, imageUri: Uri?) {
         val restaurantId = currentUserId ?: return
         viewModelScope.launch {
             val imageUrl = imageUri?.let {
@@ -47,6 +47,18 @@ class MenuViewModel(application: Application) : AndroidViewModel(application) {
                 createdAt = System.currentTimeMillis()
             )
             repository.addMenuItem(newItem)
+        }
+    }
+
+    fun updateMenuItem(updatedItem: MenuItem, newImageUri: Uri?) {
+        viewModelScope.launch {
+            // If user picked a new image, upload it. Otherwise, keep the existing URL.
+            val finalImageUrl = newImageUri?.let {
+                repository.uploadImage(it, context).getOrNull()
+            } ?: updatedItem.imageUrl
+
+            val itemToSave = updatedItem.copy(imageUrl = finalImageUrl)
+            repository.updateMenuItem(itemToSave)
         }
     }
 

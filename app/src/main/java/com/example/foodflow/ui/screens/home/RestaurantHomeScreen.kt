@@ -18,7 +18,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.foodflow.data.model.AuthState
@@ -87,7 +86,7 @@ fun RestaurantHomeScreen(
             onConfirm = {
                 val priceDouble = itemPrice.toDoubleOrNull() ?: 0.0
                 if (editingItem == null) {
-                    menuViewModel.addNewItem(itemName, itemDescription, priceDouble, selectedImageUri)
+                    menuViewModel.addNewMenuItem(itemName, itemDescription, priceDouble, selectedImageUri)
                 } else {
                     menuViewModel.updateMenuItem(
                         updatedItem = editingItem!!.copy(name = itemName, description = itemDescription, price = priceDouble),
