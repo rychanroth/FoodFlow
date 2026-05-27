@@ -80,8 +80,9 @@ fun RestaurantHomeScreen(
             onDescriptionChange = { itemDescription = it },
             price = itemPrice,
             onPriceChange = { itemPrice = it },
-            imageUri = selectedImageUri,
-            onPickImageClick = { galleryLauncher.launch("image/*") }, // Triggers the gallery
+            // FIX: Show the newly picked local URI, OR fall back to the existing remote URL string
+            imageModel = selectedImageUri ?: editingItem?.imageUrl,
+            onPickImageClick = { galleryLauncher.launch("image/*") },
             onDismiss = { clearDialogState() },
             onConfirm = {
                 val priceDouble = itemPrice.toDoubleOrNull() ?: 0.0
@@ -90,7 +91,7 @@ fun RestaurantHomeScreen(
                 } else {
                     menuViewModel.updateMenuItem(
                         updatedItem = editingItem!!.copy(name = itemName, description = itemDescription, price = priceDouble),
-                        newImageUri = selectedImageUri // Pass new URI if they changed it
+                        newImageUri = selectedImageUri // Passes null if they didn't pick a new one, keeping the old URL!
                     )
                 }
                 clearDialogState()
@@ -110,9 +111,9 @@ fun RestaurantHomeScreen(
             itemName = item.name
             itemDescription = item.description
             itemPrice = item.price.toString()
-            // If the item already has an image, you could convert the URL back to a URI for the preview,
-            // but Coil's AsyncImage handles URLs too! Let's just pass the existing URL as a URI.
-            selectedImageUri = item.imageUrl?.let { Uri.parse(it) }
+            // FIX: DO NOT parse the URL. Leave selectedImageUri null.
+            // The Dialog will use editingItem.imageUrl to display the current image.
+            selectedImageUri = null
             isDialogOpen = true
         },
         onDeleteItemClick = { menuViewModel.deleteMenuItem(it) }
