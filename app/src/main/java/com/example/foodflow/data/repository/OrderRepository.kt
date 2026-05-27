@@ -2,6 +2,7 @@ package com.example.foodflow.data.repository
 
 import com.google.firebase.firestore.FirebaseFirestore
 import com.example.foodflow.data.model.Order
+import com.example.foodflow.data.model.OrderStatus
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -34,10 +35,10 @@ class OrderRepository {
         awaitClose { subscription.remove() }
     }
 
-    // Update the status of an order
-    suspend fun updateOrderStatus(orderId: String, newStatus: String) {
+    // Update order status
+    suspend fun updateOrderStatus(orderId: String, newStatus: OrderStatus) {
         val updates = hashMapOf<String, Any>(
-            "status" to newStatus
+            "status" to newStatus // Firestore will automatically save the enum name as a string
         )
         ordersCollection.document(orderId).update(updates).await()
     }

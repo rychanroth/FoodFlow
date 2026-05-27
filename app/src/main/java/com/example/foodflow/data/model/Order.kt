@@ -4,8 +4,8 @@ data class Order(
     val id: String = "",
     val customerId: String = "",
     val restaurantId: String = "",
-    val items: List<String> = emptyList(), // Simplified for Firestore compatibility
+    val itemNames: List<String> = emptyList(),
     val totalAmount: Double = 0.0,
-    val status: String = "PLACED",
+    val status: OrderStatus = OrderStatus.PLACED,
     val createdAt: Long = System.currentTimeMillis()
 )
