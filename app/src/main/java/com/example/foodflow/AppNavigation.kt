@@ -82,10 +82,6 @@ fun AppNavigation(
                 menuViewModel = menuViewModel
             )
         }
-        composable(Route.DriverHome.route) {
-            DriverHomeScreen(
-            )
-        }
         composable(
             route = Route.RestaurantDetail.route,
             arguments = listOf(
