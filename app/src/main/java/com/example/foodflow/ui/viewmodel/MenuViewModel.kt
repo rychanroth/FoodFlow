@@ -38,7 +38,7 @@ class MenuViewModel(application: Application) : AndroidViewModel(application) {
 
     // FIX: Instead of initializing currentUserId right away (which has some firebase auth instance initialization incompat,
     // We have a Helper to get current user ID for adding/updating items
-    private fun getCurrentUserId(): String? {
+    public fun getCurrentUserId(): String? {
         return firebaseAuth.currentUser?.uid
     }
 

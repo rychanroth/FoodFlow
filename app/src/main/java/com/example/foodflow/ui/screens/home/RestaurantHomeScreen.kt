@@ -56,10 +56,18 @@ fun RestaurantHomeScreen(
         selectedImageUri = uri
     }
 
+    // NEW: Load menu items ONLY when we confirm the user is logged in
     LaunchedEffect(authState) {
         if (authState is AuthState.Idle) {
+            menuViewModel.clearMenu() // Clear data on logout
             navController.navigate(Route.Login.route) {
                 popUpTo(0) { inclusive = true }
+            }
+        } else if (authState is AuthState.Success) {
+            // The user is guaranteed to exist here
+            val uid = menuViewModel.getCurrentUserId()
+            if (uid != null) {
+                menuViewModel.loadMenuItems(uid)
             }
         }
     }
