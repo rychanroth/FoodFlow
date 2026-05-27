@@ -128,5 +128,8 @@ fun AppNavigation(
                 onBackClick = { navController.popBackStack() }
             )
         }
+        composable(Route.DriverHome.route) {
+            DriverHomeScreen(authViewModel = authViewModel, driverViewModel = viewModel())
+        }
     }
 }
