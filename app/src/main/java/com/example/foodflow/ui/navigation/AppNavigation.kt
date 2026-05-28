@@ -1,5 +1,6 @@
 package com.example.foodflow.ui.navigation
 
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -62,6 +63,8 @@ fun AppNavigation(
     }
 
     Scaffold(
+        // FIX: remove window insets on parent host
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = bottomBar
     ) { paddingValues ->
         NavHost(
