@@ -4,6 +4,7 @@ import com.example.foodflow.data.model.AppUser
 import com.example.foodflow.data.model.UserRole
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthException
+import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 
@@ -27,6 +28,33 @@ class AuthRepository {
             Result.success(newUser)
         } catch (e: FirebaseAuthException) {
             Result.failure(Exception(getAuthErrorMessage(e)))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    // NEW: Google Sign-In
+    suspend fun firebaseAuthWithGoogle(idToken: String): Result<AppUser> {
+        return try {
+            // 1. Give the Google Token to Firebase
+            val credential = GoogleAuthProvider.getCredential(idToken, null)
+            val authResult = auth.signInWithCredential(credential).await()
+            val uid = authResult.user?.uid ?: throw Exception("Google Sign-In failed")
+            val email = authResult.user?.email ?: ""
+
+            // 2. Check if user exists in Firestore
+            val userDoc = firestore.collection("users").document(uid).get().await()
+
+            if (userDoc.exists()) {
+                // Existing User: Just return their data
+                val existingUser = userDoc.toObject(AppUser::class.java)
+                Result.success(existingUser!!)
+            } else {
+                // New User: Create Firestore doc with DEFAULT CUSTOMER ROLE
+                val newUser = AppUser(uid = uid, email = email, role = UserRole.CUSTOMER)
+                firestore.collection("users").document(uid).set(newUser).await()
+                Result.success(newUser)
+            }
         } catch (e: Exception) {
             Result.failure(e)
         }

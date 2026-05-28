@@ -36,6 +36,21 @@ class AuthViewModel : ViewModel() {
         }
     }
 
+    // NEW: Handle Google Sign-In
+    fun googleSignIn(idToken: String) {
+        _authState.value = AuthState.Loading
+
+        viewModelScope.launch {
+            val result = repository.firebaseAuthWithGoogle(idToken)
+            if (result.isSuccess) {
+                val user = result.getOrNull()
+                _authState.value = AuthState.Success(user?.role ?: UserRole.CUSTOMER)
+            } else {
+                _authState.value = AuthState.Error(result.exceptionOrNull()?.message ?: "Google Sign-In failed")
+            }
+        }
+    }
+
     fun login(email: String, password: String) {
         if (email.isBlank() || password.isBlank()) {
             _authState.value = AuthState.Error("Fields cannot be empty")
