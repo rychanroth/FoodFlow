@@ -4,6 +4,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import androidx.navigation.navigation
 import com.example.foodflow.ui.Route
 import com.example.foodflow.ui.screens.home.DriverHomeScreen
 import com.example.foodflow.ui.viewmodel.AuthViewModel
@@ -13,7 +14,13 @@ fun NavGraphBuilder.driverGraph(
     navController: NavController,
     authViewModel: AuthViewModel
 ) {
-    composable(Route.DriverHome.route) {
-        DriverHomeScreen(authViewModel = authViewModel, driverViewModel = viewModel())
+    // FIX: Wrap in navigation block
+    navigation(
+        startDestination = Route.DriverHome.route,
+        route = Route.DriverGraph.route
+    ) {
+        composable(Route.DriverHome.route) {
+            DriverHomeScreen(authViewModel = authViewModel, driverViewModel = viewModel())
+        }
     }
 }

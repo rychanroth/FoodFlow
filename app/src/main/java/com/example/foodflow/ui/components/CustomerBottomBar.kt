@@ -77,7 +77,7 @@ fun CustomerBottomBar(
 
 @Preview(showBackground = true)
 @Composable
-fun CustomBottomBarPreview() {
+fun CustomerBottomBarPreview() {
     CustomerBottomBar(
         navController = rememberNavController(),
         currentRoute = Route.CustomerOrders.route

@@ -28,7 +28,10 @@ fun AppNavigation(
     val authState by authViewModel.authState.collectAsState()
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
+    // Get the current screen route
     val currentRoute = navBackStackEntry?.destination?.route
+    // Get the parent graph route (e.g., "customer_graph")
+    val currentGraphRoute = navBackStackEntry?.destination?.parent?.route
 
     // Determine start destination based on Auth State
     val startDestination = when (authState) {
@@ -42,15 +45,15 @@ fun AppNavigation(
         else -> Route.AuthGraph.route
     }
 
-    // Determine which Bottom Bar to show based on the current graph
-    val bottomBar: @Composable () -> Unit = when {
-        currentRoute?.startsWith(Route.CustomerGraph.route) == true -> {
+    // Determine which Bottom Bar to show based on the PARENT GRAPH
+    val bottomBar: @Composable () -> Unit = when (currentGraphRoute) {
+        Route.CustomerGraph.route -> {
             { CustomerBottomBar(navController = navController, currentRoute = currentRoute) }
         }
-        currentRoute?.startsWith(Route.RestaurantGraph.route) == true -> {
+        Route.RestaurantGraph.route -> {
             { RestaurantBottomBar(navController = navController, currentRoute = currentRoute) }
         }
-        currentRoute?.startsWith(Route.DriverGraph.route) == true -> {
+        Route.DriverGraph.route -> {
             { DriverBottomBar(navController = navController, currentRoute = currentRoute) }
         }
         else -> {
