@@ -45,6 +45,7 @@ fun RestaurantDetailScreen(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RestaurantDetailContent(
     restaurantName: String,

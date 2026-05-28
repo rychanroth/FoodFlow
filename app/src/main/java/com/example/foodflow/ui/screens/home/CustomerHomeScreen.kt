@@ -39,6 +39,9 @@ fun CustomerHomeScreen(
     val restaurants by customerViewModel.restaurants.collectAsState()
     val authState by authViewModel.authState.collectAsState()
 
+    val cartItems by cartViewModel.cartItems.collectAsState()
+    val cartItemCount = cartItems.sumOf { it.quantity }
+
     LaunchedEffect(authState) {
         if (authState is AuthState.Idle) {
             navController.navigate(Route.Login.route) {
@@ -50,6 +53,7 @@ fun CustomerHomeScreen(
     CustomerHomeContent(
         newlyAddedItems = newlyAddedItems,
         restaurants = restaurants,
+        cartItemCount = cartItemCount,
         onLogoutClick = { authViewModel.logout() },
         onRestaurantClick = { restaurantId ->
             navController.navigate(Route.RestaurantDetail.createRoute(restaurantId))
@@ -60,10 +64,12 @@ fun CustomerHomeScreen(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CustomerHomeContent(
     newlyAddedItems: List<MenuItem>,
     restaurants: List<AppUser>,
+    cartItemCount: Int,
     onLogoutClick: () -> Unit,
     onRestaurantClick: (String) -> Unit,
     onCartClick: () -> Unit

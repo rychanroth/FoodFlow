@@ -8,9 +8,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.ReceiptLong
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -18,7 +20,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.foodflow.data.model.AuthState
@@ -55,10 +56,18 @@ fun RestaurantHomeScreen(
         selectedImageUri = uri
     }
 
+    // NEW: Load menu items ONLY when we confirm the user is logged in
     LaunchedEffect(authState) {
         if (authState is AuthState.Idle) {
+            menuViewModel.clearMenu() // Clear data on logout
             navController.navigate(Route.Login.route) {
                 popUpTo(0) { inclusive = true }
+            }
+        } else if (authState is AuthState.Success) {
+            // The user is guaranteed to exist here
+            val uid = menuViewModel.getCurrentUserId()
+            if (uid != null) {
+                menuViewModel.loadMenuItems(uid)
             }
         }
     }
@@ -81,17 +90,18 @@ fun RestaurantHomeScreen(
             onDescriptionChange = { itemDescription = it },
             price = itemPrice,
             onPriceChange = { itemPrice = it },
-            imageUri = selectedImageUri,
-            onPickImageClick = { galleryLauncher.launch("image/*") }, // Triggers the gallery
+            // FIX: Show the newly picked local URI, OR fall back to the existing remote URL string
+            imageModel = selectedImageUri ?: editingItem?.imageUrl,
+            onPickImageClick = { galleryLauncher.launch("image/*") },
             onDismiss = { clearDialogState() },
             onConfirm = {
                 val priceDouble = itemPrice.toDoubleOrNull() ?: 0.0
                 if (editingItem == null) {
-                    menuViewModel.addNewItem(itemName, itemDescription, priceDouble, selectedImageUri)
+                    menuViewModel.addNewMenuItem(itemName, itemDescription, priceDouble, selectedImageUri)
                 } else {
-                    menuViewModel.updateItem(
+                    menuViewModel.updateMenuItem(
                         updatedItem = editingItem!!.copy(name = itemName, description = itemDescription, price = priceDouble),
-                        newImageUri = selectedImageUri // Pass new URI if they changed it
+                        newImageUri = selectedImageUri // Passes null if they didn't pick a new one, keeping the old URL!
                     )
                 }
                 clearDialogState()
@@ -111,12 +121,13 @@ fun RestaurantHomeScreen(
             itemName = item.name
             itemDescription = item.description
             itemPrice = item.price.toString()
-            // If the item already has an image, you could convert the URL back to a URI for the preview,
-            // but Coil's AsyncImage handles URLs too! Let's just pass the existing URL as a URI.
-            selectedImageUri = item.imageUrl?.let { Uri.parse(it) }
+            // FIX: DO NOT parse the URL. Leave selectedImageUri null.
+            // The Dialog will use editingItem.imageUrl to display the current image.
+            selectedImageUri = null
             isDialogOpen = true
         },
-        onDeleteItemClick = { menuViewModel.deleteItem(it) }
+        onDeleteItemClick = { menuViewModel.deleteMenuItem(it) },
+        onNavigateToRestaurantOrders = { navController.navigate(Route.RestaurantOrders.route) }
     )
 }
 
@@ -127,13 +138,17 @@ fun RestaurantHomeContent(
     onLogoutClick: () -> Unit,
     onAddItemClick: () -> Unit,
     onEditItemClick: (MenuItem) -> Unit,
-    onDeleteItemClick: (String) -> Unit
+    onDeleteItemClick: (String) -> Unit,
+    onNavigateToRestaurantOrders: () -> Unit
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Restaurant Dashboard") },
                 actions = {
+                    IconButton(onClick = onNavigateToRestaurantOrders) {
+                        Icon(Icons.AutoMirrored.Filled.ReceiptLong, contentDescription = "Orders")
+                    }
                     IconButton(onClick = onLogoutClick) {
                         Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Logout")
                     }
@@ -230,7 +245,8 @@ fun RestauarntHomeContentPreview() {
         onLogoutClick = {},
         onAddItemClick = {},
         onEditItemClick = {},
-        onDeleteItemClick = {}
+        onDeleteItemClick = {},
+        onNavigateToRestaurantOrders = {}
     )
 }
 

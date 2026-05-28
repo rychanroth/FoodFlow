@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.foodflow.data.model.CartItem
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CartScreen(
     cartItems: List<CartItem>,

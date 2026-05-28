@@ -6,6 +6,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
@@ -23,7 +24,7 @@ fun MenuItemDialog(
     onDescriptionChange: (String) -> Unit,
     price: String,
     onPriceChange: (String) -> Unit,
-    imageUri: Uri?,
+    imageModel: Any?, // Changed to Any? to accept both local Uri and remote String URL
     onPickImageClick: () -> Unit,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit
@@ -34,9 +35,9 @@ fun MenuItemDialog(
         text = {
             Column {
                 // Image Preview & Picker Button
-                if (imageUri != null) {
+                if (imageModel != null) {
                     AsyncImage(
-                        model = imageUri,
+                        model = imageModel,
                         contentDescription = "Selected image",
                         modifier = Modifier
                             .fillMaxWidth()
@@ -44,14 +45,18 @@ fun MenuItemDialog(
                             .clip(RoundedCornerShape(8.dp)),
                         contentScale = ContentScale.Crop
                     )
-                } else {
-                    OutlinedButton(
-                        onClick = onPickImageClick,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("Pick Image from Gallery")
-                    }
                 }
+
+                // Overlay button to Pick or Change image
+                OutlinedButton(
+                    onClick = onPickImageClick,
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(8.dp)
+                ) {
+                    Text(if (imageModel != null) "Change Image" else "Pick Image from Gallery")
+                }
+
                 Spacer(modifier = Modifier.height(8.dp))
 
                 OutlinedTextField(
@@ -104,7 +109,7 @@ fun AddMenuItemDialogPreview() {
         onDescriptionChange = TODO(),
         price = TODO(),
         onPriceChange = TODO(),
-        imageUri = TODO(),
+        imageModel = TODO(),
         onPickImageClick = TODO(),
         onDismiss = TODO(),
         onConfirm = TODO()

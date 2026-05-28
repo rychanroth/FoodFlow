@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.foodflow.data.model.CartItem
 import com.example.foodflow.data.model.MenuItem
 import com.example.foodflow.data.model.Order
+import com.example.foodflow.data.model.OrderStatus
 import com.example.foodflow.data.repository.CustomerRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -72,11 +73,13 @@ class CartViewModel : ViewModel() {
 
         viewModelScope.launch {
             val restaurantId = currentItems.first().menuItem.restaurantId
+            val itemNames = currentItems.map { it.menuItem.name }
             val newOrder = Order(
                 customerId = currentUserId,
                 restaurantId = restaurantId,
-                items = currentItems,
-                totalAmount = getTotalPrice()
+                itemNames = itemNames,
+                totalAmount = getTotalPrice(),
+                status = OrderStatus.PLACED
             )
             val result = repository.placeOrder(newOrder)
             if (result.isSuccess) {
