@@ -68,5 +68,10 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
+    // Google Sign-In Authentication
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.2.0")
+    // Credential Manager (Modern way to handle Google Sign-In)
+    implementation("androidx.credentials:credentials")
+    implementation("androidx.credentials:credentials-play-services-auth")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
 }
