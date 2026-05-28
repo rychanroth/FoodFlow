@@ -21,6 +21,7 @@ import com.example.foodflow.ui.screens.auth.RegisterScreen
 import com.example.foodflow.ui.screens.home.CartScreen
 import com.example.foodflow.ui.screens.home.CustomerHomeScreen
 import com.example.foodflow.ui.screens.home.CustomerOrdersScreen
+import com.example.foodflow.ui.screens.home.CustomerSearchScreen
 import com.example.foodflow.ui.screens.home.DriverHomeScreen
 import com.example.foodflow.ui.screens.home.RestaurantDetailScreen
 import com.example.foodflow.ui.screens.home.RestaurantHomeScreen
@@ -146,6 +147,9 @@ fun AppNavigation(
                 orders = orders,
                 onBackClick = { navController.popBackStack() }
             )
+        }
+        composable(Route.CustomerSearch.route) {
+            CustomerSearchScreen(navController = navController)
         }
     }
 }

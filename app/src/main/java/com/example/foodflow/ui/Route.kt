@@ -17,4 +17,5 @@ sealed class Route(val route: String) {
 
     data object RestaurantOrders : Route("restaurant_orders")
     data object CustomerOrders : Route("customer_orders")
+    data object CustomerSearch : Route("customer_search")
 }

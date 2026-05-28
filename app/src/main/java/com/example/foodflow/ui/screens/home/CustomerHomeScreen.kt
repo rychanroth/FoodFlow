@@ -9,6 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.ReceiptLong
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Storefront
 import androidx.compose.material3.*
@@ -63,7 +64,8 @@ fun CustomerHomeScreen(
         onCartClick = {
             navController.navigate(Route.Cart.route)
         },
-        onNavigateToCustomerOrders = { navController .navigate(Route.CustomerOrders.route) }
+        onNavigateToCustomerOrders = { navController .navigate(Route.CustomerOrders.route) },
+        onNavigateToCustomerSearch = { navController.navigate(Route.CustomerSearch.route) }
     )
 }
 
@@ -76,13 +78,17 @@ fun CustomerHomeContent(
     onLogoutClick: () -> Unit,
     onRestaurantClick: (String) -> Unit,
     onCartClick: () -> Unit,
-    onNavigateToCustomerOrders: () -> Unit
+    onNavigateToCustomerOrders: () -> Unit,
+    onNavigateToCustomerSearch: () -> Unit
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("FoodFlow 🍔") },
                 actions = {
+                    IconButton(onClick = onNavigateToCustomerSearch ) {
+                        Icon(Icons.Default.Search, contentDescription = "Search")
+                    }
                     IconButton(onClick = onCartClick) {
                         Icon(Icons.Default.ShoppingCart, contentDescription = "Cart")
                     }
