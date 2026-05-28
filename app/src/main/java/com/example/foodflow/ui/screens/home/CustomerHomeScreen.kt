@@ -7,6 +7,8 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.automirrored.filled.ReceiptLong
+import androidx.compose.material.icons.filled.ReceiptLong
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Storefront
 import androidx.compose.material3.*
@@ -60,7 +62,8 @@ fun CustomerHomeScreen(
         },
         onCartClick = {
             navController.navigate(Route.Cart.route)
-        }
+        },
+        onNavigateToCustomerOrders = { navController .navigate(Route.CustomerOrders.route) }
     )
 }
 
@@ -72,7 +75,8 @@ fun CustomerHomeContent(
     cartItemCount: Int,
     onLogoutClick: () -> Unit,
     onRestaurantClick: (String) -> Unit,
-    onCartClick: () -> Unit
+    onCartClick: () -> Unit,
+    onNavigateToCustomerOrders: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -81,6 +85,9 @@ fun CustomerHomeContent(
                 actions = {
                     IconButton(onClick = onCartClick) {
                         Icon(Icons.Default.ShoppingCart, contentDescription = "Cart")
+                    }
+                    IconButton(onClick = onNavigateToCustomerOrders ) {
+                        Icon(Icons.AutoMirrored.Default.ReceiptLong, contentDescription = "My Orders")
                     }
                     IconButton(onClick = onLogoutClick) {
                         Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Logout")

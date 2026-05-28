@@ -1,6 +1,7 @@
 package com.example.foodflow.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -19,6 +20,7 @@ import com.example.foodflow.ui.screens.auth.LoginScreen
 import com.example.foodflow.ui.screens.auth.RegisterScreen
 import com.example.foodflow.ui.screens.home.CartScreen
 import com.example.foodflow.ui.screens.home.CustomerHomeScreen
+import com.example.foodflow.ui.screens.home.CustomerOrdersScreen
 import com.example.foodflow.ui.screens.home.DriverHomeScreen
 import com.example.foodflow.ui.screens.home.RestaurantDetailScreen
 import com.example.foodflow.ui.screens.home.RestaurantHomeScreen
@@ -26,6 +28,7 @@ import com.example.foodflow.ui.screens.home.RestaurantOrdersScreen
 import com.example.foodflow.ui.viewmodel.AuthViewModel
 import com.example.foodflow.ui.viewmodel.CartViewModel
 import com.example.foodflow.ui.viewmodel.CustomerHomeViewModel
+import com.example.foodflow.ui.viewmodel.CustomerOrdersViewModel
 import com.example.foodflow.ui.viewmodel.MenuViewModel
 import com.example.foodflow.ui.viewmodel.RestaurantDetailViewModel
 import com.google.firebase.auth.FirebaseAuth
@@ -126,6 +129,23 @@ fun AppNavigation(
         }
         composable(Route.DriverHome.route) {
             DriverHomeScreen(authViewModel = authViewModel, driverViewModel = viewModel())
+        }
+        /* TODO: Hoist it soon */
+        composable(Route.CustomerOrders.route) {
+            val customerOrdersViewModel: CustomerOrdersViewModel = viewModel()
+            val currentUser = FirebaseAuth.getInstance().currentUser
+
+            // Load orders when screen enters
+            LaunchedEffect(currentUser) {
+                currentUser?.uid?.let { customerOrdersViewModel.loadOrders(it) }
+            }
+
+            val orders by customerOrdersViewModel.orders.collectAsState()
+
+            CustomerOrdersScreen(
+                orders = orders,
+                onBackClick = { navController.popBackStack() }
+            )
         }
     }
 }
