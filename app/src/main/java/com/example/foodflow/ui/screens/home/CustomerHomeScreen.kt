@@ -40,6 +40,7 @@ fun CustomerHomeScreen(
 ) {
     val newlyAddedItems by customerViewModel.newlyAddedItems.collectAsState()
     val restaurants by customerViewModel.restaurants.collectAsState()
+    val isLoading by customerViewModel.isLoading.collectAsState()
     val authState by authViewModel.authState.collectAsState()
 
     val cartItems by cartViewModel.cartItems.collectAsState()
@@ -56,6 +57,7 @@ fun CustomerHomeScreen(
     CustomerHomeContent(
         newlyAddedItems = newlyAddedItems,
         restaurants = restaurants,
+        isLoading = isLoading,
         cartItemCount = cartItemCount,
         onLogoutClick = { authViewModel.logout() },
         onRestaurantClick = { restaurantId ->
@@ -74,6 +76,7 @@ fun CustomerHomeScreen(
 fun CustomerHomeContent(
     newlyAddedItems: List<MenuItem>,
     restaurants: List<AppUser>,
+    isLoading: Boolean,
     cartItemCount: Int,
     onLogoutClick: () -> Unit,
     onRestaurantClick: (String) -> Unit,
@@ -86,15 +89,6 @@ fun CustomerHomeContent(
             TopAppBar(
                 title = { Text("FoodFlow 🍔") },
                 actions = {
-                    IconButton(onClick = onNavigateToCustomerSearch ) {
-                        Icon(Icons.Default.Search, contentDescription = "Search")
-                    }
-                    IconButton(onClick = onCartClick) {
-                        Icon(Icons.Default.ShoppingCart, contentDescription = "Cart")
-                    }
-                    IconButton(onClick = onNavigateToCustomerOrders ) {
-                        Icon(Icons.AutoMirrored.Default.ReceiptLong, contentDescription = "My Orders")
-                    }
                     IconButton(onClick = onLogoutClick) {
                         Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Logout")
                     }
@@ -102,56 +96,67 @@ fun CustomerHomeContent(
             )
         }
     ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            item {
-                Text(
-                    "Newly Added",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
-                Spacer(modifier = Modifier.height(8.dp))
+        if (isLoading) {
+            // LOADING STATE
+            Box(
+                modifier = Modifier.fillMaxSize().padding(paddingValues),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        } else {
+            // LOADED STATE (Proceed as normal)
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                item {
+                    Text(
+                        "Newly Added",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                if (newlyAddedItems.isEmpty()) {
-                    Text("No new items yet.", style = MaterialTheme.typography.bodyMedium)
-                } else {
-                    LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        items(newlyAddedItems) { item ->
-                            FoodCard(item = item)
+                    if (newlyAddedItems.isEmpty()) {
+                        Text("No new items yet.", style = MaterialTheme.typography.bodyMedium)
+                    } else {
+                        LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            items(newlyAddedItems) { item ->
+                                FoodCard(item = item)
+                            }
                         }
                     }
                 }
-            }
 
-            item {
-                Text(
-                    "Restaurants",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-
-            if (restaurants.isEmpty()) {
                 item {
                     Text(
-                        "No restaurants available.",
-                        style = MaterialTheme.typography.bodyMedium
+                        "Restaurants",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(top = 8.dp)
                     )
+                    Spacer(modifier = Modifier.height(8.dp))
                 }
-            } else {
-                items(restaurants) { restaurant ->
-                    RestaurantCard(
-                        restaurant = restaurant,
-                        onClick = { onRestaurantClick(restaurant.uid) }
-                    )
+
+                if (restaurants.isEmpty()) {
+                    item {
+                        Text(
+                            "No restaurants available.",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                } else {
+                    items(restaurants) { restaurant ->
+                        RestaurantCard(
+                            restaurant = restaurant,
+                            onClick = { onRestaurantClick(restaurant.uid) }
+                        )
+                    }
                 }
             }
         }
