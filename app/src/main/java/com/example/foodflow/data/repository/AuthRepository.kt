@@ -37,7 +37,7 @@ class AuthRepository {
     suspend fun firebaseAuthWithGoogle(idToken: String): Result<AppUser> {
         return try {
             // 1. Exchange the Google token for a Firebase credential
-            val credential = com.google.firebase.auth.GoogleAuthProvider.getCredential(idToken, null)
+            val credential = GoogleAuthProvider.getCredential(idToken, null)
 
             // 2. Sign in to Firebase with the credential
             val authResult = auth.signInWithCredential(credential).await()
