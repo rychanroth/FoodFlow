@@ -30,22 +30,14 @@ fun LoginScreen(
 
     val authState by authViewModel.authState.collectAsState()
 
+    // Get it from BuildConfig
     val webClientId = BuildConfig.WEB_CLIENT_ID
 
     // Handle Navigation & Password Reset UI
     LaunchedEffect(authState) {
         when (authState) {
             is AuthState.Success -> {
-                val successState = authState as AuthState.Success
-                val destination = when (successState.role) {
-                    UserRole.CUSTOMER -> Route.CustomerHome.route
-                    UserRole.RESTAURANT -> Route.RestaurantHome.route
-                    UserRole.DRIVER -> Route.DriverHome.route
-                    else -> {}
-                }
-                navController.navigate(destination) {
-                    popUpTo(Route.Login.route) { inclusive = true }
-                }
+                // Fix: Remove manual navigation logic, only let it handles UI State
             }
             is AuthState.PasswordResetSent -> {
                 // We'll just show a toast/snackbar later, for now reset to Idle

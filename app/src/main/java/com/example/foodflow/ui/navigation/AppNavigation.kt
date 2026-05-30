@@ -1,11 +1,15 @@
 package com.example.foodflow.ui.navigation
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -19,6 +23,7 @@ import com.example.foodflow.ui.components.CustomerBottomBar
 import com.example.foodflow.ui.components.DriverBottomBar
 import com.example.foodflow.ui.components.RestaurantBottomBar
 import com.example.foodflow.ui.viewmodel.AuthViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun AppNavigation(
@@ -34,16 +39,27 @@ fun AppNavigation(
     // Get the parent graph route (e.g., "customer_graph")
     val currentGraphRoute = navBackStackEntry?.destination?.parent?.route
 
-    // Determine start destination based on Auth State
+    // Determine start destination based purely on Auth State
     val startDestination = when (authState) {
         is AuthState.Success -> {
-            when ((authState as AuthState.Success).role) {
+            val role = (authState as AuthState.Success).role
+            when (role) {
+                UserRole.CUSTOMER -> Route.CustomerGraph.route
                 UserRole.RESTAURANT -> Route.RestaurantGraph.route
                 UserRole.DRIVER -> Route.DriverGraph.route
+                UserRole.ADMIN -> Route.AuthGraph.route
                 else -> Route.CustomerGraph.route
             }
         }
-        else -> Route.AuthGraph.route
+        is AuthState.Loading -> null // We don't know yet, show a spinner
+        else -> Route.AuthGraph.route // Idle, Error, PasswordReset -> Show Auth
+    }
+
+    if (startDestination == null) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+        return // Don't build the NavHost yet
     }
 
     // Determine which Bottom Bar to show based on the PARENT GRAPH

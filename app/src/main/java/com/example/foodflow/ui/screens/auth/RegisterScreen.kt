@@ -45,17 +45,7 @@ fun RegisterScreen(
 
     LaunchedEffect(authState) {
         if (authState is AuthState.Success) {
-            val successState = authState as AuthState.Success
-            val destination = when (successState.role) {
-                UserRole.CUSTOMER -> Route.CustomerHome.route
-                UserRole.RESTAURANT -> Route.RestaurantHome.route
-                UserRole.DRIVER -> Route.DriverHome.route
-                else -> {}
-            }
-
-            navController.navigate(destination) {
-                popUpTo(Route.Register.route) { inclusive = true }
-            }
+            // Fix: Remove manual navigation logic, only let it handles UI State
         }
     }
 
