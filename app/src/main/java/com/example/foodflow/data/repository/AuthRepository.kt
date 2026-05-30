@@ -19,11 +19,11 @@ class AuthRepository {
     val isLoggedIn: Boolean
         get() = auth.currentUser != null
 
-    suspend fun registerUser(email: String, password: String, role: UserRole): Result<AppUser> {
+    suspend fun registerUser(email: String, password: String): Result<AppUser> {
         return try {
             val authResult = auth.createUserWithEmailAndPassword(email, password).await()
             val uid = authResult.user?.uid ?: throw Exception("User creation failed")
-            val newUser = AppUser(uid = uid, email = email, role = role)
+            val newUser = AppUser(uid = uid, email = email, role = UserRole.CUSTOMER)
             firestore.collection("users").document(uid).set(newUser).await()
             Result.success(newUser)
         } catch (e: FirebaseAuthException) {
@@ -33,24 +33,26 @@ class AuthRepository {
         }
     }
 
-    // NEW: Google Sign-In
+    // NEW: Google Sign-In function
     suspend fun firebaseAuthWithGoogle(idToken: String): Result<AppUser> {
         return try {
-            // 1. Give the Google Token to Firebase
-            val credential = GoogleAuthProvider.getCredential(idToken, null)
-            val authResult = auth.signInWithCredential(credential).await()
-            val uid = authResult.user?.uid ?: throw Exception("Google Sign-In failed")
-            val email = authResult.user?.email ?: ""
+            // 1. Exchange the Google token for a Firebase credential
+            val credential = com.google.firebase.auth.GoogleAuthProvider.getCredential(idToken, null)
 
-            // 2. Check if user exists in Firestore
+            // 2. Sign in to Firebase with the credential
+            val authResult = auth.signInWithCredential(credential).await()
+            val uid = authResult.user?.uid ?: throw Exception("Google sign-in failed")
+
+            // 3. Check if this is a new user or existing user
             val userDoc = firestore.collection("users").document(uid).get().await()
 
             if (userDoc.exists()) {
-                // Existing User: Just return their data
-                val existingUser = userDoc.toObject(AppUser::class.java)
-                Result.success(existingUser!!)
+                // Existing User: Just log them in
+                val appUser = userDoc.toObject(AppUser::class.java) ?: throw Exception("Data parse error")
+                Result.success(appUser)
             } else {
-                // New User: Create Firestore doc with DEFAULT CUSTOMER ROLE
+                // New User: Create their profile in Firestore as CUSTOMER
+                val email = authResult.user?.email ?: ""
                 val newUser = AppUser(uid = uid, email = email, role = UserRole.CUSTOMER)
                 firestore.collection("users").document(uid).set(newUser).await()
                 Result.success(newUser)
