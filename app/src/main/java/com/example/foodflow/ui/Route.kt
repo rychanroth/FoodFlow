@@ -6,6 +6,8 @@ sealed class Route(val route: String) {
     data object CustomerGraph : Route("customer_graph")
     data object RestaurantGraph : Route("restaurant_graph")
     data object DriverGraph : Route("driver_graph")
+    data object AdminGraph : Route("admin_graph")
+
 
     // Auth Screens
     data object Login : Route("login")
@@ -28,4 +30,7 @@ sealed class Route(val route: String) {
 
     // Driver Screens
     data object DriverHome : Route("driver_home")
+
+    // Admin Screens
+    data object AdminApplications : Route("admin_applications")
 }

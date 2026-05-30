@@ -47,7 +47,7 @@ fun AppNavigation(
                 UserRole.CUSTOMER -> Route.CustomerGraph.route
                 UserRole.RESTAURANT -> Route.RestaurantGraph.route
                 UserRole.DRIVER -> Route.DriverGraph.route
-                UserRole.ADMIN -> Route.AuthGraph.route
+                UserRole.ADMIN -> Route.AdminGraph.route
                 else -> Route.CustomerGraph.route
             }
         }
@@ -73,6 +73,9 @@ fun AppNavigation(
         Route.DriverGraph.route -> {
             { DriverBottomBar(navController = navController, currentRoute = currentRoute) }
         }
+        Route.AdminGraph.route -> {
+            { /*TODO: */ }
+        }
         else -> {
             { } // No bottom bar for Auth graph
         }
@@ -93,6 +96,7 @@ fun AppNavigation(
             customerGraph(navController, authViewModel)
             restaurantGraph(navController, authViewModel)
             driverGraph(navController, authViewModel)
+            adminGraph(navController)
         }
     }
 }

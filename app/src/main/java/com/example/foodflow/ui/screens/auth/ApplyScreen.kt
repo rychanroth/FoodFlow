@@ -64,9 +64,9 @@ fun ApplyScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             // Role Selector
-            Row(
+            Column(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
+                verticalArrangement = Arrangement.SpaceEvenly
             ) {
                 val roles = listOf(UserRole.DRIVER, UserRole.RESTAURANT)
                 roles.forEach { role ->
