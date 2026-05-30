@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -27,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -34,6 +37,7 @@ import androidx.navigation.NavController
 import com.example.foodflow.data.model.AuthState
 import com.example.foodflow.data.model.UserRole
 import com.example.foodflow.ui.Route
+import com.example.foodflow.ui.components.AwaitingVerificationCard
 import com.example.foodflow.ui.viewmodel.AuthViewModel
 
 @Composable
@@ -43,19 +47,52 @@ fun RegisterScreen(
 ) {
     val authState by authViewModel.authState.collectAsState()
 
+    // Hoisted State
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") } // NEW
+
+    // Local validation error state
+    var localError by remember { mutableStateOf<String?>(null) }
+    
     LaunchedEffect(authState) {
         if (authState is AuthState.Success) {
             // Fix: Remove manual navigation logic, only let it handles UI State
         }
     }
 
-    RegisterContent(
-        authState = authState,
-        onRegister = { email, password, role ->
-            authViewModel.register(email, password, role)
-        },
-        onNavigateToLogin = { navController.navigate(Route.Login.route) }
-    )
+    // Inside LoginScreen Column UI
+    if (authState is AuthState.AwaitingVerification) {
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            AwaitingVerificationCard { authViewModel.resetState() }
+        }
+    } else {
+        RegisterContent(
+            authState = authState,
+            localError = localError, // Pass local error down
+            email = email,
+            onEmailChange = { email = it; localError = null },
+            password = password,
+            onPasswordChange = { password = it; localError = null },
+            confirmPassword = confirmPassword, // NEW
+            onConfirmPasswordChange = { confirmPassword = it; localError = null }, // NEW
+            onRegister = {
+                // V2 UX: Validate locally before hitting Firebase
+                if (password != confirmPassword) {
+                    localError = "Passwords do not match"
+                } else if (password.length < 6) {
+                    localError = "Password must be at least 6 characters"
+                } else {
+                    authViewModel.register(email, password)
+                }
+            },
+            onNavigateToLogin = { navController.navigate(Route.Login.route) }
+        )
+    }
 }
 
 // Fix: Rendering Problem
@@ -65,15 +102,16 @@ fun RegisterScreen(
 @Composable
 fun RegisterContent(
     authState: AuthState,
-    onRegister: (String, String, UserRole) -> Unit,
+    localError: String?, // NEW
+    email: String,
+    onEmailChange: (String) -> Unit,
+    password: String,
+    onPasswordChange: (String) -> Unit,
+    confirmPassword: String, // NEW
+    onConfirmPasswordChange: (String) -> Unit, // NEW
+    onRegister: () -> Unit,
     onNavigateToLogin: () -> Unit
 ) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var selectedRole by remember { mutableStateOf(UserRole.CUSTOMER) }
-
-    val roles = UserRole.entries
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -84,56 +122,35 @@ fun RegisterContent(
         Text("Create Account", style = MaterialTheme.typography.headlineMedium)
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Email Field
         OutlinedTextField(
             value = email,
-            onValueChange = { email = it },
+            onValueChange = onEmailChange,
             label = { Text("Email") },
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Password Field
         OutlinedTextField(
             value = password,
-            onValueChange = { password = it },
+            onValueChange = onPasswordChange,
             label = { Text("Password") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // NEW Confirm Password Field
+        OutlinedTextField(
+            value = confirmPassword,
+            onValueChange = onConfirmPasswordChange,
+            label = { Text("Confirm Password") },
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Role Selector
-        Text("I am a:", style = MaterialTheme.typography.titleMedium)
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            roles.forEach { role ->
-                Row(
-                    modifier = Modifier.selectable(
-                        selected = (selectedRole == role),
-                        onClick = { selectedRole = role }
-                    ),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    RadioButton(
-                        (selectedRole == role), null
-                        // Null because the Row handles the click
-                    )
-                    Text(role.name)
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // Register Button & State Handling
         Button(
-            onClick = { onRegister(email, password, selectedRole) },
+            onClick = onRegister,
             modifier = Modifier.fillMaxWidth(),
-            enabled = authState !is AuthState.Loading // Disable while loading
+            enabled = authState !is AuthState.Loading
         ) {
             if (authState is AuthState.Loading) {
                 CircularProgressIndicator(
@@ -146,27 +163,36 @@ fun RegisterContent(
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-        TextButton(onClick = onNavigateToLogin ) {
+        TextButton(onClick = onNavigateToLogin) {
             Text("Already have an account? Login")
         }
 
-        // Error Handling
-        if (authState is AuthState.Error) {
+        // Error Handling (Prioritize local errors, then ViewModel errors)
+        val errorMessage = localError ?: (authState as? AuthState.Error)?.message
+        if (errorMessage != null) {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = authState.message,
+                text = errorMessage,
                 color = MaterialTheme.colorScheme.error
             )
         }
     }
 }
 
+
 @Preview(showBackground = true)
 @Composable
 fun RegisterScreenPreview() {
     RegisterContent(
         authState = AuthState.Idle,
-        onRegister = { _, _, _ -> },
-        onNavigateToLogin = {}
+        onRegister = { -> },
+        onNavigateToLogin = {},
+        localError = TODO(),
+        email = TODO(),
+        onEmailChange = TODO(),
+        password = TODO(),
+        onPasswordChange = TODO(),
+        confirmPassword = TODO(),
+        onConfirmPasswordChange = TODO(),
     )
 }

@@ -16,6 +16,7 @@ import androidx.navigation.NavController
 import com.example.foodflow.data.model.AuthState
 import com.example.foodflow.data.model.UserRole
 import com.example.foodflow.ui.Route
+import com.example.foodflow.ui.components.AwaitingVerificationCard
 import com.example.foodflow.ui.components.GoogleSignInButton
 import com.example.foodflow.ui.viewmodel.AuthViewModel
 import com.google.android.gms.common.api.ApiException
@@ -47,24 +48,35 @@ fun LoginScreen(
         }
     }
 
-    LoginContent(
-        authState = authState,
-        webClientId = webClientId,
-        onGoogleSignInTokenReceived = { idToken ->
-            authViewModel.googleSignIn(idToken)
-        },
-        onGoogleSignInError = { errorMessage ->
-            // Show error snackbar or text
-        },
-        email = email,
-        onEmailChange = { email = it },
-        password = password,
-        onPasswordChange = { password = it },
-        onEmailLoginClick = { email, password ->
-            authViewModel.login(email, password) },
-        onForgotPasswordClick = { navController.navigate(Route.ForgotPassword.route) },
-        onNavigateToRegister = { navController.navigate(Route.Register.route) }
-    )
+    // Inside LoginScreen Column UI
+    if (authState is AuthState.AwaitingVerification) {
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            AwaitingVerificationCard { authViewModel.resetState() }
+        }
+    } else {
+        LoginContent(
+            authState = authState,
+            webClientId = webClientId,
+            onGoogleSignInTokenReceived = { idToken ->
+                authViewModel.googleSignIn(idToken)
+            },
+            onGoogleSignInError = { errorMessage ->
+                // Show error snackbar or text
+            },
+            email = email,
+            onEmailChange = { email = it },
+            password = password,
+            onPasswordChange = { password = it },
+            onEmailLoginClick = { email, password ->
+                authViewModel.login(email, password) },
+            onForgotPasswordClick = { navController.navigate(Route.ForgotPassword.route) },
+            onNavigateToRegister = { navController.navigate(Route.Register.route) }
+        )
+    }
 }
 
 @Composable
