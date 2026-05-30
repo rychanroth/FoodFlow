@@ -19,6 +19,23 @@ class AuthRepository {
     val isLoggedIn: Boolean
         get() = auth.currentUser != null
 
+    /**
+     * Helper function to get current user's role
+     */
+    suspend fun getUserRole(uid: String): Result<UserRole> {
+        return try {
+            val document = firestore.collection("users").document(uid).get().await()
+            val appUser = document.toObject(AppUser::class.java)
+            if (appUser != null) {
+                Result.success(appUser.role)
+            } else {
+                Result.failure(Exception("User data not found"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     suspend fun registerUser(email: String, password: String): Result<AppUser> {
         return try {
             val authResult = auth.createUserWithEmailAndPassword(email, password).await()

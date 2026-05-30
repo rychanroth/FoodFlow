@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.foodflow.data.model.AuthState
 import com.example.foodflow.data.model.UserRole
 import com.example.foodflow.data.repository.AuthRepository
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,6 +18,21 @@ class AuthViewModel : ViewModel() {
 
     private val _authState = MutableStateFlow<AuthState>(AuthState.Idle)
     val authState: StateFlow<AuthState> = _authState
+
+    init {
+        // Check if user is already logged in (returning user)
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser != null) {
+            viewModelScope.launch {
+                val result = repository.getUserRole(currentUser.uid)
+                if (result.isSuccess) {
+                    _authState.value = AuthState.Success(result.getOrNull() ?: UserRole.CUSTOMER)
+                } else {
+                    _authState.value = AuthState.Idle // Force login if data is corrupt
+                }
+            }
+        }
+    }
 
     fun register(email: String, password: String, role: UserRole) {
         if (email.isBlank() || password.isBlank()) {
