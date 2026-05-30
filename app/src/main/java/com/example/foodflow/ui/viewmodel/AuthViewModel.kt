@@ -34,7 +34,7 @@ class AuthViewModel : ViewModel() {
         }
     }
 
-    fun register(email: String, password: String, role: UserRole) {
+    fun register(email: String, password: String) {
         if (email.isBlank() || password.isBlank()) {
             _authState.value = AuthState.Error("Fields cannot be empty")
             return
@@ -43,11 +43,27 @@ class AuthViewModel : ViewModel() {
         _authState.value = AuthState.Loading
 
         viewModelScope.launch {
-            val result = repository.registerUser(email, password)
-            if (result.isSuccess) {
-                _authState.value = AuthState.Success(role)
+            // 1. Create the user
+            val regResult = repository.registerUser(email, password)
+
+            if (regResult.isSuccess) {
+                // 2. Send verification email
+                val verifyResult = repository.sendEmailVerification()
+                if (verifyResult.isSuccess) {
+                    // 3. Sign them out so they HAVE to verify before entering
+                    repository.logout()
+                    _authState.value = AuthState.AwaitingVerification
+                } else {
+                    _authState.value = AuthState.Error("Registered, but failed to send verification email.")
+                }
             } else {
-                _authState.value = AuthState.Error(result.exceptionOrNull()?.message ?: "Unknown error")
+                val errorMsg = regResult.exceptionOrNull()?.message ?: "Unknown error"
+                // V2 UX: Check if the error is because the email is already in use
+                if (errorMsg.contains("already in use", ignoreCase = true)) {
+                    _authState.value = AuthState.Error("This email is already registered. Try logging in or resetting your password.")
+                } else {
+                    _authState.value = AuthState.Error(errorMsg)
+                }
             }
         }
     }
@@ -78,8 +94,20 @@ class AuthViewModel : ViewModel() {
         viewModelScope.launch {
             val result = repository.login(email, password)
             if (result.isSuccess) {
-                val role = result.getOrNull() ?: UserRole.CUSTOMER
-                _authState.value = AuthState.Success(role)
+                // V2 SECURITY CHECK: Is the email verified?
+                if (repository.isEmailVerified()) {
+                    val role = result.getOrNull() ?: UserRole.CUSTOMER
+                    _authState.value = AuthState.Success(role)
+                } else {
+                    // If not verified
+                    // V2 UX: They just logged in (maybe after a password reset).
+                    // Let's send a fresh verification link automatically!
+                    repository.sendEmailVerification()
+                    repository.logout()
+
+                    // Route them to the verification screen
+                    _authState.value = AuthState.AwaitingVerification
+                }
             } else {
                 _authState.value = AuthState.Error(result.exceptionOrNull()?.message ?: "Unknown error")
             }

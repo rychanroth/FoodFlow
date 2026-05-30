@@ -19,6 +19,11 @@ class AuthRepository {
     val isLoggedIn: Boolean
         get() = auth.currentUser != null
 
+    // Check if the current user has verified their email
+    fun isEmailVerified(): Boolean {
+        return auth.currentUser?.isEmailVerified ?: false
+    }
+
     /**
      * Helper function to get current user's role
      */
@@ -110,6 +115,19 @@ class AuthRepository {
             Result.success(Unit)
         } catch (e: FirebaseAuthException) {
             Result.failure(Exception(getAuthErrorMessage(e)))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Send the verification email
+     */
+    suspend fun sendEmailVerification(): Result<Unit> {
+        return try {
+            val user = auth.currentUser ?: throw Exception("No user logged in")
+            user.sendEmailVerification().await()
+            Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }
