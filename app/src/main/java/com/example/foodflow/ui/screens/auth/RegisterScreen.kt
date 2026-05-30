@@ -50,6 +50,7 @@ fun RegisterScreen(
                 UserRole.CUSTOMER -> Route.CustomerHome.route
                 UserRole.RESTAURANT -> Route.RestaurantHome.route
                 UserRole.DRIVER -> Route.DriverHome.route
+                else -> {}
             }
 
             navController.navigate(destination) {

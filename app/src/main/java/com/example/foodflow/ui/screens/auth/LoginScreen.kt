@@ -8,14 +8,16 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.foodflow.BuildConfig
 import androidx.navigation.NavController
 import com.example.foodflow.data.model.AuthState
 import com.example.foodflow.data.model.UserRole
 import com.example.foodflow.ui.Route
+import com.example.foodflow.ui.components.GoogleSignInButton
 import com.example.foodflow.ui.viewmodel.AuthViewModel
-import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
 
 @Composable
@@ -23,41 +25,12 @@ fun LoginScreen(
     navController: NavController,
     authViewModel: AuthViewModel
 ) {
-    val context = LocalContext.current
-
-
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
     val authState by authViewModel.authState.collectAsState()
 
-
-    // 2. Create the Google Sign-In Client
-    val googleSignInClient = remember { GoogleSignIn.getClient(context, googleSignInOptions) }
-
-    // 3. Register the Activity Result Launcher
-    val googleSignInLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == AppCompatActivity.RESULT_OK) {
-            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-            try {
-                val account = task.getResult(ApiException::class.java)
-                val idToken = account?.idToken
-                if (idToken != null) {
-                    // SUCCESS: Send token to ViewModel
-                    authViewModel.googleSignIn(idToken)
-                } else {
-                    authViewModel._authState.value = AuthState.Error("Google token was null")
-                }
-            } catch (e: ApiException) {
-                authViewModel._authState.value = AuthState.Error("Google sign-in failed: ${e.message}")
-            }
-        } else {
-            // User cancelled the Google pop-up
-            authViewModel._authState.value = AuthState.Idle
-        }
-    }
+    val webClientId = BuildConfig.WEB_CLIENT_ID
 
     // Handle Navigation & Password Reset UI
     LaunchedEffect(authState) {
@@ -68,6 +41,7 @@ fun LoginScreen(
                     UserRole.CUSTOMER -> Route.CustomerHome.route
                     UserRole.RESTAURANT -> Route.RestaurantHome.route
                     UserRole.DRIVER -> Route.DriverHome.route
+                    else -> {}
                 }
                 navController.navigate(destination) {
                     popUpTo(Route.Login.route) { inclusive = true }
@@ -83,17 +57,19 @@ fun LoginScreen(
 
     LoginContent(
         authState = authState,
+        webClientId = webClientId,
+        onGoogleSignInTokenReceived = { idToken ->
+            authViewModel.googleSignIn(idToken)
+        },
+        onGoogleSignInError = { errorMessage ->
+            // Show error snackbar or text
+        },
         email = email,
         onEmailChange = { email = it },
         password = password,
         onPasswordChange = { password = it },
         onEmailLoginClick = { email, password ->
             authViewModel.login(email, password) },
-        onGoogleLoginClick = {
-            // Launch the Google pop-up!
-            val signInIntent = googleSignInClient.signInIntent
-            googleSignInLauncher.launch(signInIntent)
-        },
         onForgotPasswordClick = { navController.navigate(Route.ForgotPassword.route) },
         onNavigateToRegister = { navController.navigate(Route.Register.route) }
     )
@@ -102,12 +78,14 @@ fun LoginScreen(
 @Composable
 fun LoginContent(
     authState: AuthState,
+    webClientId: String,
+    onGoogleSignInTokenReceived: (String) -> Unit,
+    onGoogleSignInError: (String) -> Unit,
     email: String,
     onEmailChange: (String) -> Unit,
     password: String,
     onPasswordChange: (String) -> Unit,
     onEmailLoginClick: (String, String) -> Unit,
-    onGoogleLoginClick: () -> Unit,
     onForgotPasswordClick: () -> Unit,
     onNavigateToRegister: () -> Unit
 ) {
@@ -121,6 +99,18 @@ fun LoginContent(
         Text("Welcome Back", style = MaterialTheme.typography.headlineMedium)
         Spacer(modifier = Modifier.height(24.dp))
 
+        // Google Sign-In Button
+        GoogleSignInButton(
+            webClientId = webClientId,
+            onTokenReceived = onGoogleSignInTokenReceived,
+            onError = onGoogleSignInError
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+        Text("OR", modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Email and Password Sign-In section
         OutlinedTextField(
             value = email,
             onValueChange = onEmailChange,
