@@ -63,11 +63,7 @@ fun CustomerHomeScreen(
         onRestaurantClick = { restaurantId ->
             navController.navigate(Route.RestaurantDetail.createRoute(restaurantId))
         },
-        onCartClick = {
-            navController.navigate(Route.Cart.route)
-        },
-        onNavigateToCustomerOrders = { navController .navigate(Route.CustomerOrders.route) },
-        onNavigateToCustomerSearch = { navController.navigate(Route.CustomerSearch.route) }
+        onNavigateToApply = { navController.navigate(Route.Apply.route) }
     )
 }
 
@@ -80,15 +76,17 @@ fun CustomerHomeContent(
     cartItemCount: Int,
     onLogoutClick: () -> Unit,
     onRestaurantClick: (String) -> Unit,
-    onCartClick: () -> Unit,
-    onNavigateToCustomerOrders: () -> Unit,
-    onNavigateToCustomerSearch: () -> Unit
+    onNavigateToApply: () -> Unit
+
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("FoodFlow 🍔") },
                 actions = {
+                    Button(onClick = onNavigateToApply) {
+                        Text("Apply for Restaurant / Driver Role")
+                    }
                     IconButton(onClick = onLogoutClick) {
                         Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Logout")
                     }

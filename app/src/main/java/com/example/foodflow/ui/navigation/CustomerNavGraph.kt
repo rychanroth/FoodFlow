@@ -11,6 +11,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import com.example.foodflow.ui.Route
+import com.example.foodflow.ui.screens.auth.ApplyScreen
 import com.example.foodflow.ui.screens.home.CartScreen
 import com.example.foodflow.ui.screens.home.CustomerHomeScreen
 import com.example.foodflow.ui.screens.home.CustomerOrdersScreen
@@ -95,6 +96,18 @@ fun NavGraphBuilder.customerGraph(
                 orders = orders,
                 onBackClick = { navController.popBackStack() }
             )
+        }
+
+
+        composable(Route.Apply.route) {
+            val currentUser = FirebaseAuth.getInstance().currentUser
+            if (currentUser != null) {
+                ApplyScreen(
+                    currentUserId = currentUser.uid,
+                    currentUserEmail = currentUser.email ?: "",
+                    onBackClick = { navController.popBackStack() }
+                )
+            }
         }
     }
 }

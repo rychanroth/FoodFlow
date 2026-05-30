@@ -11,6 +11,7 @@ sealed class Route(val route: String) {
     data object Login : Route("login")
     data object Register : Route("register")
     data object ForgotPassword : Route("forgot_password")
+    data object Apply : Route("apply")
 
     // Customer Screens
     data object CustomerHome : Route("customer_home")
