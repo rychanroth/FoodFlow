@@ -5,6 +5,7 @@ import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -68,6 +69,18 @@ fun CustomerBottomBar(
             onClick = {
                 if (currentRoute != Route.CustomerOrders.route) {
                     navController.navigate(Route.CustomerOrders.route) {
+                        launchSingleTop = true
+                    }
+                }
+            }
+        )
+        NavigationBarItem(
+            icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
+            label = { Text("Settings") },
+            selected = currentRoute == Route.Settings.route,
+            onClick = {
+                if (currentRoute != Route.Settings.route) {
+                    navController.navigate(Route.Settings.route) {
                         launchSingleTop = true
                     }
                 }

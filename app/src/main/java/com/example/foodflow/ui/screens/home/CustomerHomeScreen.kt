@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.automirrored.filled.ReceiptLong
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCart
@@ -63,6 +64,7 @@ fun CustomerHomeScreen(
         onRestaurantClick = { restaurantId ->
             navController.navigate(Route.RestaurantDetail.createRoute(restaurantId))
         },
+        onNavigateToProfile = { navController.navigate(Route.Profile.route) },
         onNavigateToApply = { navController.navigate(Route.Apply.route) }
     )
 }
@@ -76,6 +78,7 @@ fun CustomerHomeContent(
     cartItemCount: Int,
     onLogoutClick: () -> Unit,
     onRestaurantClick: (String) -> Unit,
+    onNavigateToProfile: () -> Unit,
     onNavigateToApply: () -> Unit
 
 ) {
@@ -86,6 +89,9 @@ fun CustomerHomeContent(
                 actions = {
                     Button(onClick = onNavigateToApply) {
                         Text("Apply for Restaurant / Driver Role")
+                    }
+                    IconButton(onClick = onNavigateToProfile) {
+                        Icon(Icons.Default.Person, contentDescription = "Profile")
                     }
                     IconButton(onClick = onLogoutClick) {
                         Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Logout")

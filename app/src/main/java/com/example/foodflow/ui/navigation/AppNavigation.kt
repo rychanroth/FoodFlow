@@ -28,12 +28,14 @@ import com.example.foodflow.ui.components.DriverBottomBar
 import com.example.foodflow.ui.components.RestaurantBottomBar
 import com.example.foodflow.ui.viewmodel.AuthViewModel
 import com.example.foodflow.ui.viewmodel.CartViewModel
+import com.example.foodflow.ui.viewmodel.SettingsViewModel
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun AppNavigation(
     navController: NavHostController = rememberNavController(),
     authViewModel: AuthViewModel = viewModel(),
+    settingsViewModel: SettingsViewModel = viewModel(),
     modifier: Modifier = Modifier
 ) {
     val authState by authViewModel.authState.collectAsState()
@@ -101,10 +103,10 @@ fun AppNavigation(
         ) {
             // Delegating all screen routing to their respective graphs!
             authGraph(navController, authViewModel)
-            customerGraph(navController, authViewModel, cartViewModel)
-            restaurantGraph(navController, authViewModel)
-            driverGraph(navController, authViewModel)
-            adminGraph(navController, authViewModel)
+            customerGraph(navController, authViewModel, cartViewModel, settingsViewModel)
+            restaurantGraph(navController, authViewModel, settingsViewModel)
+            driverGraph(navController, authViewModel, settingsViewModel)
+            adminGraph(navController, authViewModel, settingsViewModel)
         }
     }
 }
