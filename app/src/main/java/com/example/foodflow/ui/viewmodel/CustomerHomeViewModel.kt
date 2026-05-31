@@ -20,15 +20,21 @@ class CustomerHomeViewModel : ViewModel() {
     private val _restaurants = MutableStateFlow<List<AppUser>>(emptyList())
     val restaurants: StateFlow<List<AppUser>> = _restaurants.asStateFlow()
 
+    // NEW: Loading state
+    private val _isLoading = MutableStateFlow(true)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
     init {
         viewModelScope.launch {
-            repository.getNewlyAddedItems().collect { items ->
-                _newlyAddedItems.value = items
+            repository.getNewlyAddedItems().collect {
+                _newlyAddedItems.value = it
+                _isLoading.value = false // Data arrived, stop loading!
             }
         }
         viewModelScope.launch {
-            repository.getRestaurants().collect { restaurants ->
-                _restaurants.value = restaurants
+            repository.getRestaurants().collect {
+                _restaurants.value = it
+                _isLoading.value = false // Data arrived, stop loading!
             }
         }
     }

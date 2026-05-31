@@ -72,4 +72,23 @@ class CustomerRepository {
             Result.failure(e)
         }
     }
+
+    // Listen for orders placed by a specific Customer
+    fun getOrdersForCustomer(customerId: String): Flow<List<Order>> = callbackFlow {
+        val subscription = firestore.collection("orders")
+            .whereEqualTo("customerId", customerId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    close(error)
+                    return@addSnapshotListener
+                }
+
+                val orders = snapshot?.documents?.mapNotNull { doc ->
+                    doc.toObject(Order::class.java)?.copy(id = doc.id)
+                }?.sortedByDescending { it.createdAt } ?: emptyList() // Newest first
+
+                trySend(orders)
+            }
+        awaitClose { subscription.remove() }
+    }
 }

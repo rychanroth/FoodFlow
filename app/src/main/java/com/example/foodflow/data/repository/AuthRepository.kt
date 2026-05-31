@@ -4,6 +4,7 @@ import com.example.foodflow.data.model.AppUser
 import com.example.foodflow.data.model.UserRole
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthException
+import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 
@@ -18,15 +19,66 @@ class AuthRepository {
     val isLoggedIn: Boolean
         get() = auth.currentUser != null
 
-    suspend fun registerUser(email: String, password: String, role: UserRole): Result<AppUser> {
+    // Check if the current user has verified their email
+    fun isEmailVerified(): Boolean {
+        return auth.currentUser?.isEmailVerified ?: false
+    }
+
+    /**
+     * Helper function to get current user's role
+     */
+    suspend fun getUserRole(uid: String): Result<UserRole> {
+        return try {
+            val document = firestore.collection("users").document(uid).get().await()
+            val appUser = document.toObject(AppUser::class.java)
+            if (appUser != null) {
+                Result.success(appUser.role)
+            } else {
+                Result.failure(Exception("User data not found"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun registerUser(email: String, password: String): Result<AppUser> {
         return try {
             val authResult = auth.createUserWithEmailAndPassword(email, password).await()
             val uid = authResult.user?.uid ?: throw Exception("User creation failed")
-            val newUser = AppUser(uid = uid, email = email, role = role)
+            val newUser = AppUser(uid = uid, email = email, role = UserRole.CUSTOMER)
             firestore.collection("users").document(uid).set(newUser).await()
             Result.success(newUser)
         } catch (e: FirebaseAuthException) {
             Result.failure(Exception(getAuthErrorMessage(e)))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    // NEW: Google Sign-In function
+    suspend fun firebaseAuthWithGoogle(idToken: String): Result<AppUser> {
+        return try {
+            // 1. Exchange the Google token for a Firebase credential
+            val credential = GoogleAuthProvider.getCredential(idToken, null)
+
+            // 2. Sign in to Firebase with the credential
+            val authResult = auth.signInWithCredential(credential).await()
+            val uid = authResult.user?.uid ?: throw Exception("Google sign-in failed")
+
+            // 3. Check if this is a new user or existing user
+            val userDoc = firestore.collection("users").document(uid).get().await()
+
+            if (userDoc.exists()) {
+                // Existing User: Just log them in
+                val appUser = userDoc.toObject(AppUser::class.java) ?: throw Exception("Data parse error")
+                Result.success(appUser)
+            } else {
+                // New User: Create their profile in Firestore as CUSTOMER
+                val email = authResult.user?.email ?: ""
+                val newUser = AppUser(uid = uid, email = email, role = UserRole.CUSTOMER)
+                firestore.collection("users").document(uid).set(newUser).await()
+                Result.success(newUser)
+            }
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -63,6 +115,19 @@ class AuthRepository {
             Result.success(Unit)
         } catch (e: FirebaseAuthException) {
             Result.failure(Exception(getAuthErrorMessage(e)))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Send the verification email
+     */
+    suspend fun sendEmailVerification(): Result<Unit> {
+        return try {
+            val user = auth.currentUser ?: throw Exception("No user logged in")
+            user.sendEmailVerification().await()
+            Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }

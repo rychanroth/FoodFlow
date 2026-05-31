@@ -7,6 +7,9 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.automirrored.filled.ReceiptLong
+import androidx.compose.material.icons.filled.ReceiptLong
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Storefront
 import androidx.compose.material3.*
@@ -37,6 +40,7 @@ fun CustomerHomeScreen(
 ) {
     val newlyAddedItems by customerViewModel.newlyAddedItems.collectAsState()
     val restaurants by customerViewModel.restaurants.collectAsState()
+    val isLoading by customerViewModel.isLoading.collectAsState()
     val authState by authViewModel.authState.collectAsState()
 
     val cartItems by cartViewModel.cartItems.collectAsState()
@@ -53,14 +57,13 @@ fun CustomerHomeScreen(
     CustomerHomeContent(
         newlyAddedItems = newlyAddedItems,
         restaurants = restaurants,
+        isLoading = isLoading,
         cartItemCount = cartItemCount,
         onLogoutClick = { authViewModel.logout() },
         onRestaurantClick = { restaurantId ->
             navController.navigate(Route.RestaurantDetail.createRoute(restaurantId))
         },
-        onCartClick = {
-            navController.navigate(Route.Cart.route)
-        }
+        onNavigateToApply = { navController.navigate(Route.Apply.route) }
     )
 }
 
@@ -69,18 +72,20 @@ fun CustomerHomeScreen(
 fun CustomerHomeContent(
     newlyAddedItems: List<MenuItem>,
     restaurants: List<AppUser>,
+    isLoading: Boolean,
     cartItemCount: Int,
     onLogoutClick: () -> Unit,
     onRestaurantClick: (String) -> Unit,
-    onCartClick: () -> Unit
+    onNavigateToApply: () -> Unit
+
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("FoodFlow 🍔") },
                 actions = {
-                    IconButton(onClick = onCartClick) {
-                        Icon(Icons.Default.ShoppingCart, contentDescription = "Cart")
+                    Button(onClick = onNavigateToApply) {
+                        Text("Apply for Restaurant / Driver Role")
                     }
                     IconButton(onClick = onLogoutClick) {
                         Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Logout")
@@ -89,56 +94,67 @@ fun CustomerHomeContent(
             )
         }
     ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            item {
-                Text(
-                    "Newly Added",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
-                Spacer(modifier = Modifier.height(8.dp))
+        if (isLoading) {
+            // LOADING STATE
+            Box(
+                modifier = Modifier.fillMaxSize().padding(paddingValues),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        } else {
+            // LOADED STATE (Proceed as normal)
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                item {
+                    Text(
+                        "Newly Added",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                if (newlyAddedItems.isEmpty()) {
-                    Text("No new items yet.", style = MaterialTheme.typography.bodyMedium)
-                } else {
-                    LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        items(newlyAddedItems) { item ->
-                            FoodCard(item = item)
+                    if (newlyAddedItems.isEmpty()) {
+                        Text("No new items yet.", style = MaterialTheme.typography.bodyMedium)
+                    } else {
+                        LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            items(newlyAddedItems) { item ->
+                                FoodCard(item = item)
+                            }
                         }
                     }
                 }
-            }
 
-            item {
-                Text(
-                    "Restaurants",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-
-            if (restaurants.isEmpty()) {
                 item {
                     Text(
-                        "No restaurants available.",
-                        style = MaterialTheme.typography.bodyMedium
+                        "Restaurants",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(top = 8.dp)
                     )
+                    Spacer(modifier = Modifier.height(8.dp))
                 }
-            } else {
-                items(restaurants) { restaurant ->
-                    RestaurantCard(
-                        restaurant = restaurant,
-                        onClick = { onRestaurantClick(restaurant.uid) }
-                    )
+
+                if (restaurants.isEmpty()) {
+                    item {
+                        Text(
+                            "No restaurants available.",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                } else {
+                    items(restaurants) { restaurant ->
+                        RestaurantCard(
+                            restaurant = restaurant,
+                            onClick = { onRestaurantClick(restaurant.uid) }
+                        )
+                    }
                 }
             }
         }

@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -12,6 +14,14 @@ android {
         }
     }
 
+
+    // === LOCAL PROPOERTIES ===
+    val localProperties = Properties()
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        localProperties.load(localPropertiesFile.inputStream())
+    }
+
     defaultConfig {
         applicationId = "com.example.foodflow"
         minSdk = 24
@@ -20,6 +30,10 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // === MODIFY defaultConfig
+        val webClientId = localProperties.getProperty("WEB_CLIENT_ID") ?: ""
+        buildConfigField("String", "WEB_CLIENT_ID", "\"$webClientId\"")
     }
 
     buildTypes {
@@ -37,6 +51,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -68,5 +83,10 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
+    // Google Sign-In Authentication
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.2.0")
+    // Credential Manager (Modern way to handle Google Sign-In)
+    implementation("androidx.credentials:credentials")
+    implementation("androidx.credentials:credentials-play-services-auth")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
 }

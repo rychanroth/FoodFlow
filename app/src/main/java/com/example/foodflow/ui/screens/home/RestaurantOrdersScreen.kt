@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.foodflow.data.model.Order
 import com.example.foodflow.data.model.OrderStatus
+import com.example.foodflow.ui.components.StatusBadge
 import com.example.foodflow.ui.viewmodel.RestaurantOrdersViewModel
 import com.google.firebase.auth.FirebaseAuth
 
@@ -157,26 +158,5 @@ fun OrderCard(
                 }
             }
         }
-    }
-}
-
-@Composable
-fun StatusBadge(status: OrderStatus) {
-    val color = when (status) {
-        OrderStatus.PLACED -> MaterialTheme.colorScheme.error
-        OrderStatus.PREPARING -> MaterialTheme.colorScheme.tertiary
-        OrderStatus.READY -> MaterialTheme.colorScheme.primary
-        OrderStatus.ON_THE_WAY -> MaterialTheme.colorScheme.secondary
-        OrderStatus.DELIVERED -> MaterialTheme.colorScheme.primaryContainer
-        OrderStatus.REJECTED -> MaterialTheme.colorScheme.outline
-    }
-    Surface(color = color.copy(alpha = 0.1f), shape = MaterialTheme.shapes.small) {
-        Text(
-            text = status.name,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-            color = color,
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.Bold
-        )
     }
 }

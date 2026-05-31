@@ -7,4 +7,5 @@ sealed interface AuthState {
     data class Error(val message: String): AuthState
 
     data object PasswordResetSent: AuthState
+    data object AwaitingVerification: AuthState
 }
