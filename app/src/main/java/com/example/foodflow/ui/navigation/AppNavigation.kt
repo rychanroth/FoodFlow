@@ -1,5 +1,7 @@
 package com.example.foodflow.ui.navigation
 
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,6 +13,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -24,6 +27,7 @@ import com.example.foodflow.ui.components.CustomerBottomBar
 import com.example.foodflow.ui.components.DriverBottomBar
 import com.example.foodflow.ui.components.RestaurantBottomBar
 import com.example.foodflow.ui.viewmodel.AuthViewModel
+import com.example.foodflow.ui.viewmodel.CartViewModel
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
@@ -33,6 +37,9 @@ fun AppNavigation(
     modifier: Modifier = Modifier
 ) {
     val authState by authViewModel.authState.collectAsState()
+
+    // V2 FIX: Scope CartViewModel to the Activity so it's shared across all screens in CustomerNavGraph!
+    val cartViewModel: CartViewModel = viewModel(LocalActivity.current as ComponentActivity)
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     // Get the current screen route
@@ -94,7 +101,7 @@ fun AppNavigation(
         ) {
             // Delegating all screen routing to their respective graphs!
             authGraph(navController, authViewModel)
-            customerGraph(navController, authViewModel)
+            customerGraph(navController, authViewModel, cartViewModel)
             restaurantGraph(navController, authViewModel)
             driverGraph(navController, authViewModel)
             adminGraph(navController, authViewModel)

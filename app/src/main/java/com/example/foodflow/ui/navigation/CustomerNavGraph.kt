@@ -26,16 +26,18 @@ import com.google.firebase.auth.FirebaseAuth
 
 fun NavGraphBuilder.customerGraph(
     navController: NavController,
-    authViewModel: AuthViewModel
+    authViewModel: AuthViewModel,
+    cartViewModel: CartViewModel
 ) {
     // FIX: Wrap in navigation block
     navigation(
         startDestination = Route.CustomerHome.route,
         route = Route.CustomerGraph.route
     ) {
+        // V2 FIX: Scope CartViewModel to the Activity in AppNavigation Compoable
+
         composable(Route.CustomerHome.route) {
             val customerViewModel: CustomerHomeViewModel = viewModel()
-            val cartViewModel: CartViewModel = viewModel()
             CustomerHomeScreen(navController, authViewModel, customerViewModel, cartViewModel)
         }
 
@@ -48,7 +50,6 @@ fun NavGraphBuilder.customerGraph(
             arguments = listOf(navArgument("restaurantId") { type = NavType.StringType })
         ) { backStackEntry ->
             val restaurantId = backStackEntry.arguments?.getString("restaurantId") ?: ""
-            val cartViewModel: CartViewModel = viewModel()
             RestaurantDetailScreen(
                 restaurantId = restaurantId,
                 restaurantName = "Restaurant Menu",
@@ -60,7 +61,6 @@ fun NavGraphBuilder.customerGraph(
         }
 
         composable(Route.Cart.route) {
-            val cartViewModel: CartViewModel = viewModel()
             val cartItems by cartViewModel.cartItems.collectAsState()
             val totalPrice = cartViewModel.getTotalPrice()
             val currentUser = FirebaseAuth.getInstance().currentUser
