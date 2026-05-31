@@ -10,6 +10,7 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import com.example.foodflow.data.model.ThemePreference
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
@@ -35,17 +36,26 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun FoodFlowTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
+    themePreference: ThemePreference = ThemePreference.SYSTEM, // Dynamic based on ThemePreference
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
+    // 1. Evaluate dark theme eligibility matching User Choice vs System State
+    val darkTheme = when (themePreference) {
+        ThemePreference.LIGHT -> false
+        ThemePreference.DARK -> true
+        ThemePreference.SYSTEM -> isSystemInDarkTheme()
+    }
+
+    // 2. Evaluate dynamic color eligibility matching Device API capability vs User Switch toggle
+    val isDynamicColorEligible = dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+
+    // 3. Resolve the finalized color scheme
     val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+        isDynamicColorEligible -> {
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
