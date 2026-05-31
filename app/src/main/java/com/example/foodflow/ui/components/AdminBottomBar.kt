@@ -4,6 +4,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.filled.Assignment
 import androidx.compose.material.icons.filled.Dashboard
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -34,6 +35,18 @@ fun AdminBottomBar(navController: NavController, currentRoute: String?) {
             onClick = {
                 if (currentRoute != Route.AdminApplications.route) {
                     navController.navigate(Route.AdminApplications.route) {
+                        launchSingleTop = true
+                    }
+                }
+            }
+        )
+        NavigationBarItem(
+            icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
+            label = { Text("Settings") },
+            selected = currentRoute == Route.AdminSettings.route,
+            onClick = {
+                if (currentRoute != Route.AdminSettings.route) {
+                    navController.navigate(Route.AdminSettings.route) {
                         launchSingleTop = true
                     }
                 }
