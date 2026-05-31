@@ -173,5 +173,9 @@ fun NavGraphBuilder.customerGraph(
                 }
             )
         }
+
+        composable(Route.Profile.route) {
+            ProfileScreen(onBackClick = { navController.popBackStack() })
+        }
     }
 }
