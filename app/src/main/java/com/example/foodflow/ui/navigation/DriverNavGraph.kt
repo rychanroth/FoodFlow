@@ -29,9 +29,7 @@ fun NavGraphBuilder.driverGraph(
             SettingsScreen(
                 settingsViewModel = settingsViewModel,
                 onBackClick = {
-                    navController.navigate(Route.DriverHome.route) {
-                        popUpTo(Route.DriverHome.route) { inclusive = true }
-                    }
+                    navController.popBackStack()
                 }
             )
         }

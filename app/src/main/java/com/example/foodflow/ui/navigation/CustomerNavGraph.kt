@@ -19,6 +19,7 @@ import com.example.foodflow.ui.screens.home.CustomerHomeScreen
 import com.example.foodflow.ui.screens.home.CustomerOrdersScreen
 import com.example.foodflow.ui.screens.home.CustomerSearchScreen
 import com.example.foodflow.ui.screens.home.PaymentInstructionScreen
+import com.example.foodflow.ui.screens.home.ProfileScreen
 import com.example.foodflow.ui.screens.home.RestaurantDetailScreen
 import com.example.foodflow.ui.screens.home.SettingsScreen
 import com.example.foodflow.ui.viewmodel.AuthViewModel
@@ -168,9 +169,7 @@ fun NavGraphBuilder.customerGraph(
             SettingsScreen(
                 settingsViewModel = settingsViewModel,
                 onBackClick = {
-                    navController.navigate(Route.CustomerHome.route) {
-                        popUpTo(Route.CustomerHome.route) { inclusive = true }
-                    }
+                    navController.popBackStack()
                 }
             )
         }

@@ -40,9 +40,7 @@ fun NavGraphBuilder.restaurantGraph(
             SettingsScreen(
                 settingsViewModel = settingsViewModel,
                 onBackClick = {
-                    navController.navigate(Route.RestaurantHome.route) {
-                        popUpTo(Route.RestaurantHome.route) { inclusive = true }
-                    }
+                    navController.popBackStack()
                 }
             )
         }

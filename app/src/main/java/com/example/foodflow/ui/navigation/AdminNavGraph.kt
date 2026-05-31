@@ -34,9 +34,7 @@ fun NavGraphBuilder.adminGraph(
             SettingsScreen(
                 settingsViewModel = settingsViewModel,
                 onBackClick = {
-                    navController.navigate(Route.AdminDashboard.route) {
-                        popUpTo(Route.AdminDashboard.route) { inclusive = true }
-                    }
+                    navController.popBackStack()
                 }
             )
         }
