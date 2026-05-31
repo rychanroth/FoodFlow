@@ -3,9 +3,12 @@ package com.example.foodflow.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.foodflow.data.model.CartItem
+import com.example.foodflow.data.model.CheckoutState
 import com.example.foodflow.data.model.MenuItem
 import com.example.foodflow.data.model.Order
 import com.example.foodflow.data.model.OrderStatus
+import com.example.foodflow.data.model.PaymentMethod
+import com.example.foodflow.data.repository.ConfigRepository
 import com.example.foodflow.data.repository.CustomerRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,6 +18,10 @@ import kotlinx.coroutines.launch
 class CartViewModel : ViewModel() {
 
     private val repository = CustomerRepository()
+    private val configRepository = ConfigRepository()
+
+    private val _checkoutState = MutableStateFlow<CheckoutState>(CheckoutState.Idle)
+    val checkoutState: StateFlow<CheckoutState> = _checkoutState
 
     private val _cartItems = MutableStateFlow<List<CartItem>>(emptyList())
     val cartItems: StateFlow<List<CartItem>> = _cartItems.asStateFlow()
@@ -72,18 +79,52 @@ class CartViewModel : ViewModel() {
         if (currentItems.isEmpty()) return
 
         viewModelScope.launch {
+            _checkoutState.value = CheckoutState.Loading // Use new state
+
+            // 1. Fetch Live Platform Settings
+            val settingsResult = configRepository.getPlatformSettings()
+            if (settingsResult.isFailure) {
+                _checkoutState.value = CheckoutState.Error("Failed to fetch platform settings") // Use new state
+                return@launch
+            }
+            val settings = settingsResult.getOrNull()!!
+
+            // 2. Calculate the Economics
+            val subtotal = getTotalPrice()
+            val deliveryFee = settings.deliveryFee
+            val platformFee = settings.platformFlatFee
+            val totalAmount = subtotal + deliveryFee + platformFee
+
+            val restaurantEarnings = subtotal - (subtotal * settings.platformCommissionRate)
+            val driverEarnings = deliveryFee * settings.driverCommissionRate
+            val platformEarnings = (subtotal * settings.platformCommissionRate) + (deliveryFee * (1 - settings.driverCommissionRate)) + platformFee
+
+            // 3. Create the Order with locked-in economics
             val restaurantId = currentItems.first().menuItem.restaurantId
             val itemNames = currentItems.map { it.menuItem.name }
+
             val newOrder = Order(
                 customerId = currentUserId,
                 restaurantId = restaurantId,
                 itemNames = itemNames,
-                totalAmount = getTotalPrice(),
-                status = OrderStatus.PLACED
+                status = OrderStatus.PLACED,
+                paymentMethod = PaymentMethod.COD,
+                subtotal = subtotal,
+                deliveryFee = deliveryFee,
+                platformFee = platformFee,
+                totalAmount = totalAmount,
+                restaurantEarnings = restaurantEarnings,
+                driverEarnings = driverEarnings,
+                platformEarnings = platformEarnings
             )
+
+            // 4. Save to Firestore
             val result = repository.placeOrder(newOrder)
             if (result.isSuccess) {
                 clearCart()
+                _checkoutState.value = CheckoutState.Success // Use new state
+            } else {
+                _checkoutState.value = CheckoutState.Error(result.exceptionOrNull()?.message ?: "Order failed") // Use new state
             }
         }
     }
