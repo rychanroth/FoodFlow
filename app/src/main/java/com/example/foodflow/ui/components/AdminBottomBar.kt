@@ -52,5 +52,17 @@ fun AdminBottomBar(navController: NavController, currentRoute: String?) {
                 }
             }
         )
+        NavigationBarItem(
+            icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
+            label = { Text("Settings") },
+            selected = currentRoute == Route.Settings.route,
+            onClick = {
+                if (currentRoute != Route.Settings.route) {
+                    navController.navigate(Route.Settings.route) {
+                        launchSingleTop = true
+                    }
+                }
+            }
+        )
     }
 }

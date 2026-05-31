@@ -8,6 +8,9 @@ sealed class Route(val route: String) {
     data object DriverGraph : Route("driver_graph")
     data object AdminGraph : Route("admin_graph")
 
+    // Global Screens
+    data object Settings : Route("settings")
+
 
     // Auth Screens
     data object Login : Route("login")

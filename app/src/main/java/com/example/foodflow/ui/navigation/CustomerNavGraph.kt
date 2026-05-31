@@ -20,17 +20,20 @@ import com.example.foodflow.ui.screens.home.CustomerOrdersScreen
 import com.example.foodflow.ui.screens.home.CustomerSearchScreen
 import com.example.foodflow.ui.screens.home.PaymentInstructionScreen
 import com.example.foodflow.ui.screens.home.RestaurantDetailScreen
+import com.example.foodflow.ui.screens.home.SettingsScreen
 import com.example.foodflow.ui.viewmodel.AuthViewModel
 import com.example.foodflow.ui.viewmodel.CartViewModel
 import com.example.foodflow.ui.viewmodel.CustomerHomeViewModel
 import com.example.foodflow.ui.viewmodel.CustomerOrdersViewModel
 import com.example.foodflow.ui.viewmodel.RestaurantDetailViewModel
+import com.example.foodflow.ui.viewmodel.SettingsViewModel
 import com.google.firebase.auth.FirebaseAuth
 
 fun NavGraphBuilder.customerGraph(
     navController: NavController,
     authViewModel: AuthViewModel,
-    cartViewModel: CartViewModel
+    cartViewModel: CartViewModel,
+    settingsViewModel: SettingsViewModel
 ) {
     // FIX: Wrap in navigation block
     navigation(
@@ -159,6 +162,17 @@ fun NavGraphBuilder.customerGraph(
                     onBackClick = { navController.popBackStack() }
                 )
             }
+        }
+
+        composable(Route.Settings.route) {
+            SettingsScreen(
+                settingsViewModel = settingsViewModel,
+                onBackClick = {
+                    navController.navigate(Route.CustomerHome.route) {
+                        popUpTo(Route.CustomerHome.route) { inclusive = true }
+                    }
+                }
+            )
         }
     }
 }

@@ -3,6 +3,7 @@ package com.example.foodflow.ui.components
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DeliveryDining
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -26,6 +27,17 @@ fun DriverBottomBar(navController: NavController, currentRoute: String?) {
                 }
             }
         )
-        // Future: Earnings, Settings tabs here
+        NavigationBarItem(
+            icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
+            label = { Text("Settings") },
+            selected = currentRoute == Route.Settings.route,
+            onClick = {
+                if (currentRoute != Route.Settings.route) {
+                    navController.navigate(Route.Settings.route) {
+                        launchSingleTop = true
+                    }
+                }
+            }
+        )
     }
 }

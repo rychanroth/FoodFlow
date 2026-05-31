@@ -7,12 +7,15 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.example.foodflow.ui.Route
 import com.example.foodflow.ui.screens.home.DriverHomeScreen
+import com.example.foodflow.ui.screens.home.SettingsScreen
 import com.example.foodflow.ui.viewmodel.AuthViewModel
 import com.example.foodflow.ui.viewmodel.DriverOrdersViewModel
+import com.example.foodflow.ui.viewmodel.SettingsViewModel
 
 fun NavGraphBuilder.driverGraph(
     navController: NavController,
-    authViewModel: AuthViewModel
+    authViewModel: AuthViewModel,
+    settingsViewModel: SettingsViewModel
 ) {
     // FIX: Wrap in navigation block
     navigation(
@@ -21,6 +24,16 @@ fun NavGraphBuilder.driverGraph(
     ) {
         composable(Route.DriverHome.route) {
             DriverHomeScreen(authViewModel = authViewModel, driverViewModel = viewModel())
+        }
+        composable(Route.Settings.route) {
+            SettingsScreen(
+                settingsViewModel = settingsViewModel,
+                onBackClick = {
+                    navController.navigate(Route.DriverHome.route) {
+                        popUpTo(Route.DriverHome.route) { inclusive = true }
+                    }
+                }
+            )
         }
     }
 }
