@@ -8,6 +8,7 @@ import com.example.foodflow.data.model.MenuItem
 import com.example.foodflow.data.model.Order
 import com.example.foodflow.data.model.OrderStatus
 import com.example.foodflow.data.model.PaymentMethod
+import com.example.foodflow.data.model.PlatformSettings
 import com.example.foodflow.data.repository.ConfigRepository
 import com.example.foodflow.data.repository.CustomerRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,6 +26,23 @@ class CartViewModel : ViewModel() {
 
     private val _cartItems = MutableStateFlow<List<CartItem>>(emptyList())
     val cartItems: StateFlow<List<CartItem>> = _cartItems.asStateFlow()
+
+    // ADD: Expose settings so the UI can display the fee breakdown
+    private val _settings = MutableStateFlow(PlatformSettings())
+    val settings: StateFlow<PlatformSettings> = _settings
+
+    init {
+        loadSettings()
+    }
+
+    fun loadSettings() {
+        viewModelScope.launch {
+            val result = configRepository.getPlatformSettings()
+            if (result.isSuccess) {
+                _settings.value = result.getOrNull() ?: PlatformSettings()
+            }
+        }
+    }
 
     fun addItemToCart(item: MenuItem) {
         val currentItems = _cartItems.value.toMutableList()
@@ -99,10 +117,8 @@ class CartViewModel : ViewModel() {
             val driverEarnings = deliveryFee * settings.driverCommissionRate
             val platformEarnings = (subtotal * settings.platformCommissionRate) + (deliveryFee * (1 - settings.driverCommissionRate)) + platformFee
 
-            // 3. Create the Order with locked-in economics
             val restaurantId = currentItems.first().menuItem.restaurantId
             val itemNames = currentItems.map { it.menuItem.name }
-
             val newOrder = Order(
                 customerId = currentUserId,
                 restaurantId = restaurantId,

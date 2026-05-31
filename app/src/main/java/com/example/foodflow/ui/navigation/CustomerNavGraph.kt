@@ -62,12 +62,16 @@ fun NavGraphBuilder.customerGraph(
 
         composable(Route.Cart.route) {
             val cartItems by cartViewModel.cartItems.collectAsState()
-            val totalPrice = cartViewModel.getTotalPrice()
+            val settings by cartViewModel.settings.collectAsState()
+
+            val subtotal = cartViewModel.getTotalPrice()
+            val totalPrice = subtotal + settings.deliveryFee + settings.platformFlatFee
             val currentUser = FirebaseAuth.getInstance().currentUser
 
             CartScreen(
                 cartItems = cartItems,
                 totalPrice = totalPrice,
+                settings = settings, // PASS SETTINGS
                 onBackClick = { navController.popBackStack() },
                 onIncreaseClick = { cartViewModel.increaseQuantity(it) },
                 onDecreaseClick = { cartViewModel.decreaseQuantity(it) },
