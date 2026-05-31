@@ -1,6 +1,7 @@
 package com.example.foodflow.ui.components
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Search
@@ -61,7 +62,7 @@ fun CustomerBottomBar(
             }
         )
         NavigationBarItem(
-            icon = { Icon(Icons.Default.ReceiptLong, contentDescription = "Orders") },
+            icon = { Icon(Icons.AutoMirrored.Default.ReceiptLong, contentDescription = "Orders") },
             label = { Text("Orders") },
             selected = currentRoute == Route.CustomerOrders.route,
             onClick = {

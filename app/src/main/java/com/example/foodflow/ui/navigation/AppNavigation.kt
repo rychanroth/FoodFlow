@@ -19,6 +19,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.foodflow.data.model.AuthState
 import com.example.foodflow.data.model.UserRole
 import com.example.foodflow.ui.Route
+import com.example.foodflow.ui.components.AdminBottomBar
 import com.example.foodflow.ui.components.CustomerBottomBar
 import com.example.foodflow.ui.components.DriverBottomBar
 import com.example.foodflow.ui.components.RestaurantBottomBar
@@ -74,7 +75,7 @@ fun AppNavigation(
             { DriverBottomBar(navController = navController, currentRoute = currentRoute) }
         }
         Route.AdminGraph.route -> {
-            { /*TODO: */ }
+            { AdminBottomBar(navController = navController, currentRoute = currentRoute) }
         }
         else -> {
             { } // No bottom bar for Auth graph
@@ -96,7 +97,7 @@ fun AppNavigation(
             customerGraph(navController, authViewModel)
             restaurantGraph(navController, authViewModel)
             driverGraph(navController, authViewModel)
-            adminGraph(navController)
+            adminGraph(navController, authViewModel)
         }
     }
 }

@@ -14,28 +14,38 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.foodflow.data.model.Application
 import com.example.foodflow.ui.viewmodel.AdminViewModel
 
+// ... imports
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.TopAppBar
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdminApplicationScreen(
     viewModel: AdminViewModel = viewModel()
 ) {
     val pendingApps by viewModel.pendingApps.collectAsState()
 
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Text("Pending Applications", style = MaterialTheme.typography.headlineMedium)
-        Spacer(modifier = Modifier.height(16.dp))
-
-        if (pendingApps.isEmpty()) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("No pending applications.")
-            }
-        } else {
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                items(pendingApps, key = { it.id }) { app ->
-                    ApplicationCard(
-                        app = app,
-                        onApprove = { viewModel.approveApplication(app) },
-                        onReject = { viewModel.rejectApplication(app.id) }
-                    )
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Applications") }
+            )
+        }
+    ) { paddingValues ->
+        Column(modifier = Modifier.fillMaxSize().padding(paddingValues).padding(16.dp)) {
+            if (pendingApps.isEmpty()) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("No pending applications.")
+                }
+            } else {
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    items(pendingApps, key = { it.id }) { app ->
+                        ApplicationCard(
+                            app = app,
+                            onApprove = { viewModel.approveApplication(app) },
+                            onReject = { viewModel.rejectApplication(app.id) }
+                        )
+                    }
                 }
             }
         }

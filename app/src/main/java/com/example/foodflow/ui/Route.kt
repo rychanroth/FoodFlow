@@ -32,5 +32,6 @@ sealed class Route(val route: String) {
     data object DriverHome : Route("driver_home")
 
     // Admin Screens
+    data object AdminDashboard : Route("admin_dashboard")
     data object AdminApplications : Route("admin_applications")
 }
