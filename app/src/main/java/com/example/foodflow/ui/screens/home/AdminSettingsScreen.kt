@@ -1,7 +1,10 @@
 package com.example.foodflow.ui.screens.home
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -58,9 +61,10 @@ fun SettingsContent(
     var platformCommissionRate by remember { mutableStateOf((initialSettings.platformCommissionRate * 100).toString()) } // Display as %
     var driverCommissionRate by remember { mutableStateOf((initialSettings.driverCommissionRate * 100).toString()) } // Display as %
     var platformBankAccount by remember { mutableStateOf(initialSettings.platformBankAccount) }
+    var platformBankAccountUrl by remember { mutableStateOf(initialSettings.platformBankAccountUrl) }
 
     Column(
-        modifier = modifier.padding(16.dp).fillMaxSize(),
+        modifier = modifier.padding(16.dp).fillMaxSize().verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text("Fee Configuration", style = MaterialTheme.typography.headlineMedium)
@@ -89,7 +93,7 @@ fun SettingsContent(
         )
 
         Spacer(modifier = Modifier.height(16.dp))
-        Divider()
+        HorizontalDivider(Modifier, DividerDefaults.Thickness, DividerDefaults.color)
         Spacer(modifier = Modifier.height(16.dp))
 
         Text("Payment Configuration", style = MaterialTheme.typography.headlineMedium)
@@ -104,13 +108,24 @@ fun SettingsContent(
 
         Spacer(modifier = Modifier.weight(1f))
 
+        OutlinedTextField(
+            value = platformBankAccountUrl,
+            onValueChange = { platformBankAccountUrl = it },
+            label = { Text("Platform Bank Account Bakong Dynamic URL") },
+            supportingText = { Text("Something like: https://link.payway.com.kh/aba?id=YOUR_ID&amount={amount}...") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.weight(1f))
+
         Button(
             onClick = {
                 val newSettings = PlatformSettings(
                     deliveryFee = deliveryFee.toDoubleOrNull() ?: 0.0,
                     platformCommissionRate = (platformCommissionRate.toDoubleOrNull() ?: 0.0) / 100, // Convert % back to decimal
                     driverCommissionRate = (driverCommissionRate.toDoubleOrNull() ?: 0.0) / 100, // Convert % back to decimal
-                    platformBankAccount = platformBankAccount
+                    platformBankAccount = platformBankAccount,
+                    platformBankAccountUrl = platformBankAccountUrl
                 )
                 onSave(newSettings)
             },
