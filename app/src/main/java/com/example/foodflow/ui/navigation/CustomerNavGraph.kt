@@ -107,21 +107,30 @@ fun NavGraphBuilder.customerGraph(
 
         composable(Route.PaymentInstruction.route) {
             val settings by cartViewModel.settings.collectAsState()
-            val lastOrderTotal = // You'll need to expose the last order total from CartViewModel,
-            // or just pass the cart total before it cleared.
-                // For now, hardcode a placeholder or expose it.
+            // Get the orderId from the ViewModel
+            val orderId = cartViewModel.lastOrderId
 
+            if (orderId != null) {
                 PaymentInstructionScreen(
-                    totalAmount = cartViewModel.lastOrderTotal, // Add this to CartViewModel too!
+                    orderId = orderId,
+                    totalAmount = cartViewModel.lastOrderTotal,
                     bankAccountDetails = settings.platformBankAccount,
                     bankPaymentUrl = settings.platformBankAccountUrl,
+                    cartViewModel = cartViewModel, // Pass ViewModel for upload
                     onPaymentConfirmed = {
                         navController.navigate(Route.CustomerHome.route) {
                             popUpTo(Route.CustomerHome.route) { inclusive = true }
                         }
                     },
-                    onBackClick = { navController.popBackStack() }
+                    // By the time the user reaches the Payment screen, cartViewModel.clearCart() has already run
+                    // Navigate them to Home Screen instead
+                    onBackClick = {
+                        navController.navigate(Route.CustomerHome.route) {
+                            popUpTo(Route.CustomerHome.route) { inclusive = true }
+                        }
+                    }
                 )
+            }
         }
 
         composable(Route.CustomerOrders.route) {

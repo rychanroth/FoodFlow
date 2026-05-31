@@ -1,5 +1,7 @@
 package com.example.foodflow.ui.viewmodel
 
+import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.foodflow.data.model.CartItem
@@ -11,9 +13,11 @@ import com.example.foodflow.data.model.PaymentMethod
 import com.example.foodflow.data.model.PlatformSettings
 import com.example.foodflow.data.repository.ConfigRepository
 import com.example.foodflow.data.repository.CustomerRepository
+import com.example.foodflow.data.repository.MenuRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class CartViewModel : ViewModel() {
@@ -34,6 +38,7 @@ class CartViewModel : ViewModel() {
     var lastPaymentMethod: PaymentMethod = PaymentMethod.COD
         private set
     var lastOrderTotal = 0.0
+    var lastOrderId: String? = null
 
     init {
         loadSettings()
@@ -149,10 +154,28 @@ class CartViewModel : ViewModel() {
             // 4. Save to Firestore
             val result = repository.placeOrder(newOrder)
             if (result.isSuccess) {
+                lastOrderId = result.getOrNull()
                 clearCart()
                 _checkoutState.value = CheckoutState.Success // Use new state
             } else {
                 _checkoutState.value = CheckoutState.Error(result.exceptionOrNull()?.message ?: "Order failed") // Use new state
+            }
+        }
+    }
+
+    // ADD: Function to upload the transaction proof
+    fun uploadTransactionProof(orderId: String, imageUri: Uri, context: Context) {
+        viewModelScope.launch {
+            _checkoutState.value = CheckoutState.Loading
+            val uploadResult =
+                MenuRepository().uploadImage(imageUri, context) // Re-use our ImgBB repo!
+            if (uploadResult.isSuccess) {
+                val imageUrl = uploadResult.getOrNull()!!
+                // Update the order in Firestore with the image URL
+                repository.updateOrderTransactionProof(orderId, imageUrl)
+                _checkoutState.value = CheckoutState.Success
+            } else {
+                _checkoutState.update { CheckoutState.Error("Failed to upload receipt. Please try again.") }
             }
         }
     }

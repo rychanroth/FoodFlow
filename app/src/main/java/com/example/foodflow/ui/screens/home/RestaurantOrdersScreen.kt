@@ -9,9 +9,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import com.example.foodflow.data.model.Order
 import com.example.foodflow.data.model.OrderStatus
 import com.example.foodflow.ui.components.StatusBadge
@@ -127,6 +130,25 @@ fun OrderCard(
 
             Spacer(modifier = Modifier.height(8.dp))
             Text("Total: $${"%.2f".format(order.totalAmount)}", style = MaterialTheme.typography.titleMedium)
+
+            if (order.transactionImageUrl != null) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text("Payment Proof:", fontWeight = FontWeight.SemiBold)
+                Spacer(modifier = Modifier.height(4.dp))
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    AsyncImage(
+                        model = order.transactionImageUrl,
+                        contentDescription = "Payment Proof",
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .clip(MaterialTheme.shapes.medium),
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.height(12.dp))
 

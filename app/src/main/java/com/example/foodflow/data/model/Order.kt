@@ -19,10 +19,11 @@ data class Order(
     val totalAmount: Double = 0.0,           // What the Customer pays (Subtotal + DeliveryFee + PlatformFee)
     val restaurantEarnings: Double = 0.0,    // What the Restaurant gets
     val driverEarnings: Double = 0.0,        // What the Driver gets
-    val platformEarnings: Double = 0.0       // What the Platform gets
+    val platformEarnings: Double = 0.0,       // What the Platform gets
+    val transactionImageUrl: String? = null // Image of payment transaction with bank transfer as paymentmethod
 )
 
-enum class PaymentMethod {
+enum class  PaymentMethod {
     COD,
     BANK_TRANSFER
 }
