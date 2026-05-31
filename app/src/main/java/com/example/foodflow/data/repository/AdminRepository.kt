@@ -3,6 +3,7 @@ package com.example.foodflow.data.repository
 import com.google.firebase.firestore.FirebaseFirestore
 import com.example.foodflow.data.model.Application
 import com.example.foodflow.data.model.ApplicationStatus
+import com.example.foodflow.data.model.PlatformSettings
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -49,5 +50,26 @@ class AdminRepository {
     suspend fun rejectApplication(applicationId: String) {
         val appRef = firestore.collection("applications").document(applicationId)
         appRef.update("status", ApplicationStatus.REJECTED.name).await()
+    }
+
+    // Fetch the current platform settings
+    suspend fun getPlatformSettings(): Result<PlatformSettings> {
+        return try {
+            val document = firestore.collection("configuration").document("platformSettings").get().await()
+            val settings = document.toObject(PlatformSettings::class.java) ?: PlatformSettings()
+            Result.success(settings)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    // Update the platform settings
+    suspend fun updatePlatformSettings(settings: PlatformSettings): Result<Unit> {
+        return try {
+            firestore.collection("configuration").document("platformSettings").set(settings).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 }
