@@ -19,6 +19,7 @@ sealed class Route(val route: String) {
     data object CustomerHome : Route("customer_home")
     data object CustomerSearch : Route("customer_search")
     data object Cart : Route("cart")
+    data object PaymentInstruction : Route("payment_instruction")
     data object CustomerOrders : Route("customer_orders")
     data object RestaurantDetail : Route("restaurant_detail/{restaurantId}") {
         fun createRoute(restaurantId: String) = "restaurant_detail/$restaurantId"

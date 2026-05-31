@@ -91,4 +91,11 @@ class CustomerRepository {
             }
         awaitClose { subscription.remove() }
     }
+
+    suspend fun updateOrderTransactionProof(orderId: String, imageUrl: String) {
+        val updates = hashMapOf<String, Any>(
+            "transactionImageUrl" to imageUrl
+        )
+        firestore.collection("orders").document(orderId).update(updates).await()
+    }
 }

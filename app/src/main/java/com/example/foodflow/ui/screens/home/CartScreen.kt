@@ -1,12 +1,18 @@
 package com.example.foodflow.ui.screens.home
 
+import android.widget.ImageButton
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -15,17 +21,44 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.foodflow.data.model.CartItem
+import com.example.foodflow.data.model.PaymentMethod
+import com.example.foodflow.data.model.PlatformSettings
+import com.example.foodflow.ui.components.OrderSummarySheet
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CartScreen(
     cartItems: List<CartItem>,
     totalPrice: Double,
+    settings: PlatformSettings,
     onBackClick: () -> Unit,
     onIncreaseClick: (String) -> Unit,
     onDecreaseClick: (String) -> Unit,
-    onCheckoutClick: () -> Unit
+    onCheckoutClick: (PaymentMethod) -> Unit
 ) {
+    var showSummarySheet by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState()
+
+    // The Bottom Sheet
+    if (showSummarySheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showSummarySheet = false },
+            sheetState = sheetState
+        ) {
+            // Pass the actual settings from CartViewModel (We'll pass it down from NavGraph next step)
+            // For now, hardcode just to see the UI, then we'll wire it.
+            OrderSummarySheet(
+                cartItems = cartItems,
+                settings = settings, // Placeholder
+                onConfirmOrder = { paymentMethod ->
+                    onCheckoutClick(paymentMethod)
+                    showSummarySheet = false
+                },
+                onDismiss = { showSummarySheet = false }
+            )
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -55,8 +88,15 @@ fun CartScreen(
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold
                         )
-                        Button(onClick = onCheckoutClick) {
-                            Text("Checkout (COD)")
+                        IconButton(
+                            onClick = { showSummarySheet = true },
+                            modifier = Modifier.size(56.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.KeyboardArrowDown,
+                                contentDescription = "Collapse Summary",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
                     }
                 }

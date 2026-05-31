@@ -2,6 +2,7 @@ package com.example.foodflow.data.model
 
 data class PlatformSettings(
     val deliveryFee: Double = 2.00,          // Flat fee charged to customer
+    val platformFlatFee: Double = 1.00,       // Flat service fee charged to customer
     val platformCommissionRate: Double = 0.10, // 10% of subtotal taken by platform
     val driverCommissionRate: Double = 0.70,   // 70% of delivery fee given to driver
     val platformBankAccount: String = "ABA Bank - 013572914 - FoodFlow Inc.", // For manual transfer

@@ -9,9 +9,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import com.example.foodflow.data.model.Order
 import com.example.foodflow.data.model.OrderStatus
 import com.example.foodflow.ui.components.StatusBadge
@@ -36,6 +39,7 @@ fun RestaurantOrdersScreen(
     RestaurantOrdersContent(
         orders = orders,
         onBackClick = onBackClick,
+        onVerifyBankPaymentClick = { viewModel.verifyBankPayment(it) },
         onAcceptClick = { viewModel.acceptOrder(it) },
         onRejectClick = { viewModel.rejectOrder(it) },
         onReadyClick = { viewModel.markReadyForPickup(it) }
@@ -47,6 +51,7 @@ fun RestaurantOrdersScreen(
 fun RestaurantOrdersContent(
     orders: List<Order>,
     onBackClick: () -> Unit,
+    onVerifyBankPaymentClick: (String) -> Unit,
     onAcceptClick: (String) -> Unit,
     onRejectClick: (String) -> Unit,
     onReadyClick: (String) -> Unit
@@ -82,6 +87,7 @@ fun RestaurantOrdersContent(
                 items(orders, key = { it.id }) { order ->
                     OrderCard(
                         order = order,
+                        onVerifyBankPaymentClick = { onVerifyBankPaymentClick(order.id)},
                         onAcceptClick = { onAcceptClick(order.id) },
                         onRejectClick = { onRejectClick(order.id) },
                         onReadyClick = { onReadyClick(order.id) }
@@ -95,6 +101,7 @@ fun RestaurantOrdersContent(
 @Composable
 fun OrderCard(
     order: Order,
+    onVerifyBankPaymentClick: () -> Unit,
     onAcceptClick: () -> Unit,
     onRejectClick: () -> Unit,
     onReadyClick: () -> Unit
@@ -124,6 +131,25 @@ fun OrderCard(
             Spacer(modifier = Modifier.height(8.dp))
             Text("Total: $${"%.2f".format(order.totalAmount)}", style = MaterialTheme.typography.titleMedium)
 
+            if (order.transactionImageUrl != null) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text("Payment Proof:", fontWeight = FontWeight.SemiBold)
+                Spacer(modifier = Modifier.height(4.dp))
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    AsyncImage(
+                        model = order.transactionImageUrl,
+                        contentDescription = "Payment Proof",
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .clip(MaterialTheme.shapes.medium),
+                    )
+                }
+            }
+
             Spacer(modifier = Modifier.height(12.dp))
 
             // Action Buttons based on Status
@@ -132,6 +158,12 @@ fun OrderCard(
                 horizontalArrangement = Arrangement.End
             ) {
                 when (order.status) {
+                    OrderStatus.PENDING_PAYMENT_VERIFICATION -> {
+                        // NEW: Verify payment first
+                        Button(onClick = onVerifyBankPaymentClick ) {
+                            Text("Verify Payment")
+                        }
+                    }
                     OrderStatus.PLACED -> {
                         OutlinedButton(
                             onClick = onRejectClick,
