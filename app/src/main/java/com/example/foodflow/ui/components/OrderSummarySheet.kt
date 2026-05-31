@@ -2,15 +2,21 @@ package com.example.foodflow.ui.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.foodflow.data.model.CartItem
+import com.example.foodflow.data.model.PaymentMethod
 import com.example.foodflow.data.model.PlatformSettings
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -18,9 +24,11 @@ import com.example.foodflow.data.model.PlatformSettings
 fun OrderSummarySheet(
     cartItems: List<CartItem>,
     settings: PlatformSettings,
-    onConfirmOrder: () -> Unit,
+    onConfirmOrder: (PaymentMethod) -> Unit,
     onDismiss: () -> Unit
 ) {
+    var selectedPaymentMethod by remember { mutableStateOf(PaymentMethod.COD)}
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -79,9 +87,37 @@ fun OrderSummarySheet(
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            Row(
+                modifier = Modifier.selectable(
+                    selected = (selectedPaymentMethod == PaymentMethod.COD),
+                    onClick = { selectedPaymentMethod = PaymentMethod.COD }
+                ),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                RadioButton(selected = (selectedPaymentMethod == PaymentMethod.COD), onClick = null)
+                Text("Cash on Delivery")
+            }
+            Row(
+                modifier = Modifier.selectable(
+                    selected = (selectedPaymentMethod == PaymentMethod.BANK_TRANSFER),
+                    onClick = { selectedPaymentMethod = PaymentMethod.BANK_TRANSFER }
+                ),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                RadioButton(selected = (selectedPaymentMethod == PaymentMethod.BANK_TRANSFER), onClick = null)
+                Text("Bank Transfer")
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
         // Confirm Button
         Button(
-            onClick = onConfirmOrder,
+            onClick = { onConfirmOrder(selectedPaymentMethod) },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Place Order (COD)")
