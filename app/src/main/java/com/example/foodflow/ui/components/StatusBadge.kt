@@ -13,6 +13,7 @@ import com.example.foodflow.data.model.OrderStatus
 @Composable
 fun StatusBadge(status: OrderStatus) {
     val color = when (status) {
+        OrderStatus.PENDING_PAYMENT_VERIFICATION -> MaterialTheme.colorScheme.outline
         OrderStatus.PLACED -> MaterialTheme.colorScheme.error
         OrderStatus.PREPARING -> MaterialTheme.colorScheme.tertiary
         OrderStatus.READY -> MaterialTheme.colorScheme.primary

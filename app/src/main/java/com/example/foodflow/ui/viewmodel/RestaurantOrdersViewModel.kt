@@ -25,6 +25,12 @@ class RestaurantOrdersViewModel : ViewModel() {
         }
     }
 
+    fun verifyBankPayment(orderId: String) {
+        viewModelScope.launch {
+            repository.updateOrderStatus(orderId, OrderStatus.PLACED)
+        }
+    }
+
     fun acceptOrder(orderId: String) {
         viewModelScope.launch {
             repository.updateOrderStatus(orderId, OrderStatus.PREPARING) // Changed

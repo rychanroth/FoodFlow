@@ -36,6 +36,7 @@ fun RestaurantOrdersScreen(
     RestaurantOrdersContent(
         orders = orders,
         onBackClick = onBackClick,
+        onVerifyBankPaymentClick = { viewModel.verifyBankPayment(it) },
         onAcceptClick = { viewModel.acceptOrder(it) },
         onRejectClick = { viewModel.rejectOrder(it) },
         onReadyClick = { viewModel.markReadyForPickup(it) }
@@ -47,6 +48,7 @@ fun RestaurantOrdersScreen(
 fun RestaurantOrdersContent(
     orders: List<Order>,
     onBackClick: () -> Unit,
+    onVerifyBankPaymentClick: (String) -> Unit,
     onAcceptClick: (String) -> Unit,
     onRejectClick: (String) -> Unit,
     onReadyClick: (String) -> Unit
@@ -82,6 +84,7 @@ fun RestaurantOrdersContent(
                 items(orders, key = { it.id }) { order ->
                     OrderCard(
                         order = order,
+                        onVerifyBankPaymentClick = { onVerifyBankPaymentClick(order.id)},
                         onAcceptClick = { onAcceptClick(order.id) },
                         onRejectClick = { onRejectClick(order.id) },
                         onReadyClick = { onReadyClick(order.id) }
@@ -95,6 +98,7 @@ fun RestaurantOrdersContent(
 @Composable
 fun OrderCard(
     order: Order,
+    onVerifyBankPaymentClick: () -> Unit,
     onAcceptClick: () -> Unit,
     onRejectClick: () -> Unit,
     onReadyClick: () -> Unit
@@ -132,6 +136,12 @@ fun OrderCard(
                 horizontalArrangement = Arrangement.End
             ) {
                 when (order.status) {
+                    OrderStatus.PENDING_PAYMENT_VERIFICATION -> {
+                        // NEW: Verify payment first
+                        Button(onClick = onVerifyBankPaymentClick ) {
+                            Text("Verify Payment")
+                        }
+                    }
                     OrderStatus.PLACED -> {
                         OutlinedButton(
                             onClick = onRejectClick,

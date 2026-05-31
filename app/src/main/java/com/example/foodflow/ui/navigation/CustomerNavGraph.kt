@@ -10,12 +10,15 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
+import com.example.foodflow.data.model.CheckoutState
+import com.example.foodflow.data.model.PaymentMethod
 import com.example.foodflow.ui.Route
 import com.example.foodflow.ui.screens.auth.ApplyScreen
 import com.example.foodflow.ui.screens.home.CartScreen
 import com.example.foodflow.ui.screens.home.CustomerHomeScreen
 import com.example.foodflow.ui.screens.home.CustomerOrdersScreen
 import com.example.foodflow.ui.screens.home.CustomerSearchScreen
+import com.example.foodflow.ui.screens.home.PaymentInstructionScreen
 import com.example.foodflow.ui.screens.home.RestaurantDetailScreen
 import com.example.foodflow.ui.viewmodel.AuthViewModel
 import com.example.foodflow.ui.viewmodel.CartViewModel
@@ -63,6 +66,7 @@ fun NavGraphBuilder.customerGraph(
         composable(Route.Cart.route) {
             val cartItems by cartViewModel.cartItems.collectAsState()
             val settings by cartViewModel.settings.collectAsState()
+            val checkoutState by cartViewModel.checkoutState.collectAsState()
 
             val subtotal = cartViewModel.getTotalPrice()
             val totalPrice = subtotal + settings.deliveryFee + settings.platformFlatFee
@@ -75,15 +79,49 @@ fun NavGraphBuilder.customerGraph(
                 onBackClick = { navController.popBackStack() },
                 onIncreaseClick = { cartViewModel.increaseQuantity(it) },
                 onDecreaseClick = { cartViewModel.decreaseQuantity(it) },
-                onCheckoutClick = {
+                onCheckoutClick = { paymentMethod ->
                     if (currentUser != null) {
-                        cartViewModel.placeOrder(currentUser.uid)
+                        cartViewModel.placeOrder(currentUser.uid, paymentMethod)
+                    }
+                }
+            )
+
+            LaunchedEffect(checkoutState) {
+                if (checkoutState is CheckoutState.Success) {
+                    // Determine where to go based on the last payment method used.
+                    // For MVP, we can check the last created order, but it's easier to just
+                    // pass a small state. Let's add a small state to CartViewModel:
+                    // val lastPaymentMethod = _lastPaymentMethod.value
+
+                    if (cartViewModel.lastPaymentMethod == PaymentMethod.BANK_TRANSFER) {
+                        navController.navigate(Route.PaymentInstruction.route)
+                    } else {
                         navController.navigate(Route.CustomerHome.route) {
                             popUpTo(Route.CustomerHome.route) { inclusive = true }
                         }
                     }
+                    cartViewModel.resetCheckoutState()
                 }
-            )
+            }
+        }
+
+        composable(Route.PaymentInstruction.route) {
+            val settings by cartViewModel.settings.collectAsState()
+            val lastOrderTotal = // You'll need to expose the last order total from CartViewModel,
+            // or just pass the cart total before it cleared.
+                // For now, hardcode a placeholder or expose it.
+
+                PaymentInstructionScreen(
+                    totalAmount = cartViewModel.lastOrderTotal, // Add this to CartViewModel too!
+                    bankAccountDetails = settings.platformBankAccount,
+                    bankPaymentUrl = settings.platformBankAccountUrl,
+                    onPaymentConfirmed = {
+                        navController.navigate(Route.CustomerHome.route) {
+                            popUpTo(Route.CustomerHome.route) { inclusive = true }
+                        }
+                    },
+                    onBackClick = { navController.popBackStack() }
+                )
         }
 
         composable(Route.CustomerOrders.route) {

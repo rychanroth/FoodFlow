@@ -31,6 +31,10 @@ class CartViewModel : ViewModel() {
     private val _settings = MutableStateFlow(PlatformSettings())
     val settings: StateFlow<PlatformSettings> = _settings
 
+    var lastPaymentMethod: PaymentMethod = PaymentMethod.COD
+        private set
+    var lastOrderTotal = 0.0
+
     init {
         loadSettings()
     }
@@ -92,7 +96,7 @@ class CartViewModel : ViewModel() {
         _cartItems.value = emptyList()
     }
 
-    fun placeOrder(currentUserId: String) {
+    fun placeOrder(currentUserId: String, paymentMethod: PaymentMethod) {
         val currentItems = _cartItems.value
         if (currentItems.isEmpty()) return
 
@@ -100,12 +104,8 @@ class CartViewModel : ViewModel() {
             _checkoutState.value = CheckoutState.Loading // Use new state
 
             // 1. Fetch Live Platform Settings
-            val settingsResult = configRepository.getPlatformSettings()
-            if (settingsResult.isFailure) {
-                _checkoutState.value = CheckoutState.Error("Failed to fetch platform settings") // Use new state
-                return@launch
-            }
-            val settings = settingsResult.getOrNull()!!
+            // Refactor: use the init block settings state
+            val settings = _settings.value
 
             // 2. Calculate the Economics
             val subtotal = getTotalPrice()
@@ -119,12 +119,24 @@ class CartViewModel : ViewModel() {
 
             val restaurantId = currentItems.first().menuItem.restaurantId
             val itemNames = currentItems.map { it.menuItem.name }
+
+            // Update state
+            lastPaymentMethod = paymentMethod
+            lastOrderTotal = totalAmount
+
+            // V2 LOGIC: Set status based on payment method
+            val initialStatus = if (paymentMethod == PaymentMethod.BANK_TRANSFER) {
+                OrderStatus.PENDING_PAYMENT_VERIFICATION
+            } else {
+                OrderStatus.PLACED
+            }
+
             val newOrder = Order(
                 customerId = currentUserId,
                 restaurantId = restaurantId,
                 itemNames = itemNames,
-                status = OrderStatus.PLACED,
-                paymentMethod = PaymentMethod.COD,
+                status = initialStatus,
+                paymentMethod = paymentMethod,
                 subtotal = subtotal,
                 deliveryFee = deliveryFee,
                 platformFee = platformFee,
@@ -143,5 +155,9 @@ class CartViewModel : ViewModel() {
                 _checkoutState.value = CheckoutState.Error(result.exceptionOrNull()?.message ?: "Order failed") // Use new state
             }
         }
+    }
+
+    fun resetCheckoutState() {
+        _checkoutState.value = CheckoutState.Idle
     }
 }

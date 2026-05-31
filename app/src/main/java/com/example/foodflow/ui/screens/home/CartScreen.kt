@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.foodflow.data.model.CartItem
+import com.example.foodflow.data.model.PaymentMethod
 import com.example.foodflow.data.model.PlatformSettings
 import com.example.foodflow.ui.components.OrderSummarySheet
 
@@ -33,7 +34,7 @@ fun CartScreen(
     onBackClick: () -> Unit,
     onIncreaseClick: (String) -> Unit,
     onDecreaseClick: (String) -> Unit,
-    onCheckoutClick: () -> Unit
+    onCheckoutClick: (PaymentMethod) -> Unit
 ) {
     var showSummarySheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
@@ -49,8 +50,8 @@ fun CartScreen(
             OrderSummarySheet(
                 cartItems = cartItems,
                 settings = settings, // Placeholder
-                onConfirmOrder = {
-                    onCheckoutClick()
+                onConfirmOrder = { paymentMethod ->
+                    onCheckoutClick(paymentMethod)
                     showSummarySheet = false
                 },
                 onDismiss = { showSummarySheet = false }
