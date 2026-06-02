@@ -11,15 +11,36 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.foodflow.data.model.Order
 import com.example.foodflow.data.model.OrderStatus
 import com.example.foodflow.ui.components.OrderStatusBadge
 import com.example.foodflow.ui.components.OrderStatusTracker
 import com.example.foodflow.ui.components.StatusBadge
+import com.example.foodflow.ui.viewmodel.CustomerOrdersViewModel
+import com.google.firebase.auth.FirebaseAuth
+
+@Composable
+fun CustomerOrderScreen(
+    navController: NavController,
+    customerOrdersViewModel: CustomerOrdersViewModel
+) {
+    val currentUser = FirebaseAuth.getInstance().currentUser
+    val orders by customerOrdersViewModel.orders.collectAsState()
+
+    LaunchedEffect(currentUser) {
+        currentUser?.uid?.let { customerOrdersViewModel.loadOrders(it) }
+    }
+
+    CustomerOrderContent(orders) {
+        navController.popBackStack()
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CustomerOrdersScreen(
+fun CustomerOrderContent(
     orders: List<Order>,
     onBackClick: () -> Unit
 ) {

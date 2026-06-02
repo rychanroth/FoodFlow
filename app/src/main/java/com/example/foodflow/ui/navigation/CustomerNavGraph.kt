@@ -16,7 +16,7 @@ import com.example.foodflow.ui.Route
 import com.example.foodflow.ui.screens.auth.ApplyScreen
 import com.example.foodflow.ui.screens.home.CartScreen
 import com.example.foodflow.ui.screens.home.CustomerHomeScreen
-import com.example.foodflow.ui.screens.home.CustomerOrdersScreen
+import com.example.foodflow.ui.screens.home.CustomerOrderScreen
 import com.example.foodflow.ui.screens.home.CustomerSearchScreen
 import com.example.foodflow.ui.screens.home.PaymentInstructionScreen
 import com.example.foodflow.ui.screens.home.ProfileScreen
@@ -34,6 +34,7 @@ fun NavGraphBuilder.customerGraph(
     navController: NavController,
     authViewModel: AuthViewModel,
     cartViewModel: CartViewModel,
+    customerOrdersViewModel: CustomerOrdersViewModel,
     settingsViewModel: SettingsViewModel
 ) {
     // FIX: Wrap in navigation block
@@ -76,19 +77,7 @@ fun NavGraphBuilder.customerGraph(
         }
 
         composable(Route.CustomerOrders.route) {
-            val customerOrdersViewModel: CustomerOrdersViewModel = viewModel()
-            val currentUser = FirebaseAuth.getInstance().currentUser
-
-            LaunchedEffect(currentUser) {
-                currentUser?.uid?.let { customerOrdersViewModel.loadOrders(it) }
-            }
-
-            val orders by customerOrdersViewModel.orders.collectAsState()
-
-            CustomerOrdersScreen(
-                orders = orders,
-                onBackClick = { navController.popBackStack() }
-            )
+            CustomerOrderScreen(navController, customerOrdersViewModel)
         }
 
 

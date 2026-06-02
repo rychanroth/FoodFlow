@@ -20,6 +20,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.foodflow.data.model.AuthState
+import com.example.foodflow.data.model.OrderStatus
 import com.example.foodflow.data.model.UserRole
 import com.example.foodflow.ui.Route
 import com.example.foodflow.ui.components.AdminBottomBar
@@ -28,6 +29,7 @@ import com.example.foodflow.ui.components.DriverBottomBar
 import com.example.foodflow.ui.components.RestaurantBottomBar
 import com.example.foodflow.ui.viewmodel.AuthViewModel
 import com.example.foodflow.ui.viewmodel.CartViewModel
+import com.example.foodflow.ui.viewmodel.CustomerOrdersViewModel
 import com.example.foodflow.ui.viewmodel.SettingsViewModel
 import com.google.firebase.auth.FirebaseAuth
 
@@ -36,6 +38,7 @@ fun AppNavigation(
     navController: NavHostController = rememberNavController(),
     authViewModel: AuthViewModel = viewModel(),
     settingsViewModel: SettingsViewModel = viewModel(),
+    customerOrdersViewModel: CustomerOrdersViewModel = viewModel(),
     modifier: Modifier = Modifier
 ) {
     val authState by authViewModel.authState.collectAsState()
@@ -103,7 +106,7 @@ fun AppNavigation(
         ) {
             // Delegating all screen routing to their respective graphs!
             authGraph(navController, authViewModel)
-            customerGraph(navController, authViewModel, cartViewModel, settingsViewModel)
+            customerGraph(navController, authViewModel, cartViewModel, customerOrdersViewModel, settingsViewModel)
             restaurantGraph(navController, authViewModel, settingsViewModel)
             driverGraph(navController, authViewModel, settingsViewModel)
             adminGraph(navController, authViewModel, settingsViewModel)
