@@ -13,6 +13,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.foodflow.data.model.Order
 import com.example.foodflow.data.model.OrderStatus
+import com.example.foodflow.ui.components.OrderStatusBadge
+import com.example.foodflow.ui.components.OrderStatusTracker
 import com.example.foodflow.ui.components.StatusBadge
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -100,30 +102,9 @@ fun CustomerOrderCard(order: Order) {
             // Visual Tracker for Active Orders
             if (order.status != OrderStatus.DELIVERED && order.status != OrderStatus.REJECTED) {
                 Spacer(modifier = Modifier.height(12.dp))
-                LinearProgressIndicator(
-                    progress = {
-                        when (order.status) {
-                            OrderStatus.PLACED -> 0.25f
-                            OrderStatus.PREPARING -> 0.5f
-                            OrderStatus.READY -> 0.75f
-                            OrderStatus.ON_THE_WAY -> 0.9f
-                            else -> 0f
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                )
+                OrderStatusTracker(order.status)
                 Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    when (order.status) {
-                        OrderStatus.PLACED -> "Waiting for restaurant to accept..."
-                        OrderStatus.PREPARING -> "Restaurant is cooking your food!"
-                        OrderStatus.READY -> "Food is ready, waiting for driver..."
-                        OrderStatus.ON_THE_WAY -> "Your driver is on the way!"
-                        else -> ""
-                    },
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.primary
-                )
+                OrderStatusBadge(order.status)
             }
         }
     }
