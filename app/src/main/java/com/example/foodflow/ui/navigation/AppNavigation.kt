@@ -106,7 +106,7 @@ fun AppNavigation(
         ) {
             // Delegating all screen routing to their respective graphs!
             authGraph(navController, authViewModel)
-            customerGraph(navController, authViewModel, cartViewModel, customerOrdersViewModel, settingsViewModel)
+            customerGraph(navController, authViewModel, cartViewModel, settingsViewModel)
             restaurantGraph(navController, authViewModel, settingsViewModel)
             driverGraph(navController, authViewModel, settingsViewModel)
             adminGraph(navController, authViewModel, settingsViewModel)

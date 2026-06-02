@@ -1,8 +1,5 @@
 package com.example.foodflow.ui.navigation
 
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
@@ -10,13 +7,11 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
-import com.example.foodflow.data.model.CheckoutState
-import com.example.foodflow.data.model.PaymentMethod
 import com.example.foodflow.ui.Route
 import com.example.foodflow.ui.screens.auth.ApplyScreen
 import com.example.foodflow.ui.screens.home.CartScreen
 import com.example.foodflow.ui.screens.home.CustomerHomeScreen
-import com.example.foodflow.ui.screens.home.CustomerOrderScreen
+import com.example.foodflow.ui.screens.home.CustomerOrdersScreen
 import com.example.foodflow.ui.screens.home.CustomerSearchScreen
 import com.example.foodflow.ui.screens.home.PaymentInstructionScreen
 import com.example.foodflow.ui.screens.home.ProfileScreen
@@ -25,8 +20,6 @@ import com.example.foodflow.ui.screens.home.SettingsScreen
 import com.example.foodflow.ui.viewmodel.AuthViewModel
 import com.example.foodflow.ui.viewmodel.CartViewModel
 import com.example.foodflow.ui.viewmodel.CustomerHomeViewModel
-import com.example.foodflow.ui.viewmodel.CustomerOrdersViewModel
-import com.example.foodflow.ui.viewmodel.RestaurantDetailViewModel
 import com.example.foodflow.ui.viewmodel.SettingsViewModel
 import com.google.firebase.auth.FirebaseAuth
 
@@ -34,7 +27,6 @@ fun NavGraphBuilder.customerGraph(
     navController: NavController,
     authViewModel: AuthViewModel,
     cartViewModel: CartViewModel,
-    customerOrdersViewModel: CustomerOrdersViewModel,
     settingsViewModel: SettingsViewModel
 ) {
     // FIX: Wrap in navigation block
@@ -77,19 +69,12 @@ fun NavGraphBuilder.customerGraph(
         }
 
         composable(Route.CustomerOrders.route) {
-            CustomerOrderScreen(navController, customerOrdersViewModel)
+            CustomerOrdersScreen(navController)
         }
 
 
         composable(Route.Apply.route) {
-            val currentUser = FirebaseAuth.getInstance().currentUser
-            if (currentUser != null) {
-                ApplyScreen(
-                    currentUserId = currentUser.uid,
-                    currentUserEmail = currentUser.email ?: "",
-                    onBackClick = { navController.popBackStack() }
-                )
-            }
+            ApplyScreen(navController)
         }
 
         composable(Route.Settings.route) {

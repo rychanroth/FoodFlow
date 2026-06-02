@@ -22,10 +22,10 @@ import com.example.foodflow.ui.viewmodel.CustomerOrdersViewModel
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
-fun CustomerOrderScreen(
+fun CustomerOrdersScreen(
     navController: NavController,
-    customerOrdersViewModel: CustomerOrdersViewModel
 ) {
+    val customerOrdersViewModel: CustomerOrdersViewModel = viewModel()
     val currentUser = FirebaseAuth.getInstance().currentUser
     val orders by customerOrdersViewModel.orders.collectAsState()
 
@@ -33,14 +33,14 @@ fun CustomerOrderScreen(
         currentUser?.uid?.let { customerOrdersViewModel.loadOrders(it) }
     }
 
-    CustomerOrderContent(orders) {
+    CustomerOrdersContent(orders) {
         navController.popBackStack()
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CustomerOrderContent(
+fun CustomerOrdersContent(
     orders: List<Order>,
     onBackClick: () -> Unit
 ) {
