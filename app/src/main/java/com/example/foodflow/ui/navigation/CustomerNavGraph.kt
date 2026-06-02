@@ -78,16 +78,11 @@ fun NavGraphBuilder.customerGraph(
         }
 
         composable(Route.Settings.route) {
-            SettingsScreen(
-                settingsViewModel = settingsViewModel,
-                onBackClick = {
-                    navController.popBackStack()
-                }
-            )
+            SettingsScreen(navController, settingsViewModel)
         }
 
         composable(Route.Profile.route) {
-            ProfileScreen(onBackClick = { navController.popBackStack() })
+            ProfileScreen(navController)
         }
     }
 }

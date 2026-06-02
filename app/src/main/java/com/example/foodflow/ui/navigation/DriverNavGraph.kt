@@ -26,12 +26,7 @@ fun NavGraphBuilder.driverGraph(
             DriverHomeScreen(authViewModel = authViewModel, driverViewModel = viewModel())
         }
         composable(Route.Settings.route) {
-            SettingsScreen(
-                settingsViewModel = settingsViewModel,
-                onBackClick = {
-                    navController.popBackStack()
-                }
-            )
+            SettingsScreen(navController, settingsViewModel)
         }
     }
 }

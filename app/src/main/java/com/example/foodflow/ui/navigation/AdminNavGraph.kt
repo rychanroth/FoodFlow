@@ -31,12 +31,7 @@ fun NavGraphBuilder.adminGraph(
             AdminSettingsScreen()
         }
         composable(Route.Settings.route) {
-            SettingsScreen(
-                settingsViewModel = settingsViewModel,
-                onBackClick = {
-                    navController.popBackStack()
-                }
-            )
+            SettingsScreen(navController, settingsViewModel)
         }
     }
 }

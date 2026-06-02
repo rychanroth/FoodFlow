@@ -16,6 +16,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.foodflow.R
 import com.example.foodflow.data.model.AppUser
@@ -23,18 +24,40 @@ import com.example.foodflow.ui.viewmodel.ProfileState
 import com.example.foodflow.ui.viewmodel.ProfileViewModel
 import com.google.firebase.auth.FirebaseAuth
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
-    onBackClick: () -> Unit,
+    navController: NavController,
     viewModel: ProfileViewModel = viewModel()
 ) {
-    val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+    val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+
+    // Safety check: If user is somehow null, boot them back
+    if (currentUserId == null) {
+        LaunchedEffect(Unit) { navController.popBackStack() }
+        return
+    }
+
     LaunchedEffect(currentUserId) { viewModel.loadUserProfile(currentUserId) }
 
     val profileState by viewModel.profileState.collectAsState()
 
+    ProfileLayout(
+        profileState = profileState,
+        onBackClick = { navController.popBackStack() },
+        onAvatarChange = { uri -> viewModel.uploadAvatar(currentUserId, uri) }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ProfileLayout(
+    profileState: ProfileState,
+    onBackClick: () -> Unit,
+    onAvatarChange: (Uri) -> Unit,
+    modifier: Modifier = Modifier
+) {
     Scaffold(
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = { Text("My Profile") },
@@ -46,22 +69,26 @@ fun ProfileScreen(
             )
         }
     ) { paddingValues ->
-        when (val state = profileState) {
-            is ProfileState.Loading -> {
-                Box(modifier = Modifier.fillMaxSize().padding(paddingValues), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
+        Box(modifier = Modifier.padding(paddingValues)) {
+            when (profileState) {
+                is ProfileState.Loading -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
+                    }
                 }
-            }
-            is ProfileState.Success -> {
-                ProfileContent(
-                    modifier = Modifier.padding(paddingValues),
-                    user = state.user,
-                    onAvatarChange = { viewModel.uploadAvatar(currentUserId, it) }
-                )
-            }
-            is ProfileState.Error -> {
-                Box(modifier = Modifier.fillMaxSize().padding(paddingValues), contentAlignment = Alignment.Center) {
-                    Text(state.message)
+                is ProfileState.Success -> {
+                    ProfileContent(
+                        user = profileState.user,
+                        onAvatarChange = onAvatarChange
+                    )
+                }
+                is ProfileState.Error -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(
+                            text = profileState.message,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
                 }
             }
         }
@@ -70,9 +97,9 @@ fun ProfileScreen(
 
 @Composable
 fun ProfileContent(
-    modifier: Modifier = Modifier,
     user: AppUser,
-    onAvatarChange: (Uri) -> Unit
+    onAvatarChange: (Uri) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     val galleryLauncher = rememberLauncherForActivityResult(
@@ -85,13 +112,19 @@ fun ProfileContent(
     }
 
     Column(
-        modifier = modifier.fillMaxSize().padding(24.dp),
+        modifier = modifier
+            .fillMaxSize()
+            .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Avatar
+        // Avatar Section
         Box(contentAlignment = Alignment.BottomEnd) {
+            val imageModel = selectedImageUri
+                ?: user.avatarUrl.takeIf { it.isNotEmpty() }
+                ?: R.drawable.ic_launcher_foreground
+
             AsyncImage(
-                model = selectedImageUri ?: user.avatarUrl.ifEmpty { R.drawable.ic_launcher_foreground }, // Add a default placeholder
+                model = imageModel,
                 contentDescription = "Avatar",
                 modifier = Modifier
                     .size(120.dp)
@@ -100,7 +133,8 @@ fun ProfileContent(
             )
             FloatingActionButton(
                 onClick = { galleryLauncher.launch("image/*") },
-                modifier = Modifier.size(36.dp)
+                modifier = Modifier.size(36.dp),
+                shape = CircleShape
             ) {
                 Text("+")
             }
@@ -115,19 +149,35 @@ fun ProfileContent(
         Spacer(modifier = Modifier.height(32.dp))
 
         // Addresses (Read-only for MVP)
-        Text("Saved Addresses", style = MaterialTheme.typography.titleMedium)
+        Text(
+            text = "Saved Addresses",
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.align(Alignment.Start)
+        )
         Spacer(modifier = Modifier.height(8.dp))
+
         if (user.addresses.isEmpty()) {
-            Text("No addresses saved.")
+            Text(
+                text = "No addresses saved.",
+                modifier = Modifier.align(Alignment.Start),
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         } else {
             user.addresses.forEach { address ->
-                Card(modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)) {
-                        Column(modifier = Modifier.padding(12.dp)) {
-                            Text(address.street, fontWeight = FontWeight.Bold)
-                            Text(address.city)
-                        }
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    )
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(address.street, fontWeight = FontWeight.Bold)
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(address.city, style = MaterialTheme.typography.bodyMedium)
                     }
-
+                }
             }
         }
     }

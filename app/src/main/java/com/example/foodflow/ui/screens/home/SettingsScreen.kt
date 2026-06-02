@@ -12,14 +12,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.foodflow.data.model.ThemePreference
 import com.example.foodflow.ui.viewmodel.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
+    navController: NavController,
     settingsViewModel: SettingsViewModel,
-    onBackClick: () -> Unit
 ) {
     val themePreference by settingsViewModel.themePreferenceState.collectAsState()
     val dynamicColor by settingsViewModel.dynamicColorState.collectAsState()
@@ -29,7 +30,7 @@ fun SettingsScreen(
         dynamicColor = dynamicColor,
         onThemeChange = { settingsViewModel.setThemePreference(it) },
         onDynamicColorChange = { settingsViewModel.setDynamicColor(it) },
-        onBackClick = onBackClick
+        onBackClick = { navController.popBackStack() }
     )
 }
 
