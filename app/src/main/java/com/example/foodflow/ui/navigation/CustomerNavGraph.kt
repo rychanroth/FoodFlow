@@ -68,45 +68,7 @@ fun NavGraphBuilder.customerGraph(
         }
 
         composable(Route.Cart.route) {
-            val cartItems by cartViewModel.cartItems.collectAsState()
-            val settings by cartViewModel.settings.collectAsState()
-            val checkoutState by cartViewModel.checkoutState.collectAsState()
-
-            val subtotal = cartViewModel.getTotalPrice()
-            val totalPrice = subtotal + settings.deliveryFee + settings.platformFlatFee
-            val currentUser = FirebaseAuth.getInstance().currentUser
-
-            CartScreen(
-                cartItems = cartItems,
-                totalPrice = totalPrice,
-                settings = settings, // PASS SETTINGS
-                onBackClick = { navController.popBackStack() },
-                onIncreaseClick = { cartViewModel.increaseQuantity(it) },
-                onDecreaseClick = { cartViewModel.decreaseQuantity(it) },
-                onCheckoutClick = { paymentMethod ->
-                    if (currentUser != null) {
-                        cartViewModel.placeOrder(currentUser.uid, paymentMethod)
-                    }
-                }
-            )
-
-            LaunchedEffect(checkoutState) {
-                if (checkoutState is CheckoutState.Success) {
-                    // Determine where to go based on the last payment method used.
-                    // For MVP, we can check the last created order, but it's easier to just
-                    // pass a small state. Let's add a small state to CartViewModel:
-                    // val lastPaymentMethod = _lastPaymentMethod.value
-
-                    if (cartViewModel.lastPaymentMethod == PaymentMethod.BANK_TRANSFER) {
-                        navController.navigate(Route.PaymentInstruction.route)
-                    } else {
-                        navController.navigate(Route.CustomerHome.route) {
-                            popUpTo(Route.CustomerHome.route) { inclusive = true }
-                        }
-                    }
-                    cartViewModel.resetCheckoutState()
-                }
-            }
+            CartScreen(navController, cartViewModel)
         }
 
         composable(Route.PaymentInstruction.route) {

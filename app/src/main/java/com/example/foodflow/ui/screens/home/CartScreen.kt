@@ -9,6 +9,8 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -19,39 +21,42 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.foodflow.data.model.CartItem
+import com.example.foodflow.data.model.CheckoutState
 import com.example.foodflow.data.model.PaymentMethod
 import com.example.foodflow.data.model.PlatformSettings
+import com.example.foodflow.ui.Route
 import com.example.foodflow.ui.components.OrderSummarySheet
+import com.example.foodflow.ui.viewmodel.CartViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CartScreen(
-    cartItems: List<CartItem>,
-    totalPrice: Double,
-    settings: PlatformSettings,
-    onBackClick: () -> Unit,
-    onIncreaseClick: (String) -> Unit,
-    onDecreaseClick: (String) -> Unit,
-    onCheckoutClick: (PaymentMethod) -> Unit
+    navController: NavController,
+    cartViewModel: CartViewModel
 ) {
-    var showSummarySheet by remember { mutableStateOf(false) }
-    val sheetState = rememberModalBottomSheetState()
+    val cartItems by cartViewModel.cartItems.collectAsState()
+    val settings by cartViewModel.settings.collectAsState()
+    val checkoutState by cartViewModel.checkoutState.collectAsState()
 
-    // The Bottom Sheet
+    val subtotal = cartViewModel.getTotalPrice()
+    val totalPrice = subtotal + settings.deliveryFee + settings.platformFlatFee
+    val currentUser = FirebaseAuth.getInstance().currentUser
+
+    var showSummarySheet by remember { mutableStateOf(false) }
+
     if (showSummarySheet) {
-        ModalBottomSheet(
-            onDismissRequest = { showSummarySheet = false },
-            sheetState = sheetState
-        ) {
-            // Pass the actual settings from CartViewModel (We'll pass it down from NavGraph next step)
-            // For now, hardcode just to see the UI, then we'll wire it.
+        ModalBottomSheet(onDismissRequest = { showSummarySheet = false }) {
             OrderSummarySheet(
                 cartItems = cartItems,
-                settings = settings, // Placeholder
+                settings = settings,
                 onConfirmOrder = { paymentMethod ->
-                    onCheckoutClick(paymentMethod)
+                    if (currentUser != null) {
+                        cartViewModel.placeOrder(currentUser.uid, paymentMethod)
+                    }
                     showSummarySheet = false
                 },
                 onDismiss = { showSummarySheet = false }
@@ -59,6 +64,39 @@ fun CartScreen(
         }
     }
 
+    CartContent(
+        cartItems = cartItems,
+        totalPrice = totalPrice,
+        onBackClick = { navController.popBackStack() },
+        onShowSummaryClick = { showSummarySheet = true },
+        onIncreaseClick = { cartViewModel.increaseQuantity(it) },
+        onDecreaseClick = { cartViewModel.decreaseQuantity(it) }
+    )
+
+    LaunchedEffect(checkoutState) {
+        if (checkoutState is CheckoutState.Success) {
+            if (cartViewModel.lastPaymentMethod == PaymentMethod.BANK_TRANSFER) {
+                navController.navigate(Route.PaymentInstruction.route)
+            } else {
+                navController.navigate(Route.CustomerHome.route) {
+                    popUpTo(Route.CustomerHome.route) { inclusive = true }
+                }
+            }
+            cartViewModel.resetCheckoutState()
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CartContent(
+    cartItems: List<CartItem>,
+    totalPrice: Double,
+    onBackClick: () -> Unit,
+    onShowSummaryClick: () -> Unit,
+    onIncreaseClick: (String) -> Unit,
+    onDecreaseClick: (String) -> Unit
+) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -89,12 +127,12 @@ fun CartScreen(
                             fontWeight = FontWeight.Bold
                         )
                         IconButton(
-                            onClick = { showSummarySheet = true },
+                            onClick = onShowSummaryClick,
                             modifier = Modifier.size(56.dp)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.KeyboardArrowDown,
-                                contentDescription = "Collapse Summary",
+                                contentDescription = "Show Summary",
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
@@ -121,7 +159,8 @@ fun CartScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 contentPadding = PaddingValues(vertical = 16.dp)
             ) {
-                items(cartItems) { cartItem ->
+                // Pro-Tip: Adding the key here stops the list from flickering!
+                items(cartItems, key = { it.menuItem.id }) { cartItem ->
                     CartItemCard(
                         item = cartItem,
                         onIncreaseClick = { onIncreaseClick(cartItem.menuItem.id) },
