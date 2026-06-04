@@ -8,7 +8,7 @@ import com.example.foodflow.ui.Route
 import com.example.foodflow.ui.screens.restaurant.MenuManagementScreen
 import com.example.foodflow.ui.screens.restaurant.OrdersScreen
 import com.example.foodflow.ui.screens.common.SettingsScreen
-import com.example.foodflow.ui.screens.restaurant.HomeScreen
+import com.example.foodflow.ui.screens.restaurant.RestaurantDashboardScreen
 import com.example.foodflow.ui.viewmodel.AuthViewModel
 import com.example.foodflow.ui.viewmodel.SettingsViewModel
 
@@ -23,7 +23,8 @@ fun NavGraphBuilder.restaurantGraph(
         route = Route.RestaurantGraph.route
     ) {
         composable(Route.RestaurantHome.route) {
-            HomeScreen(
+            RestaurantDashboardScreen(
+                navController = navController,
                 authViewModel = authViewModel
             )
         }

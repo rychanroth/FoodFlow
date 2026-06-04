@@ -27,7 +27,7 @@ class RestaurantDashboardViewModel : ViewModel() {
     private val _pendingOrdersCount = MutableStateFlow(0)
     val pendingOrdersCount: StateFlow<Int> = _pendingOrdersCount.asStateFlow()
 
-    fun loadDashboard(restaurantId: String) {
+    fun loadDashboard(restaurantId: String?) {
         viewModelScope.launch {
             repository.getThisRestaurantOrdersForToday(restaurantId).collect { orders ->
                 _todaysOrders.value = orders
