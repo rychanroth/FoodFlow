@@ -9,4 +9,5 @@
 .cxx
 local.properties
 app/google-services.json
-`
+.venv
+run_analyzer.py
