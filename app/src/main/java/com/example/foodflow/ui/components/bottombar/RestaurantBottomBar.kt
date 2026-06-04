@@ -1,4 +1,4 @@
-package com.example.foodflow.ui.components
+package com.example.foodflow.ui.components.bottombar
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu

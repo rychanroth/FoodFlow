@@ -1,8 +1,7 @@
-package com.example.foodflow.ui.components
+package com.example.foodflow.ui.components.bottombar
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Assignment
-import androidx.compose.material.icons.filled.Assignment
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*

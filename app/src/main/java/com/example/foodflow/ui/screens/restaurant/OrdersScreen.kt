@@ -1,4 +1,4 @@
-package com.example.foodflow.ui.screens.home
+package com.example.foodflow.ui.screens.restaurant
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -10,10 +10,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.foodflow.data.model.Order
 import com.example.foodflow.data.model.OrderStatus
@@ -22,8 +22,8 @@ import com.example.foodflow.ui.viewmodel.RestaurantOrdersViewModel
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
-fun RestaurantOrdersScreen(
-    onBackClick: () -> Unit,
+fun OrdersScreen(
+    navController: NavController,
     viewModel: RestaurantOrdersViewModel = viewModel()
 ) {
     // Fetch the current restaurant's ID to load their specific orders
@@ -38,7 +38,7 @@ fun RestaurantOrdersScreen(
 
     RestaurantOrdersContent(
         orders = orders,
-        onBackClick = onBackClick,
+        onBackClick = { navController.popBackStack() },
         onVerifyBankPaymentClick = { viewModel.verifyBankPayment(it) },
         onAcceptClick = { viewModel.acceptOrder(it) },
         onRejectClick = { viewModel.rejectOrder(it) },

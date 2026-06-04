@@ -6,10 +6,9 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.example.foodflow.ui.Route
-import com.example.foodflow.ui.screens.home.DriverHomeScreen
-import com.example.foodflow.ui.screens.home.SettingsScreen
+import com.example.foodflow.ui.screens.driver.HomeScreen
+import com.example.foodflow.ui.screens.common.SettingsScreen
 import com.example.foodflow.ui.viewmodel.AuthViewModel
-import com.example.foodflow.ui.viewmodel.DriverOrdersViewModel
 import com.example.foodflow.ui.viewmodel.SettingsViewModel
 
 fun NavGraphBuilder.driverGraph(
@@ -23,15 +22,10 @@ fun NavGraphBuilder.driverGraph(
         route = Route.DriverGraph.route
     ) {
         composable(Route.DriverHome.route) {
-            DriverHomeScreen(authViewModel = authViewModel, driverViewModel = viewModel())
+            HomeScreen(authViewModel = authViewModel, driverViewModel = viewModel())
         }
         composable(Route.Settings.route) {
-            SettingsScreen(
-                settingsViewModel = settingsViewModel,
-                onBackClick = {
-                    navController.popBackStack()
-                }
-            )
+            SettingsScreen(navController, settingsViewModel)
         }
     }
 }

@@ -1,4 +1,4 @@
-package com.example.foodflow.ui.screens.home
+package com.example.foodflow.ui.screens.admin
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -17,10 +17,11 @@ import com.example.foodflow.ui.viewmodel.AdminViewModel
 // ... imports
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBar
+import com.example.foodflow.ui.components.customer.ApplicationCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AdminApplicationScreen(
+fun ApplicationScreen(
     viewModel: AdminViewModel = viewModel()
 ) {
     val pendingApps by viewModel.pendingApps.collectAsState()
@@ -46,33 +47,6 @@ fun AdminApplicationScreen(
                             onReject = { viewModel.rejectApplication(app.id) }
                         )
                     }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun ApplicationCard(app: Application, onApprove: () -> Unit, onReject: () -> Unit) {
-    Card(modifier = Modifier.fillMaxWidth(), elevation = CardDefaults.cardElevation(2.dp)) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text("Role: ${app.requestedRole.name}", style = MaterialTheme.typography.titleMedium)
-            Text("Email: ${app.userEmail}")
-            Text("Details: ${app.businessDetails}")
-            Spacer(modifier = Modifier.height(12.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
-            ) {
-                OutlinedButton(
-                    onClick = onReject,
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
-                ) {
-                    Text("Reject")
-                }
-                Spacer(modifier = Modifier.width(8.dp))
-                Button(onClick = onApprove) {
-                    Text("Approve")
                 }
             }
         }

@@ -1,4 +1,4 @@
-package com.example.foodflow.ui.screens.home
+package com.example.foodflow.ui.screens.customer
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -11,13 +11,37 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.foodflow.data.model.Order
 import com.example.foodflow.data.model.OrderStatus
+import com.example.foodflow.ui.components.OrderStatusBadge
+import com.example.foodflow.ui.components.OrderStatusTracker
 import com.example.foodflow.ui.components.StatusBadge
+import com.example.foodflow.ui.components.customer.CustomerOrderCard
+import com.example.foodflow.ui.viewmodel.CustomerOrdersViewModel
+import com.google.firebase.auth.FirebaseAuth
+
+@Composable
+fun OrdersScreen(
+    navController: NavController,
+) {
+    val customerOrdersViewModel: CustomerOrdersViewModel = viewModel()
+    val currentUser = FirebaseAuth.getInstance().currentUser
+    val orders by customerOrdersViewModel.orders.collectAsState()
+
+    LaunchedEffect(currentUser) {
+        currentUser?.uid?.let { customerOrdersViewModel.loadOrders(it) }
+    }
+
+    CustomerOrdersContent(orders) {
+        navController.popBackStack()
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CustomerOrdersScreen(
+fun CustomerOrdersContent(
     orders: List<Order>,
     onBackClick: () -> Unit
 ) {
@@ -73,57 +97,6 @@ fun CustomerOrdersScreen(
                         CustomerOrderCard(order = order)
                     }
                 }
-            }
-        }
-    }
-}
-
-@Composable
-fun CustomerOrderCard(order: Order) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text("Order #${order.id.takeLast(5)}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                StatusBadge(status = order.status)
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-            Text("Items: ${order.itemNames.joinToString()}", style = MaterialTheme.typography.bodyMedium)
-            Text("Total: $${"%.2f".format(order.totalAmount)}", style = MaterialTheme.typography.bodyMedium)
-
-            // Visual Tracker for Active Orders
-            if (order.status != OrderStatus.DELIVERED && order.status != OrderStatus.REJECTED) {
-                Spacer(modifier = Modifier.height(12.dp))
-                LinearProgressIndicator(
-                    progress = {
-                        when (order.status) {
-                            OrderStatus.PLACED -> 0.25f
-                            OrderStatus.PREPARING -> 0.5f
-                            OrderStatus.READY -> 0.75f
-                            OrderStatus.ON_THE_WAY -> 0.9f
-                            else -> 0f
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    when (order.status) {
-                        OrderStatus.PLACED -> "Waiting for restaurant to accept..."
-                        OrderStatus.PREPARING -> "Restaurant is cooking your food!"
-                        OrderStatus.READY -> "Food is ready, waiting for driver..."
-                        OrderStatus.ON_THE_WAY -> "Your driver is on the way!"
-                        else -> ""
-                    },
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.primary
-                )
             }
         }
     }

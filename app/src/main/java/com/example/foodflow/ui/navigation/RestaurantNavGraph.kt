@@ -6,9 +6,9 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.example.foodflow.ui.Route
-import com.example.foodflow.ui.screens.home.RestaurantHomeScreen
-import com.example.foodflow.ui.screens.home.RestaurantOrdersScreen
-import com.example.foodflow.ui.screens.home.SettingsScreen
+import com.example.foodflow.ui.screens.restaurant.HomeScreen
+import com.example.foodflow.ui.screens.restaurant.OrdersScreen
+import com.example.foodflow.ui.screens.common.SettingsScreen
 import com.example.foodflow.ui.viewmodel.AuthViewModel
 import com.example.foodflow.ui.viewmodel.MenuViewModel
 import com.example.foodflow.ui.viewmodel.SettingsViewModel
@@ -25,24 +25,17 @@ fun NavGraphBuilder.restaurantGraph(
     ) {
         composable(Route.RestaurantHome.route) {
             val menuViewModel: MenuViewModel = viewModel()
-            RestaurantHomeScreen(
+            HomeScreen(
                 navController = navController,
                 authViewModel = authViewModel,
                 menuViewModel = menuViewModel
             )
         }
         composable(Route.RestaurantOrders.route) {
-            RestaurantOrdersScreen(
-                onBackClick = { navController.popBackStack() }
-            )
+            OrdersScreen(navController)
         }
         composable(Route.Settings.route) {
-            SettingsScreen(
-                settingsViewModel = settingsViewModel,
-                onBackClick = {
-                    navController.popBackStack()
-                }
-            )
+            SettingsScreen(navController, settingsViewModel)
         }
     }
 }

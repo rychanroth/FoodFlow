@@ -1,4 +1,4 @@
-package com.example.foodflow.ui.screens.home
+package com.example.foodflow.ui.screens.admin
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -6,11 +6,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import com.example.foodflow.ui.viewmodel.AuthViewModel
 
 @Composable
-fun AdminDashboardScreen(
+fun DashboardScreen(
     authViewModel: AuthViewModel,
 ) {
     AdminDashboardContent(

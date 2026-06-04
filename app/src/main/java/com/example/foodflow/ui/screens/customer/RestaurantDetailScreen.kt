@@ -1,4 +1,4 @@
-package com.example.foodflow.ui.screens.home
+package com.example.foodflow.ui.screens.customer
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -10,12 +10,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.AsyncImage
 import com.example.foodflow.data.model.MenuItem
+import com.example.foodflow.ui.components.customer.CustomerMenuItemCard
 import com.example.foodflow.ui.viewmodel.CartViewModel
 import com.example.foodflow.ui.viewmodel.RestaurantDetailViewModel
 
@@ -103,41 +101,3 @@ fun RestaurantDetailContent(
     }
 }
 
-@Composable
-fun CustomerMenuItemCard(item: MenuItem, onAddToCartClick: () -> Unit) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Row(
-            modifier = Modifier.padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            if (item.imageUrl.isNotEmpty()) {
-                AsyncImage(
-                    model = item.imageUrl,
-                    contentDescription = item.name,
-                    modifier = Modifier
-                        .size(80.dp)
-                        .clip(MaterialTheme.shapes.medium),
-                    contentScale = ContentScale.Crop
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-            }
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(item.name, style = MaterialTheme.typography.titleMedium)
-                Text(
-                    item.description,
-                    style = MaterialTheme.typography.bodySmall,
-                    maxLines = 2
-                )
-                Text("$${item.price}", style = MaterialTheme.typography.bodyLarge)
-            }
-
-            FilledTonalButton(onClick = onAddToCartClick) {
-                Text("Add")
-            }
-        }
-    }
-}
