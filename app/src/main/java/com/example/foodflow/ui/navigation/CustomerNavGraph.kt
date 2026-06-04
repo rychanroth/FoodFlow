@@ -15,7 +15,7 @@ import com.example.foodflow.ui.screens.customer.OrdersScreen
 import com.example.foodflow.ui.screens.customer.SearchScreen
 import com.example.foodflow.ui.screens.customer.PaymentInstructionScreen
 import com.example.foodflow.ui.screens.common.ProfileScreen
-import com.example.foodflow.ui.screens.restaurant.DetailScreen
+import com.example.foodflow.ui.screens.customer.RestaurantDetailScreen
 import com.example.foodflow.ui.screens.common.SettingsScreen
 import com.example.foodflow.ui.viewmodel.AuthViewModel
 import com.example.foodflow.ui.viewmodel.CartViewModel
@@ -49,7 +49,7 @@ fun NavGraphBuilder.customerGraph(
             arguments = listOf(navArgument("restaurantId") { type = NavType.StringType })
         ) { backStackEntry ->
             val restaurantId = backStackEntry.arguments?.getString("restaurantId") ?: ""
-            DetailScreen(
+            RestaurantDetailScreen(
                 restaurantId = restaurantId,
                 restaurantName = "Restaurant Menu",
                 onBackClick = { navController.popBackStack() },

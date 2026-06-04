@@ -13,25 +13,22 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.foodflow.data.model.AuthState
-import com.example.foodflow.data.model.OrderStatus
 import com.example.foodflow.data.model.UserRole
 import com.example.foodflow.ui.Route
-import com.example.foodflow.ui.components.AdminBottomBar
-import com.example.foodflow.ui.components.CustomerBottomBar
-import com.example.foodflow.ui.components.DriverBottomBar
-import com.example.foodflow.ui.components.RestaurantBottomBar
+import com.example.foodflow.ui.components.bottombar.AdminBottomBar
+import com.example.foodflow.ui.components.bottombar.CustomerBottomBar
+import com.example.foodflow.ui.components.bottombar.DriverBottomBar
+import com.example.foodflow.ui.components.bottombar.RestaurantBottomBar
 import com.example.foodflow.ui.viewmodel.AuthViewModel
 import com.example.foodflow.ui.viewmodel.CartViewModel
 import com.example.foodflow.ui.viewmodel.CustomerOrdersViewModel
 import com.example.foodflow.ui.viewmodel.SettingsViewModel
-import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun AppNavigation(

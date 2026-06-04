@@ -16,16 +16,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
 import com.example.foodflow.data.model.CartItem
 import com.example.foodflow.data.model.CheckoutState
 import com.example.foodflow.data.model.PaymentMethod
 import com.example.foodflow.ui.Route
+import com.example.foodflow.ui.components.customer.CartItemCard
 import com.example.foodflow.ui.components.OrderSummarySheet
 import com.example.foodflow.ui.viewmodel.CartViewModel
 import com.google.firebase.auth.FirebaseAuth
@@ -164,56 +162,6 @@ fun CartContent(
                         onIncreaseClick = { onIncreaseClick(cartItem.menuItem.id) },
                         onDecreaseClick = { onDecreaseClick(cartItem.menuItem.id) }
                     )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun CartItemCard(
-    item: CartItem,
-    onIncreaseClick: () -> Unit,
-    onDecreaseClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Row(
-            modifier = Modifier.padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            if (item.menuItem.imageUrl.isNotEmpty()) {
-                AsyncImage(
-                    model = item.menuItem.imageUrl,
-                    contentDescription = item.menuItem.name,
-                    modifier = Modifier
-                        .size(70.dp)
-                        .clip(MaterialTheme.shapes.medium),
-                    contentScale = ContentScale.Crop
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-            }
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(item.menuItem.name, style = MaterialTheme.typography.titleMedium)
-                Text(
-                    "$${item.menuItem.price}",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = onDecreaseClick) {
-                    Text("-", style = MaterialTheme.typography.titleLarge)
-                }
-                Text(
-                    item.quantity.toString(),
-                    style = MaterialTheme.typography.titleMedium
-                )
-                IconButton(onClick = onIncreaseClick) {
-                    Text("+", style = MaterialTheme.typography.titleLarge)
                 }
             }
         }

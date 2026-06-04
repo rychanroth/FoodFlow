@@ -18,6 +18,7 @@ import com.example.foodflow.data.model.OrderStatus
 import com.example.foodflow.ui.components.OrderStatusBadge
 import com.example.foodflow.ui.components.OrderStatusTracker
 import com.example.foodflow.ui.components.StatusBadge
+import com.example.foodflow.ui.components.customer.CustomerOrderCard
 import com.example.foodflow.ui.viewmodel.CustomerOrdersViewModel
 import com.google.firebase.auth.FirebaseAuth
 
@@ -96,36 +97,6 @@ fun CustomerOrdersContent(
                         CustomerOrderCard(order = order)
                     }
                 }
-            }
-        }
-    }
-}
-
-@Composable
-fun CustomerOrderCard(order: Order) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text("Order #${order.id.takeLast(5)}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                StatusBadge(status = order.status)
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-            Text("Items: ${order.itemNames.joinToString()}", style = MaterialTheme.typography.bodyMedium)
-            Text("Total: $${"%.2f".format(order.totalAmount)}", style = MaterialTheme.typography.bodyMedium)
-
-            // Visual Tracker for Active Orders
-            if (order.status != OrderStatus.DELIVERED && order.status != OrderStatus.REJECTED) {
-                Spacer(modifier = Modifier.height(12.dp))
-                OrderStatusTracker(order.status)
-                Spacer(modifier = Modifier.height(4.dp))
-                OrderStatusBadge(order.status)
             }
         }
     }

@@ -24,6 +24,8 @@ import com.example.foodflow.data.model.AppUser
 import com.example.foodflow.data.model.AuthState
 import com.example.foodflow.data.model.MenuItem
 import com.example.foodflow.ui.Route
+import com.example.foodflow.ui.components.customer.FoodCard
+import com.example.foodflow.ui.components.customer.RestaurantCard
 import com.example.foodflow.ui.viewmodel.AuthViewModel
 import com.example.foodflow.ui.viewmodel.CartViewModel
 import com.example.foodflow.ui.viewmodel.CustomerHomeViewModel
@@ -158,59 +160,6 @@ fun CustomerHomeContent(
                         )
                     }
                 }
-            }
-        }
-    }
-}
-
-@Composable
-fun FoodCard(item: MenuItem) {
-    Card(
-        modifier = Modifier.width(150.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Column {
-            if (item.imageUrl.isNotEmpty()) {
-                AsyncImage(
-                    model = item.imageUrl,
-                    contentDescription = item.name,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(100.dp)
-                        .clip(MaterialTheme.shapes.medium),
-                    contentScale = ContentScale.Crop
-                )
-            }
-            Column(modifier = Modifier.padding(8.dp)) {
-                Text(item.name, style = MaterialTheme.typography.titleSmall, maxLines = 1)
-                Text("$${item.price}", style = MaterialTheme.typography.bodySmall)
-            }
-        }
-    }
-}
-
-@Composable
-fun RestaurantCard(restaurant: AppUser, onClick: () -> Unit) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() },
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = Icons.Default.Storefront,
-                contentDescription = "Restaurant",
-                modifier = Modifier.size(48.dp),
-                tint = MaterialTheme.colorScheme.primary
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            Column {
-                Text(restaurant.email, style = MaterialTheme.typography.titleMedium)
-                Text("Tap to view menu", style = MaterialTheme.typography.bodySmall)
             }
         }
     }

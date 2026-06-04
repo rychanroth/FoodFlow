@@ -17,6 +17,8 @@ import androidx.navigation.NavController
 import com.example.foodflow.data.model.AppUser
 import com.example.foodflow.data.model.MenuItem
 import com.example.foodflow.ui.Route
+import com.example.foodflow.ui.components.customer.FoodCard
+import com.example.foodflow.ui.components.customer.RestaurantCard
 import com.example.foodflow.ui.viewmodel.CustomerSearchViewModel
 
 @Composable
@@ -97,7 +99,7 @@ fun CustomerSearchContent(
                 if (filteredItems.isNotEmpty()) {
                     item { Text("Menu Items", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold) }
                     items(filteredItems) { item ->
-                        FoodCard(item = item) // Re-using the FoodCard from HomeScreen
+                        FoodCard(item = item)
                     }
                 }
 

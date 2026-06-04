@@ -1,25 +1,19 @@
 package com.example.foodflow.ui.screens.auth
 
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.foodflow.BuildConfig
 import androidx.navigation.NavController
 import com.example.foodflow.data.model.AuthState
-import com.example.foodflow.data.model.UserRole
 import com.example.foodflow.ui.Route
 import com.example.foodflow.ui.components.AwaitingVerificationCard
-import com.example.foodflow.ui.components.GoogleSignInButton
+import com.example.foodflow.ui.components.auth.GoogleSignInButton
 import com.example.foodflow.ui.viewmodel.AuthViewModel
-import com.google.android.gms.common.api.ApiException
 
 @Composable
 fun LoginScreen(
