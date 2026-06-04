@@ -24,6 +24,21 @@ class AuthRepository {
         return auth.currentUser?.isEmailVerified ?: false
     }
 
+    // Add this to AuthRepository.kt
+    suspend fun getCurrentAppUser(uid: String): Result<AppUser> {
+        return try {
+            val document = firestore.collection("users").document(uid).get().await()
+            val appUser = document.toObject(AppUser::class.java)
+            if (appUser != null) {
+                Result.success(appUser)
+            } else {
+                Result.failure(Exception("User data not found"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     /**
      * Helper function to get current user's role
      */
