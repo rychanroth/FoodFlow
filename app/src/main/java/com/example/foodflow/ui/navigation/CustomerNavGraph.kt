@@ -81,7 +81,7 @@ fun NavGraphBuilder.customerGraph(
         }
 
         composable(Route.Profile.route) {
-            ProfileScreen(navController)
+            ProfileScreen(navController, authViewModel)
         }
     }
 }

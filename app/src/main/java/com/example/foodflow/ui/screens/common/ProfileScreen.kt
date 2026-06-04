@@ -20,6 +20,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.foodflow.R
 import com.example.foodflow.data.model.AppUser
+import com.example.foodflow.ui.viewmodel.AuthViewModel
 import com.example.foodflow.ui.viewmodel.ProfileState
 import com.example.foodflow.ui.viewmodel.ProfileViewModel
 import com.google.firebase.auth.FirebaseAuth
@@ -27,9 +28,11 @@ import com.google.firebase.auth.FirebaseAuth
 @Composable
 fun ProfileScreen(
     navController: NavController,
-    viewModel: ProfileViewModel = viewModel()
+    authViewModel: AuthViewModel,
+    viewModel: ProfileViewModel = viewModel(),
 ) {
-    val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+    val user by authViewModel.currentUser.collectAsState()
+    val currentUserId = user?.uid ?: ""
 
     // Safety check: If user is somehow null, boot them back
     if (currentUserId == null) {

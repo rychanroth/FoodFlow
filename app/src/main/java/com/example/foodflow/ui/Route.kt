@@ -10,13 +10,13 @@ sealed class Route(val route: String) {
 
     // Global Screens
     data object Settings : Route("settings")
+    data object Profile : Route("profile")
 
 
     // Auth Screens
     data object Login : Route("login")
     data object Register : Route("register")
     data object ForgotPassword : Route("forgot_password")
-    data object Apply : Route("apply")
 
     // Customer Screens
     data object CustomerHome : Route("customer_home")
@@ -27,10 +27,11 @@ sealed class Route(val route: String) {
     data object RestaurantDetail : Route("restaurant_detail/{restaurantId}") {
         fun createRoute(restaurantId: String) = "restaurant_detail/$restaurantId"
     }
-    data object Profile : Route("profile")
+    data object Apply : Route("apply")
 
     // Restaurant Screens
     data object RestaurantHome : Route("restaurant_home")
+    data object RestaurantMenuManagement : Route("restaurant_menu_management")
     data object RestaurantOrders : Route("restaurant_orders")
 
     // Driver Screens

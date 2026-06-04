@@ -19,7 +19,7 @@ class RestaurantOrdersViewModel : ViewModel() {
 
     fun loadOrders(restaurantId: String) {
         viewModelScope.launch {
-            repository.getOrdersForRestaurant(restaurantId).collect { ordersList ->
+            repository.getOrdersForThisRestaurant(restaurantId).collect { ordersList ->
                 _orders.value = ordersList
             }
         }
