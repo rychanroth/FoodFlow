@@ -1,4 +1,4 @@
-package com.example.foodflow.ui.screens.home
+package com.example.foodflow.ui.screens.driver
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -10,13 +10,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.foodflow.data.model.Order
-import com.example.foodflow.data.model.OrderStatus
 import com.example.foodflow.ui.viewmodel.AuthViewModel
 import com.example.foodflow.ui.viewmodel.DriverOrdersViewModel
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
-fun DriverHomeScreen(
+fun HomeScreen(
     authViewModel: AuthViewModel,
     driverViewModel: DriverOrdersViewModel = viewModel()
 ) {

@@ -1,4 +1,4 @@
-package com.example.foodflow.ui.screens.home
+package com.example.foodflow.ui.screens.restaurant
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -10,7 +10,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -23,7 +22,7 @@ import com.example.foodflow.ui.viewmodel.RestaurantOrdersViewModel
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
-fun RestaurantOrdersScreen(
+fun OrdersScreen(
     navController: NavController,
     viewModel: RestaurantOrdersViewModel = viewModel()
 ) {

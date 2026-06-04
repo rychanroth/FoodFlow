@@ -5,10 +5,10 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.example.foodflow.ui.Route
-import com.example.foodflow.ui.screens.home.AdminApplicationScreen
-import com.example.foodflow.ui.screens.home.AdminDashboardScreen
-import com.example.foodflow.ui.screens.home.AdminSettingsScreen
-import com.example.foodflow.ui.screens.home.SettingsScreen
+import com.example.foodflow.ui.screens.admin.ApplicationScreen
+import com.example.foodflow.ui.screens.admin.DashboardScreen
+import com.example.foodflow.ui.screens.admin.SettingsScreen
+import com.example.foodflow.ui.screens.common.SettingsScreen
 import com.example.foodflow.ui.viewmodel.AuthViewModel
 import com.example.foodflow.ui.viewmodel.SettingsViewModel
 
@@ -22,13 +22,13 @@ fun NavGraphBuilder.adminGraph(
         route = Route.AdminGraph.route
     ) {
         composable(Route.AdminDashboard.route) {
-            AdminDashboardScreen(authViewModel)
+            DashboardScreen(authViewModel)
         }
         composable(Route.AdminApplications.route) {
-            AdminApplicationScreen()
+            ApplicationScreen()
         }
         composable(Route.AdminSettings.route) {
-            AdminSettingsScreen()
+            SettingsScreen()
         }
         composable(Route.Settings.route) {
             SettingsScreen(navController, settingsViewModel)

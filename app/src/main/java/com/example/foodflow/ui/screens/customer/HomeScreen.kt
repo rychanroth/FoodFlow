@@ -1,4 +1,4 @@
-package com.example.foodflow.ui.screens.home
+package com.example.foodflow.ui.screens.customer
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -7,11 +7,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.ReceiptLong
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Storefront
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -33,7 +29,7 @@ import com.example.foodflow.ui.viewmodel.CartViewModel
 import com.example.foodflow.ui.viewmodel.CustomerHomeViewModel
 
 @Composable
-fun CustomerHomeScreen(
+fun HomeScreen(
     navController: NavController,
     authViewModel: AuthViewModel,
     customerViewModel: CustomerHomeViewModel = viewModel(),

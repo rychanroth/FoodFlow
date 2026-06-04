@@ -8,20 +8,19 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import com.example.foodflow.ui.Route
-import com.example.foodflow.ui.screens.auth.ApplyScreen
-import com.example.foodflow.ui.screens.home.CartScreen
-import com.example.foodflow.ui.screens.home.CustomerHomeScreen
-import com.example.foodflow.ui.screens.home.CustomerOrdersScreen
-import com.example.foodflow.ui.screens.home.CustomerSearchScreen
-import com.example.foodflow.ui.screens.home.PaymentInstructionScreen
-import com.example.foodflow.ui.screens.home.ProfileScreen
-import com.example.foodflow.ui.screens.home.RestaurantDetailScreen
-import com.example.foodflow.ui.screens.home.SettingsScreen
+import com.example.foodflow.ui.screens.customer.ApplyScreen
+import com.example.foodflow.ui.screens.customer.CartScreen
+import com.example.foodflow.ui.screens.customer.HomeScreen
+import com.example.foodflow.ui.screens.customer.OrdersScreen
+import com.example.foodflow.ui.screens.customer.SearchScreen
+import com.example.foodflow.ui.screens.customer.PaymentInstructionScreen
+import com.example.foodflow.ui.screens.common.ProfileScreen
+import com.example.foodflow.ui.screens.restaurant.DetailScreen
+import com.example.foodflow.ui.screens.common.SettingsScreen
 import com.example.foodflow.ui.viewmodel.AuthViewModel
 import com.example.foodflow.ui.viewmodel.CartViewModel
 import com.example.foodflow.ui.viewmodel.CustomerHomeViewModel
 import com.example.foodflow.ui.viewmodel.SettingsViewModel
-import com.google.firebase.auth.FirebaseAuth
 
 fun NavGraphBuilder.customerGraph(
     navController: NavController,
@@ -38,11 +37,11 @@ fun NavGraphBuilder.customerGraph(
 
         composable(Route.CustomerHome.route) {
             val customerViewModel: CustomerHomeViewModel = viewModel()
-            CustomerHomeScreen(navController, authViewModel, customerViewModel, cartViewModel)
+            HomeScreen(navController, authViewModel, customerViewModel, cartViewModel)
         }
 
         composable(Route.CustomerSearch.route) {
-            CustomerSearchScreen(navController = navController)
+            SearchScreen(navController = navController)
         }
 
         composable(
@@ -50,7 +49,7 @@ fun NavGraphBuilder.customerGraph(
             arguments = listOf(navArgument("restaurantId") { type = NavType.StringType })
         ) { backStackEntry ->
             val restaurantId = backStackEntry.arguments?.getString("restaurantId") ?: ""
-            RestaurantDetailScreen(
+            DetailScreen(
                 restaurantId = restaurantId,
                 restaurantName = "Restaurant Menu",
                 onBackClick = { navController.popBackStack() },
@@ -69,7 +68,7 @@ fun NavGraphBuilder.customerGraph(
         }
 
         composable(Route.CustomerOrders.route) {
-            CustomerOrdersScreen(navController)
+            OrdersScreen(navController)
         }
 
 

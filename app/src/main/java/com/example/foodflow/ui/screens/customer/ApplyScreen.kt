@@ -1,4 +1,4 @@
-package com.example.foodflow.ui.screens.auth
+package com.example.foodflow.ui.screens.customer
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable

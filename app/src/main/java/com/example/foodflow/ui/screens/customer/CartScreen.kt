@@ -1,6 +1,5 @@
-package com.example.foodflow.ui.screens.home
+package com.example.foodflow.ui.screens.customer
 
-import android.widget.ImageButton
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -26,7 +25,6 @@ import coil.compose.AsyncImage
 import com.example.foodflow.data.model.CartItem
 import com.example.foodflow.data.model.CheckoutState
 import com.example.foodflow.data.model.PaymentMethod
-import com.example.foodflow.data.model.PlatformSettings
 import com.example.foodflow.ui.Route
 import com.example.foodflow.ui.components.OrderSummarySheet
 import com.example.foodflow.ui.viewmodel.CartViewModel

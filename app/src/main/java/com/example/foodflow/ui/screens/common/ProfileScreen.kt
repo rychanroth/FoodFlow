@@ -1,4 +1,4 @@
-package com.example.foodflow.ui.screens.home
+package com.example.foodflow.ui.screens.common
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult

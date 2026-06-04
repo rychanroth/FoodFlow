@@ -1,4 +1,4 @@
-package com.example.foodflow.ui.screens.home
+package com.example.foodflow.ui.screens.admin
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -15,7 +15,7 @@ import com.example.foodflow.ui.viewmodel.AdminSettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AdminSettingsScreen(
+fun SettingsScreen(
     viewModel: AdminSettingsViewModel = viewModel()
 ) {
     val settingsState by viewModel.settingsState.collectAsState()

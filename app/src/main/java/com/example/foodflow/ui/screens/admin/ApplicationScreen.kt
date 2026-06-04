@@ -1,4 +1,4 @@
-package com.example.foodflow.ui.screens.home
+package com.example.foodflow.ui.screens.admin
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,7 +20,7 @@ import androidx.compose.material3.TopAppBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AdminApplicationScreen(
+fun ApplicationScreen(
     viewModel: AdminViewModel = viewModel()
 ) {
     val pendingApps by viewModel.pendingApps.collectAsState()

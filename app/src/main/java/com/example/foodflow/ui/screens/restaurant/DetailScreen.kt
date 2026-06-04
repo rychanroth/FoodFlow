@@ -1,4 +1,4 @@
-package com.example.foodflow.ui.screens.home
+package com.example.foodflow.ui.screens.restaurant
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,7 +20,7 @@ import com.example.foodflow.ui.viewmodel.CartViewModel
 import com.example.foodflow.ui.viewmodel.RestaurantDetailViewModel
 
 @Composable
-fun RestaurantDetailScreen(
+fun DetailScreen(
     restaurantId: String,
     restaurantName: String,
     onBackClick: () -> Unit,

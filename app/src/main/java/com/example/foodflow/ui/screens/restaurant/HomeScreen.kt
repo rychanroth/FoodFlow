@@ -1,4 +1,4 @@
-package com.example.foodflow.ui.screens.home
+package com.example.foodflow.ui.screens.restaurant
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -12,7 +12,6 @@ import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.ReceiptLong
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -30,7 +29,7 @@ import com.example.foodflow.ui.viewmodel.AuthViewModel
 import com.example.foodflow.ui.viewmodel.MenuViewModel
 
 @Composable
-fun RestaurantHomeScreen(
+fun HomeScreen(
     navController: NavController,
     menuViewModel: MenuViewModel,
     authViewModel: AuthViewModel

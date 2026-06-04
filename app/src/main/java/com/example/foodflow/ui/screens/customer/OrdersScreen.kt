@@ -1,4 +1,4 @@
-package com.example.foodflow.ui.screens.home
+package com.example.foodflow.ui.screens.customer
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -22,7 +22,7 @@ import com.example.foodflow.ui.viewmodel.CustomerOrdersViewModel
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
-fun CustomerOrdersScreen(
+fun OrdersScreen(
     navController: NavController,
 ) {
     val customerOrdersViewModel: CustomerOrdersViewModel = viewModel()

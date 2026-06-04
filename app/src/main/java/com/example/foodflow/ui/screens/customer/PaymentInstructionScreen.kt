@@ -1,4 +1,4 @@
-package com.example.foodflow.ui.screens.home
+package com.example.foodflow.ui.screens.customer
 
 import android.content.Intent
 import android.net.Uri
