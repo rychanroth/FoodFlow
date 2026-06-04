@@ -14,6 +14,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.foodflow.data.model.Order
 import com.example.foodflow.data.model.OrderStatus
@@ -23,7 +24,7 @@ import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun RestaurantOrdersScreen(
-    onBackClick: () -> Unit,
+    navController: NavController,
     viewModel: RestaurantOrdersViewModel = viewModel()
 ) {
     // Fetch the current restaurant's ID to load their specific orders
@@ -38,7 +39,7 @@ fun RestaurantOrdersScreen(
 
     RestaurantOrdersContent(
         orders = orders,
-        onBackClick = onBackClick,
+        onBackClick = { navController.popBackStack() },
         onVerifyBankPaymentClick = { viewModel.verifyBankPayment(it) },
         onAcceptClick = { viewModel.acceptOrder(it) },
         onRejectClick = { viewModel.rejectOrder(it) },

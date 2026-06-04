@@ -32,9 +32,7 @@ fun NavGraphBuilder.restaurantGraph(
             )
         }
         composable(Route.RestaurantOrders.route) {
-            RestaurantOrdersScreen(
-                onBackClick = { navController.popBackStack() }
-            )
+            RestaurantOrdersScreen(navController)
         }
         composable(Route.Settings.route) {
             SettingsScreen(navController, settingsViewModel)
