@@ -19,7 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.example.foodflow.data.model.CheckoutState
+import com.example.foodflow.ui.state.CheckoutState
 import com.example.foodflow.ui.Route
 import com.example.foodflow.ui.viewmodel.CartViewModel
 

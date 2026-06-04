@@ -5,7 +5,7 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.foodflow.data.model.CartItem
-import com.example.foodflow.data.model.CheckoutState
+import com.example.foodflow.ui.state.CheckoutState
 import com.example.foodflow.data.model.MenuItem
 import com.example.foodflow.data.model.Order
 import com.example.foodflow.data.model.OrderStatus

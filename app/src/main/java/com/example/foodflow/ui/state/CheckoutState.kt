@@ -1,4 +1,4 @@
-package com.example.foodflow.data.model
+package com.example.foodflow.ui.state
 
 sealed interface CheckoutState {
     data object Idle : CheckoutState

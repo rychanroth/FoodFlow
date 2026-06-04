@@ -18,7 +18,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.foodflow.data.model.AuthState
+import com.example.foodflow.ui.state.AuthState
 import com.example.foodflow.data.model.UserRole
 import com.example.foodflow.ui.Route
 import com.example.foodflow.ui.components.bottombar.AdminBottomBar

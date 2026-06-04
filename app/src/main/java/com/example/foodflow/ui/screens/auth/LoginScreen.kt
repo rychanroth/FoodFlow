@@ -9,7 +9,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.foodflow.BuildConfig
 import androidx.navigation.NavController
-import com.example.foodflow.data.model.AuthState
+import com.example.foodflow.ui.state.AuthState
 import com.example.foodflow.ui.Route
 import com.example.foodflow.ui.components.AwaitingVerificationCard
 import com.example.foodflow.ui.components.auth.GoogleSignInButton

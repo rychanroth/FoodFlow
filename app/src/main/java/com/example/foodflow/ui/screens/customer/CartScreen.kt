@@ -20,7 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.foodflow.data.model.CartItem
-import com.example.foodflow.data.model.CheckoutState
+import com.example.foodflow.ui.state.CheckoutState
 import com.example.foodflow.data.model.PaymentMethod
 import com.example.foodflow.ui.Route
 import com.example.foodflow.ui.components.customer.CartItemCard

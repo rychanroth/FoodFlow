@@ -1,4 +1,6 @@
-package com.example.foodflow.data.model
+package com.example.foodflow.ui.state
+
+import com.example.foodflow.data.model.UserRole
 
 sealed interface AuthState {
     data object Idle: AuthState

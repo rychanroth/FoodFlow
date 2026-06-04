@@ -15,3 +15,10 @@ data class Address(
     val city: String = "",
     val isDefault: Boolean = false
 )
+
+enum class UserRole {
+    CUSTOMER,
+    RESTAURANT,
+    DRIVER,
+    ADMIN // NEW: Super Admin
+}
