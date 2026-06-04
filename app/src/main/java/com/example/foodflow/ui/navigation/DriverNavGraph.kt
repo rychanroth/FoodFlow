@@ -8,6 +8,7 @@ import androidx.navigation.navigation
 import com.example.foodflow.ui.Route
 import com.example.foodflow.ui.screens.driver.HomeScreen
 import com.example.foodflow.ui.screens.common.SettingsScreen
+import com.example.foodflow.ui.screens.driver.EarningsScreen
 import com.example.foodflow.ui.viewmodel.AuthViewModel
 import com.example.foodflow.ui.viewmodel.SettingsViewModel
 
@@ -23,6 +24,9 @@ fun NavGraphBuilder.driverGraph(
     ) {
         composable(Route.DriverHome.route) {
             HomeScreen(authViewModel = authViewModel, driverViewModel = viewModel())
+        }
+        composable(Route.DriverEarnings.route) {
+            EarningsScreen(navController, authViewModel)
         }
         composable(Route.Settings.route) {
             SettingsScreen(navController, settingsViewModel)

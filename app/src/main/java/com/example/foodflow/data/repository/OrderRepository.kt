@@ -30,7 +30,7 @@ class OrderRepository {
     }
 
     // V2: Fetch today's orders for a restaurant for Dashboard aggregation
-    fun getThisRestaurantOrdersForToday(restaurantId: String): Flow<List<Order>> = callbackFlow {
+    fun getThisRestaurantOrdersForToday(restaurantId: String?): Flow<List<Order>> = callbackFlow {
         val startOfDay = Calendar.getInstance().apply {
             set(Calendar.HOUR_OF_DAY, 0)
             set(Calendar.MINUTE, 0)
@@ -84,7 +84,7 @@ class OrderRepository {
     }
 
     // V2: Fetch driver's completed deliveries for Earnings tab (date range)
-    fun getThisDriverEarnings(driverId: String, startDate: Long, endDate: Long): Flow<List<Order>> = callbackFlow {
+    fun getThisDriverEarnings(driverId: String?, startDate: Long, endDate: Long): Flow<List<Order>> = callbackFlow {
         val subscription = ordersCollection
             .whereEqualTo("driverId", driverId)
             .whereEqualTo("status", OrderStatus.DELIVERED.name)

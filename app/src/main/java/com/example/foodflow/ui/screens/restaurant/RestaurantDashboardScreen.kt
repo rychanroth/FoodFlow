@@ -11,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -188,4 +189,18 @@ fun OrderQuickCard(order: Order) {
             )
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun RestaurantDashboardContentPreview() {
+    RestaurantDashboardContent(
+        todaysOrderCount = TODO(),
+        todaysRevenue = TODO(),
+        pendingOrdersCount = TODO(),
+        todaysOrders = TODO(),
+        onNavigateToRestaurantOrders = TODO(),
+        onLogoutClick = TODO(),
+        modifier = TODO()
+    )
 }
