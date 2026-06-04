@@ -29,6 +29,26 @@ class OrderRepository {
         awaitClose { subscription.remove() }
     }
 
+    // GET ORDER DETAIL
+    fun getOrderStream(orderId: String): Flow<Order> = callbackFlow {
+        val subscription = ordersCollection.document(orderId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) { close(error); return@addSnapshotListener }
+
+                if (snapshot != null && snapshot.exists()) {
+                    try {
+                        val order = snapshot.toObject(Order::class.java)?.copy(id = snapshot.id)
+                        if (order != null) trySend(order) else close(Exception("Order parse failed"))
+                    } catch (e: Exception) {
+                        close(e) // Catch mapping errors
+                    }
+                } else {
+                    close(Exception("Order not found"))
+                }
+            }
+        awaitClose { subscription.remove() }
+    }
+
     // V2: Fetch today's orders for a restaurant for Dashboard aggregation
     fun getThisRestaurantOrdersForToday(restaurantId: String?): Flow<List<Order>> = callbackFlow {
         val startOfDay = Calendar.getInstance().apply {

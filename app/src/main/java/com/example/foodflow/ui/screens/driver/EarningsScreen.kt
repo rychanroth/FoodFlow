@@ -1,5 +1,7 @@
 package com.example.foodflow.ui.screens.driver
 
+import android.R.attr.order
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -14,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.foodflow.data.model.Order
+import com.example.foodflow.ui.Route
 import com.example.foodflow.ui.viewmodel.AuthViewModel
 import com.example.foodflow.ui.viewmodel.DateRange
 import com.example.foodflow.ui.viewmodel.DriverEarningsViewModel
@@ -48,6 +51,9 @@ fun EarningsScreen(
             totalDeliveries = totalDeliveries,
             orders = orders,
             selectedRange = selectedRange,
+            onNavigateToOrderDetail = { orderId ->
+                navController.navigate(Route.OrderDetail.createRoute(orderId))
+          },
             onDateRangeChange = { range -> viewModel.updateDateRange(driverId, range) },
             onLogoutClick = { authViewModel.logout() }
         )
@@ -61,6 +67,7 @@ fun EarningsContent(
     totalDeliveries: Int,
     orders: List<Order>,
     selectedRange: DateRange,
+    onNavigateToOrderDetail: (String) -> Unit,
     onDateRangeChange: (DateRange) -> Unit,
     onLogoutClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -144,7 +151,10 @@ fun EarningsContent(
             // Earnings List
             LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(orders) { order ->
-                    EarningItemCard(order = order)
+                    EarningItemCard(
+                        order = order,
+                        onClick = { onNavigateToOrderDetail(order.id) },
+                    )
                 }
             }
         }
@@ -152,9 +162,9 @@ fun EarningsContent(
 }
 
 @Composable
-fun EarningItemCard(order: Order) {
+fun EarningItemCard(order: Order, onClick: () -> Unit) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().clickable { onClick() },
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
         Row(
