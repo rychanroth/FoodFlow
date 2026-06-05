@@ -1,20 +1,33 @@
 package com.example.foodflow.ui.screens.common
 
+import android.content.Intent
+import android.graphics.Bitmap
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.layer.GraphicsLayer
+import androidx.compose.ui.graphics.rememberGraphicsLayer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.foodflow.data.model.Order
-import com.example.foodflow.data.model.OrderItem
+import com.example.foodflow.ui.components.OrderShareableCard
 import com.example.foodflow.ui.viewmodel.OrderDetailViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -23,15 +36,50 @@ fun OrderDetailScreen(
     viewModel: OrderDetailViewModel = viewModel()
 ) {
     val order by viewModel.order.collectAsState()
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
+    // This layer records the drawing commands of our Card
+    val graphicsLayer = rememberGraphicsLayer()
 
     if (order == null) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
         }
     } else {
         OrderDetailContent(
             order = order!!,
-            onBackClick = { navController.popBackStack() }
+            graphicsLayer = graphicsLayer,
+            onBackClick = { navController.popBackStack() },
+            onShareClick = {
+                scope.launch(Dispatchers.IO) {
+                    // 1. Convert the graphics layer to a Bitmap
+                    val bitmap = graphicsLayer.toImageBitmap().asAndroidBitmap()
+
+                    // 2. Save Bitmap to cache
+                    val file = File(context.cacheDir, "images/order_${order!!.id.takeLast(5)}.png")
+                    file.parentFile?.mkdirs()
+                    file.outputStream().use { out ->
+                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+                    }
+
+                    // 3. Get URI via FileProvider
+                    val uri = FileProvider.getUriForFile(
+                        context,
+                        "${context.packageName}.fileprovider",
+                        file
+                    )
+
+                    // 4. Fire Share Intent
+                    val shareIntent = Intent().apply {
+                        action = Intent.ACTION_SEND
+                        putExtra(Intent.EXTRA_STREAM, uri)
+                        type = "image/png"
+                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    }
+                    context.startActivity(Intent.createChooser(shareIntent, "Share Order Receipt"))
+                }
+            }
         )
     }
 }
@@ -40,7 +88,9 @@ fun OrderDetailScreen(
 @Composable
 fun OrderDetailContent(
     order: Order,
+    graphicsLayer: GraphicsLayer,
     onBackClick: () -> Unit,
+    onShareClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -50,6 +100,11 @@ fun OrderDetailContent(
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = onShareClick) {
+                        Icon(Icons.Default.Share, contentDescription = "Share Receipt")
                     }
                 }
             )
@@ -64,115 +119,21 @@ fun OrderDetailContent(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Status & Date Header
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = order.status.name.replace("_", " "),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = when (order.status) {
-                            com.example.foodflow.data.model.OrderStatus.DELIVERED -> MaterialTheme.colorScheme.primary
-                            com.example.foodflow.data.model.OrderStatus.REJECTED -> MaterialTheme.colorScheme.error
-                            else -> MaterialTheme.colorScheme.onSurface
-                        }
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Placed on: ${java.text.SimpleDateFormat("MMM dd, yyyy hh:mm a", java.util.Locale.getDefault()).format(order.createdAt)}",
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-            }
-
-            // Participants Info
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    DetailRow("Customer", order.customerName)
-                    DetailRow("Delivery Address", order.deliveryAddress.ifBlank { "N/A" })
-                    DetailRow("Restaurant", order.restaurantName)
-                    DetailRow("Payment Method", order.paymentMethod.name)
-
-                    if (order.transactionImageUrl != null) {
-                        Text("Bank Transfer Proof Uploaded", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelMedium)
+            // The Shareable Card with the capture modifier attached
+            OrderShareableCard(
+                order = order,
+                modifier = Modifier.drawWithContent {
+                    // Record the drawing into the graphicsLayer
+                    graphicsLayer.record {
+                        this@drawWithContent.drawContent()
                     }
+                    // Actually draw it on screen
+                    drawContent()
                 }
-            }
+            )
 
-            // Order Items
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Items", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    if (order.items.isEmpty()) {
-                        // Fallback for legacy V1 orders that only have itemNames
-                        order.itemNames.forEach { name ->
-                            Text(text = "• $name", style = MaterialTheme.typography.bodyMedium)
-                        }
-                    } else {
-                        order.items.forEach { item ->
-                            OrderItemRow(item)
-                        }
-                    }
-                }
-            }
-
-            // Receipt Breakdown
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Payment Breakdown", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    DetailRow("Subtotal", "$${"%.2f".format(order.subtotal)}")
-                    DetailRow("Delivery Fee", "$${"%.2f".format(order.deliveryFee)}")
-                    DetailRow("Platform Fee", "$${"%.2f".format(order.platformFee)}")
-
-                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text("Total", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
-                        Text("$${"%.2f".format(order.totalAmount)}", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
-                    }
-                }
-            }
-
-            // Earnings Breakdown (Crucial for Driver/Restaurant/Admin)
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Earnings Breakdown", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    DetailRow("Restaurant Earns", "$${"%.2f".format(order.restaurantEarnings)}")
-                    DetailRow("Driver Earns", "$${"%.2f".format(order.driverEarnings)}")
-                    DetailRow("Platform Earns", "$${"%.2f".format(order.platformEarnings)}")
-                }
-            }
+            // You can still add other non-shareable UI elements below the card here
+            // e.g., Earnings Breakdown strictly for the app UI, not the receipt
         }
-    }
-}
-
-@Composable
-fun DetailRow(label: String, value: String) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(text = label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Text(text = value, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
-    }
-}
-
-@Composable
-fun OrderItemRow(item: OrderItem) {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(text = "${item.quantity}x ${item.name}", style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
-        Text(text = "$${"%.2f".format(item.price * item.quantity)}", style = MaterialTheme.typography.bodyMedium)
     }
 }
