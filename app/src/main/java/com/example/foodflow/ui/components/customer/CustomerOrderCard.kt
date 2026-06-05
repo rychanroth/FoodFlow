@@ -60,10 +60,8 @@ fun CustomerOrderCard(
             Spacer(modifier = Modifier.height(12.dp))
 
             // Footer: Total Amount & Tracker
-            Row(
+            Column(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = "$${"%.2f".format(order.totalAmount)}",
