@@ -2,6 +2,7 @@ package com.example.foodflow.ui.components.bottombar
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DeliveryDining
+import androidx.compose.material.icons.filled.Money
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -21,6 +22,19 @@ fun DriverBottomBar(navController: NavController, currentRoute: String?) {
                 if (currentRoute != Route.DriverHome.route) {
                     navController.navigate(Route.DriverHome.route) {
                         popUpTo(Route.DriverHome.route) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                }
+            }
+        )
+        NavigationBarItem(
+            icon = { Icon(Icons.Default.Money, contentDescription = "Earnings") },
+            label = { Text("Earnings") },
+            selected = currentRoute == Route.DriverEarnings.route,
+            onClick = {
+                if (currentRoute != Route.DriverEarnings.route) {
+                    navController.navigate(Route.DriverEarnings.route) {
+                        popUpTo(Route.DriverEarnings.route) { inclusive = true }
                         launchSingleTop = true
                     }
                 }

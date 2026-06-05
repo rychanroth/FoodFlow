@@ -19,19 +19,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.example.foodflow.data.model.AuthState
+import com.example.foodflow.ui.state.AuthState
 import com.example.foodflow.data.model.MenuItem
 import com.example.foodflow.ui.Route
 import com.example.foodflow.ui.components.MenuItemDialog
+import com.example.foodflow.ui.components.restaurant.MenuItemCard
 import com.example.foodflow.ui.viewmodel.AuthViewModel
 import com.example.foodflow.ui.viewmodel.MenuViewModel
 
 @Composable
-fun HomeScreen(
+fun MenuManagementScreen(
     navController: NavController,
-    menuViewModel: MenuViewModel,
+    menuViewModel: MenuViewModel = viewModel(),
     authViewModel: AuthViewModel
 ) {
     val menuItems by menuViewModel.menuItems.collectAsState()
@@ -108,7 +110,7 @@ fun HomeScreen(
         )
     }
 
-    RestaurantHomeContent(
+    MenuManagementContent(
         menuItems = menuItems,
         onLogoutClick = { authViewModel.logout() },
         onAddItemClick = {
@@ -132,7 +134,7 @@ fun HomeScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RestaurantHomeContent(
+fun MenuManagementContent(
     menuItems: List<MenuItem>,
     onLogoutClick: () -> Unit,
     onAddItemClick: () -> Unit,
@@ -143,15 +145,7 @@ fun RestaurantHomeContent(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Restaurant Dashboard") },
-                actions = {
-                    IconButton(onClick = onNavigateToRestaurantOrders) {
-                        Icon(Icons.AutoMirrored.Filled.ReceiptLong, contentDescription = "Orders")
-                    }
-                    IconButton(onClick = onLogoutClick) {
-                        Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Logout")
-                    }
-                }
+                title = { Text("Restaurant Dashboard") }
             )
         },
         floatingActionButton = {
@@ -190,53 +184,12 @@ fun RestaurantHomeContent(
     }
 }
 
-@Composable
-fun MenuItemCard(item: MenuItem, onEditClick: () -> Unit, onDeleteClick: () -> Unit) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Show Image from URL if it exists
-            if (item.imageUrl.isNotEmpty()) {
-                AsyncImage(
-                    model = item.imageUrl,
-                    contentDescription = item.name,
-                    modifier = Modifier.size(60.dp),
-                    contentScale = ContentScale.Crop
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-            }
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(item.name, style = MaterialTheme.typography.titleLarge)
-                Text(item.description, style = MaterialTheme.typography.bodyMedium)
-                Text("$${item.price}", style = MaterialTheme.typography.bodyLarge)
-            }
-
-            Row {
-                IconButton(onClick = onEditClick) {
-                    Icon(Icons.Default.Edit, "Edit", tint = MaterialTheme.colorScheme.primary)
-                }
-                IconButton(onClick = onDeleteClick) {
-                    Icon(Icons.Default.Delete, "Delete", tint = MaterialTheme.colorScheme.error)
-                }
-            }
-        }
-    }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
 @Composable
 fun RestauarntHomeContentPreview() {
-    RestaurantHomeContent(
+    MenuManagementContent(
         menuItems = listOf(
             MenuItem(id = "1", name = "Pizza", description = "Delicious cheese pizza", price = 12.99),
             MenuItem(id = "2", name = "Burger", description = "Juicy beef burger", price = 8.99)

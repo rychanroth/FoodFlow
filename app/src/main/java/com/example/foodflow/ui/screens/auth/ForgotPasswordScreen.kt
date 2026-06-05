@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.foodflow.data.model.AuthState
+import com.example.foodflow.ui.state.AuthState
 import com.example.foodflow.ui.Route
 import com.example.foodflow.ui.viewmodel.AuthViewModel
 

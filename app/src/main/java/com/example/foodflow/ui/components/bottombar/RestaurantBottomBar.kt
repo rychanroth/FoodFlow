@@ -1,6 +1,7 @@
 package com.example.foodflow.ui.components.bottombar
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Settings
@@ -15,13 +16,26 @@ import com.example.foodflow.ui.Route
 fun RestaurantBottomBar(navController: NavController, currentRoute: String?) {
     NavigationBar(modifier = Modifier, tonalElevation = 8.dp) {
         NavigationBarItem(
-            icon = { Icon(Icons.Default.Menu, contentDescription = "Menu") },
-            label = { Text("Menu") },
+            icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
+            label = { Text("Home") },
             selected = currentRoute == Route.RestaurantHome.route,
             onClick = {
                 if (currentRoute != Route.RestaurantHome.route) {
                     navController.navigate(Route.RestaurantHome.route) {
                         popUpTo(Route.RestaurantHome.route) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                }
+            }
+        )
+        NavigationBarItem(
+            icon = { Icon(Icons.Default.Menu, contentDescription = "Menu") },
+            label = { Text("Menu") },
+            selected = currentRoute == Route.RestaurantMenuManagement.route,
+            onClick = {
+                if (currentRoute != Route.RestaurantMenuManagement.route) {
+                    navController.navigate(Route.RestaurantMenuManagement.route) {
+                        popUpTo(Route.RestaurantMenuManagement.route) { inclusive = true }
                         launchSingleTop = true
                     }
                 }
