@@ -1,16 +1,34 @@
 package com.example.foodflow.ui.screens.auth
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.foodflow.ui.state.AuthState
+import com.example.foodflow.ui.components.common.FoodFlowLoadingButton
+import com.example.foodflow.ui.components.common.FoodFlowTextField
 import com.example.foodflow.ui.navigation.Route
+import com.example.foodflow.ui.state.AuthState
 import com.example.foodflow.ui.viewmodel.AuthViewModel
 
 
@@ -57,30 +75,21 @@ fun ForgotPasswordContent(
         )
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Only show the form if the email hasn't been sent yet
         if (authState !is AuthState.PasswordResetSent) {
-            OutlinedTextField(
+            FoodFlowTextField(
                 value = email,
-                onValueChange = onEmailChange, // Bubbles the text change up
-                label = { Text("Email") },
-                modifier = Modifier.fillMaxWidth()
+                onValueChange = onEmailChange,
+                label = "Email",
+                keyboardType = KeyboardType.Email,
+                imeAction = ImeAction.Done
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            Button(
-                onClick = onSendResetClick, // Bubbles the click event up
-                modifier = Modifier.fillMaxWidth(),
-                enabled = authState !is AuthState.Loading
-            ) {
-                if (authState is AuthState.Loading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp),
-                        color = MaterialTheme.colorScheme.onPrimary
-                    )
-                } else {
-                    Text("Send Reset Link")
-                }
-            }
+            FoodFlowLoadingButton(
+                text = "Send Reset Link",
+                onClick = onSendResetClick,
+                isLoading = authState is AuthState.Loading
+            )
 
             if (authState is AuthState.Error) {
                 Spacer(modifier = Modifier.height(8.dp))
@@ -90,9 +99,8 @@ fun ForgotPasswordContent(
                 )
             }
         } else {
-            // SUCCESS STATE
             Icon(
-                imageVector = androidx.compose.material.icons.Icons.Default.CheckCircle,
+                imageVector = Icons.Default.CheckCircle,
                 contentDescription = "Success",
                 modifier = Modifier.size(64.dp),
                 tint = MaterialTheme.colorScheme.primary
@@ -108,10 +116,4 @@ fun ForgotPasswordContent(
             Text("Back to Login")
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun ForgotPasswordContentPreview() {
-    ForgotPasswordContent(AuthState.Idle, "", { t -> }, {}, {})
 }

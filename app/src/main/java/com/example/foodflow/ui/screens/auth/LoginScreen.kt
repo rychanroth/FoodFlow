@@ -1,18 +1,37 @@
 package com.example.foodflow.ui.screens.auth
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.example.foodflow.BuildConfig
 import androidx.navigation.NavController
-import com.example.foodflow.ui.state.AuthState
-import com.example.foodflow.ui.navigation.Route
-import com.example.foodflow.ui.components.customer.AwaitingVerificationCard
+import com.example.foodflow.BuildConfig
 import com.example.foodflow.ui.components.auth.GoogleSignInButton
+import com.example.foodflow.ui.components.common.FoodFlowLoadingButton
+import com.example.foodflow.ui.components.common.FoodFlowPasswordField
+import com.example.foodflow.ui.components.common.FoodFlowTextField
+import com.example.foodflow.ui.components.customer.AwaitingVerificationCard
+import com.example.foodflow.ui.navigation.Route
+import com.example.foodflow.ui.state.AuthState
 import com.example.foodflow.ui.viewmodel.AuthViewModel
 
 @Composable
@@ -24,25 +43,16 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
 
     val authState by authViewModel.authState.collectAsState()
-
-    // Get it from BuildConfig
     val webClientId = BuildConfig.WEB_CLIENT_ID
 
-    // Handle Navigation & Password Reset UI
     LaunchedEffect(authState) {
         when (authState) {
-            is AuthState.Success -> {
-                // Fix: Remove manual navigation logic, only let it handles UI State
-            }
-            is AuthState.PasswordResetSent -> {
-                // We'll just show a toast/snackbar later, for now reset to Idle
-                authViewModel.resetState()
-            }
-            else -> {} // Idle, Loading, Error handled below
+            is AuthState.Success -> {}
+            is AuthState.PasswordResetSent -> { authViewModel.resetState() }
+            else -> {}
         }
     }
 
-    // Inside LoginScreen Column UI
     if (authState is AuthState.AwaitingVerification) {
         Column(
             verticalArrangement = Arrangement.Center,
@@ -55,18 +65,13 @@ fun LoginScreen(
         LoginContent(
             authState = authState,
             webClientId = webClientId,
-            onGoogleSignInTokenReceived = { idToken ->
-                authViewModel.googleSignIn(idToken)
-            },
-            onGoogleSignInError = { errorMessage ->
-                // Show error snackbar or text
-            },
+            onGoogleSignInTokenReceived = { idToken -> authViewModel.googleSignIn(idToken) },
+            onGoogleSignInError = { },
             email = email,
             onEmailChange = { email = it },
             password = password,
             onPasswordChange = { password = it },
-            onEmailLoginClick = { email, password ->
-                authViewModel.login(email, password) },
+            onEmailLoginClick = { email, password -> authViewModel.login(email, password) },
             onForgotPasswordClick = { navController.navigate(Route.ForgotPassword.route) },
             onNavigateToRegister = { navController.navigate(Route.Register.route) }
         )
@@ -97,7 +102,6 @@ fun LoginContent(
         Text("Welcome Back", style = MaterialTheme.typography.headlineMedium)
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Google Sign-In Button
         GoogleSignInButton(
             webClientId = webClientId,
             onTokenReceived = onGoogleSignInTokenReceived,
@@ -108,37 +112,28 @@ fun LoginContent(
         Text("OR", modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Email and Password Sign-In section
-        OutlinedTextField(
+        FoodFlowTextField(
             value = email,
             onValueChange = onEmailChange,
-            label = { Text("Email") },
-            modifier = Modifier.fillMaxWidth()
+            label = "Email",
+            keyboardType = KeyboardType.Email,
+            imeAction = ImeAction.Next
         )
         Spacer(modifier = Modifier.height(8.dp))
 
-        OutlinedTextField(
+        FoodFlowPasswordField(
             value = password,
             onValueChange = onPasswordChange,
-            label = { Text("Password") },
-            modifier = Modifier.fillMaxWidth()
+            label = "Password",
+            imeAction = ImeAction.Done
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-        Button(
+        FoodFlowLoadingButton(
+            text = "Login",
             onClick = { onEmailLoginClick(email, password) },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = authState !is AuthState.Loading
-        ) {
-            if (authState is AuthState.Loading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(24.dp),
-                    color = MaterialTheme.colorScheme.onPrimary
-                )
-            } else {
-                Text("Login")
-            }
-        }
+            isLoading = authState is AuthState.Loading
+        )
 
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -148,7 +143,6 @@ fun LoginContent(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Navigate to Register
         TextButton(onClick = onNavigateToRegister) {
             Text("Don't have an account? Register")
         }
