@@ -6,11 +6,11 @@ import com.example.foodflow.data.model.MenuItem
 import com.example.foodflow.data.model.MenuItemCategory
 import com.example.foodflow.data.model.Promotion
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
-import com.google.firebase.firestore.Query
 
 class MenuRepository {
     private val firestore = FirebaseFirestore.getInstance()
@@ -28,6 +28,26 @@ class MenuRepository {
                     try { doc.toObject(MenuItem::class.java)?.copy(id = doc.id) } catch (e: Exception) { null }
                 } ?: emptyList()
                 trySend(items)
+            }
+        awaitClose { subscription.remove() }
+    }
+
+    fun getMenuItemById(menuItemId: String): Flow<MenuItem> = callbackFlow {
+        val subscription = menuCollection.document(menuItemId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) { close(error); return@addSnapshotListener }
+
+                val item = try {
+                    snapshot?.toObject(MenuItem::class.java)?.copy(id = snapshot.id)
+                } catch (e: Exception) {
+                    null
+                }
+
+                if (item != null) {
+                    trySend(item)
+                } else {
+                    close(Exception("Menu item not found"))
+                }
             }
         awaitClose { subscription.remove() }
     }

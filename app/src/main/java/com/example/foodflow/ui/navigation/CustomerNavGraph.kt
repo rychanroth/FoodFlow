@@ -7,6 +7,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
+import com.example.foodflow.ui.screens.common.MenuItemDetailScreen
 import com.example.foodflow.ui.screens.common.OrderDetailScreen
 import com.example.foodflow.ui.screens.common.ProfileScreen
 import com.example.foodflow.ui.screens.customer.CartScreen
@@ -53,6 +54,18 @@ fun NavGraphBuilder.customerGraph(
                 onBackClick = { navController.popBackStack() },
                 onCartClick = { navController.navigate(Route.Cart.route) },
                 viewModel = viewModel(),
+                cartViewModel = cartViewModel
+            )
+        }
+        composable(
+            route = Route.MenuItemDetail.route,
+            arguments = listOf(navArgument("menuItemId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val menuItemId = backStackEntry.arguments?.getString("menuItemId") ?: ""
+            // We will create MenuItemDetailScreen in the next steps
+            MenuItemDetailScreen(
+                menuItemId = menuItemId,
+                onBackClick = { navController.popBackStack() },
                 cartViewModel = cartViewModel
             )
         }
