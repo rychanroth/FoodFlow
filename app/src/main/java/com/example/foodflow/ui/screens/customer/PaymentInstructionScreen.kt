@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.foodflow.ui.state.CheckoutState
-import com.example.foodflow.ui.Route
+import com.example.foodflow.ui.navigation.Route
 import com.example.foodflow.ui.viewmodel.CartViewModel
 
 @Composable

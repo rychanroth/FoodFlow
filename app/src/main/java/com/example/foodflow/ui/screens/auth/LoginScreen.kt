@@ -10,8 +10,8 @@ import androidx.compose.ui.unit.dp
 import com.example.foodflow.BuildConfig
 import androidx.navigation.NavController
 import com.example.foodflow.ui.state.AuthState
-import com.example.foodflow.ui.Route
-import com.example.foodflow.ui.components.AwaitingVerificationCard
+import com.example.foodflow.ui.navigation.Route
+import com.example.foodflow.ui.components.customer.AwaitingVerificationCard
 import com.example.foodflow.ui.components.auth.GoogleSignInButton
 import com.example.foodflow.ui.viewmodel.AuthViewModel
 

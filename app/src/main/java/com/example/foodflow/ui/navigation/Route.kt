@@ -1,4 +1,4 @@
-package com.example.foodflow.ui
+package com.example.foodflow.ui.navigation
 
 sealed class Route(val route: String) {
     // Graph Routes (The Neighborhoods)
@@ -42,4 +42,9 @@ sealed class Route(val route: String) {
     data object AdminDashboard : Route("admin_dashboard")
     data object AdminApplications : Route("admin_applications")
     data object AdminSettings : Route("admin_settings")
+
+    // DETAIL SCREEN
+    object OrderDetail : Route("order_detail/{orderId}") {
+        fun createRoute(orderId: String) = "order_detail/$orderId"
+    }
 }

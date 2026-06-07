@@ -22,9 +22,9 @@ import androidx.navigation.NavController
 import com.example.foodflow.data.model.CartItem
 import com.example.foodflow.ui.state.CheckoutState
 import com.example.foodflow.data.model.PaymentMethod
-import com.example.foodflow.ui.Route
+import com.example.foodflow.ui.navigation.Route
 import com.example.foodflow.ui.components.customer.CartItemCard
-import com.example.foodflow.ui.components.OrderSummarySheet
+import com.example.foodflow.ui.components.common.OrderSummarySheet
 import com.example.foodflow.ui.viewmodel.CartViewModel
 import com.google.firebase.auth.FirebaseAuth
 

@@ -1,39 +1,51 @@
-package com.example.foodflow.data.model
+    package com.example.foodflow.data.model
 
-data class Order(
-    val id: String = "",
-    val customerId: String = "",
-    val restaurantId: String = "",
-    val driverId: String? = null, // NEW: Null means no driver has claimed it yet
-    val itemNames: List<String> = emptyList(),
-    val status: OrderStatus = OrderStatus.PLACED,
-    val createdAt: Long = System.currentTimeMillis(),
+    data class Order(
+        val id: String = "",
+        val customerId: String = "",
+        val restaurantId: String = "",
+        val driverId: String? = null,
 
-    // V2 Payment & Monetization Fields
-    val paymentMethod: PaymentMethod = PaymentMethod.COD,
+        val items: List<OrderItem> = emptyList(), // Replaces itemNames
+        val status: OrderStatus = OrderStatus.PLACED,
+        val createdAt: Long = System.currentTimeMillis(),
 
-    // The Split (Calculated at checkout based on PlatformSettings)
-    val subtotal: Double = 0.0,              // Total of food items
-    val deliveryFee: Double = 0.0,           // Flat delivery fee from settings
-    val platformFee: Double = 0.0,           // Flat platform fee
-    val totalAmount: Double = 0.0,           // What the Customer pays (Subtotal + DeliveryFee + PlatformFee)
-    val restaurantEarnings: Double = 0.0,    // What the Restaurant gets
-    val driverEarnings: Double = 0.0,        // What the Driver gets
-    val platformEarnings: Double = 0.0,       // What the Platform gets
-    val transactionImageUrl: String? = null // Image of payment transaction with bank transfer as paymentmethod
-)
+        // Denormalized data for Detail Screens
+        val customerName: String = "Unknown Customer",
+        val restaurantName: String = "Unknown Restaurant",
+        val deliveryAddress: String = "",
 
-enum class  PaymentMethod {
-    COD,
-    BANK_TRANSFER
-}
+        // V2 Payment & Monetization Fields
+        val paymentMethod: PaymentMethod = PaymentMethod.COD,
+        val subtotal: Double = 0.0,
+        val deliveryFee: Double = 0.0,
+        val platformFee: Double = 0.0,
+        val totalAmount: Double = 0.0,
+        val restaurantEarnings: Double = 0.0,
+        val driverEarnings: Double = 0.0,
+        val platformEarnings: Double = 0.0,
+        val transactionImageUrl: String? = null
+    )
 
-enum class OrderStatus {
-    PENDING_PAYMENT_VERIFICATION,
-    PLACED,
-    PREPARING,
-    READY,
-    ON_THE_WAY,
-    DELIVERED,
-    REJECTED
-}
+    data class OrderItem(
+        val menuItemId: String = "",
+        val name: String = "",
+        val quantity: Int = 0,
+        val price: Double = 0.0,
+        val imageUrl: String = "" // NEW: Snapshot of the image at time of purchase
+    )
+
+    enum class  PaymentMethod {
+        COD,
+        BANK_TRANSFER
+    }
+
+    enum class OrderStatus {
+        PENDING_PAYMENT_VERIFICATION,
+        PLACED,
+        PREPARING,
+        READY,
+        ON_THE_WAY,
+        DELIVERED,
+        REJECTED
+    }

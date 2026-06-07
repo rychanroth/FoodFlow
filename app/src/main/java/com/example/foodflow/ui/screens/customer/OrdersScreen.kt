@@ -15,35 +15,39 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.foodflow.data.model.Order
 import com.example.foodflow.data.model.OrderStatus
-import com.example.foodflow.ui.components.OrderStatusBadge
-import com.example.foodflow.ui.components.OrderStatusTracker
-import com.example.foodflow.ui.components.StatusBadge
+import com.example.foodflow.ui.navigation.Route
 import com.example.foodflow.ui.components.customer.CustomerOrderCard
+import com.example.foodflow.ui.viewmodel.AuthViewModel
 import com.example.foodflow.ui.viewmodel.CustomerOrdersViewModel
-import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun OrdersScreen(
     navController: NavController,
+    authViewModel: AuthViewModel
 ) {
     val customerOrdersViewModel: CustomerOrdersViewModel = viewModel()
-    val currentUser = FirebaseAuth.getInstance().currentUser
+    val user by authViewModel.currentUser.collectAsState()
     val orders by customerOrdersViewModel.orders.collectAsState()
 
-    LaunchedEffect(currentUser) {
-        currentUser?.uid?.let { customerOrdersViewModel.loadOrders(it) }
+    LaunchedEffect(user) {
+        user?.uid?.let { customerOrdersViewModel.loadOrders(it) }
     }
 
-    CustomerOrdersContent(orders) {
-        navController.popBackStack()
-    }
+    CustomerOrdersContent(
+        orders = orders,
+        onBackClick = { navController.popBackStack() },
+        onOrderClick = { orderId ->
+            navController.navigate(Route.OrderDetail.createRoute(orderId))
+        }
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CustomerOrdersContent(
     orders: List<Order>,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onOrderClick: (String) -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -73,7 +77,6 @@ fun CustomerOrdersContent(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 contentPadding = PaddingValues(vertical = 16.dp)
             ) {
-                // Separate active and past orders for better UX
                 val activeOrders = orders.filter {
                     it.status != OrderStatus.DELIVERED && it.status != OrderStatus.REJECTED
                 }
@@ -82,9 +85,14 @@ fun CustomerOrdersContent(
                 }
 
                 if (activeOrders.isNotEmpty()) {
-                    item { Text("Active Orders", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold) }
+                    item {
+                        Text("Active Orders", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                    }
                     items(activeOrders) { order ->
-                        CustomerOrderCard(order = order)
+                        CustomerOrderCard(
+                            order = order,
+                            onClick = { onOrderClick(order.id) }
+                        )
                     }
                 }
 
@@ -94,7 +102,10 @@ fun CustomerOrdersContent(
                         Text("Past Orders", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                     }
                     items(pastOrders) { order ->
-                        CustomerOrderCard(order = order)
+                        CustomerOrderCard(
+                            order = order,
+                            onClick = { onOrderClick(order.id) }
+                        )
                     }
                 }
             }

@@ -10,7 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.foodflow.ui.Route
+import com.example.foodflow.ui.navigation.Route
 
 @Composable
 fun RestaurantBottomBar(navController: NavController, currentRoute: String?) {

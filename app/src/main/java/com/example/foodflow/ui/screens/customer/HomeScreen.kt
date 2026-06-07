@@ -18,7 +18,7 @@ import androidx.navigation.NavController
 import com.example.foodflow.data.model.AppUser
 import com.example.foodflow.ui.state.AuthState
 import com.example.foodflow.data.model.MenuItem
-import com.example.foodflow.ui.Route
+import com.example.foodflow.ui.navigation.Route
 import com.example.foodflow.ui.components.customer.FoodCard
 import com.example.foodflow.ui.components.customer.RestaurantCard
 import com.example.foodflow.ui.viewmodel.AuthViewModel
