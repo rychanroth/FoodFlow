@@ -4,11 +4,14 @@ import android.content.Context
 import android.net.Uri
 import com.example.foodflow.data.model.AppUser
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.tasks.await
 
-class ProfileRepository {
+class ProfileRepository(private val context: Context) {
 
     private val firestore = FirebaseFirestore.getInstance()
+    private val userPreferences = UserPreferences(context)
+    val favoritesFlow: Flow<Set<String>> = userPreferences.favoritesFlow
 
     suspend fun getUserProfile(userId: String): Result<AppUser> {
         return try {
@@ -31,5 +34,9 @@ class ProfileRepository {
 
     suspend fun uploadImage(uri: Uri, context: Context): Result<String> {
         return ImageUploader.upload(uri, context)
+    }
+
+    suspend fun toggleFavorite(itemId: String) {
+        userPreferences.toggleFavorite(itemId)
     }
 }
