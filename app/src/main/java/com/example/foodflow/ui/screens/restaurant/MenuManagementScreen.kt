@@ -31,6 +31,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.foodflow.data.model.MenuItem
 import com.example.foodflow.data.model.MenuItemCategory
+import com.example.foodflow.ui.components.common.ConfirmDialog
 import com.example.foodflow.ui.components.restaurant.MenuItemCard
 import com.example.foodflow.ui.components.restaurant.MenuItemDialog
 import com.example.foodflow.ui.navigation.Route
@@ -46,7 +47,6 @@ fun MenuManagementScreen(
 ) {
     val menuItems by menuViewModel.menuItems.collectAsState()
     val authState by authViewModel.authState.collectAsState()
-
     val categories by menuViewModel.categories.collectAsState()
 
     // Dialog State
@@ -57,63 +57,38 @@ fun MenuManagementScreen(
     var itemPrice by remember { mutableStateOf("") }
     var itemCategoryId by remember { mutableStateOf("") }
     var itemIsActive by remember { mutableStateOf(true) }
-
-    // NEW: Image URI State
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
 
-    // NEW: The Activity Result Launcher for picking images
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        // When the user picks an image, update our hoisted state
-        selectedImageUri = uri
-    }
+    ) { uri: Uri? -> selectedImageUri = uri }
 
-    // NEW: Load menu items ONLY when we confirm the user is logged in
     LaunchedEffect(authState) {
         if (authState is AuthState.Idle) {
-            menuViewModel.clearMenu() // Clear data on logout
-            navController.navigate(Route.Login.route) {
-                popUpTo(0) { inclusive = true }
-            }
+            menuViewModel.clearMenu()
+            navController.navigate(Route.Login.route) { popUpTo(0) { inclusive = true } }
         } else if (authState is AuthState.Success) {
-            // The user is guaranteed to exist here
             val uid = menuViewModel.getCurrentUserId()
-            if (uid != null) {
-                menuViewModel.loadMenuItems(uid)
-            }
+            if (uid != null) menuViewModel.loadMenuItems(uid)
         }
     }
 
     fun clearDialogState() {
-        isDialogOpen = false
-        editingItem = null
-        itemName = ""
-        itemDescription = ""
-        itemPrice = ""
-        selectedImageUri = null // Clear image too
-        itemCategoryId = ""
-        itemIsActive = true
+        isDialogOpen = false; editingItem = null; itemName = ""; itemDescription = ""
+        itemPrice = ""; selectedImageUri = null; itemCategoryId = ""; itemIsActive = true
     }
 
     if (isDialogOpen) {
         MenuItemDialog(
             isEditMode = editingItem != null,
-            name = itemName,
-            onNameChange = { itemName = it },
-            description = itemDescription,
-            onDescriptionChange = { itemDescription = it },
-            price = itemPrice,
-            onPriceChange = { itemPrice = it },
-            // FIX: Show the newly picked local URI, OR fall back to the existing remote URL string
+            name = itemName, onNameChange = { itemName = it },
+            description = itemDescription, onDescriptionChange = { itemDescription = it },
+            price = itemPrice, onPriceChange = { itemPrice = it },
             imageModel = selectedImageUri ?: editingItem?.imageUrl,
             onPickImageClick = { galleryLauncher.launch("image/*") },
             onDismiss = { clearDialogState() },
-            categories = categories,
-            selectedCategoryId = itemCategoryId,
-            onCategorySelected = { itemCategoryId = it },
-            isActive = itemIsActive,
-            onActiveChanged = { itemIsActive = it },
+            categories = categories, selectedCategoryId = itemCategoryId, onCategorySelected = { itemCategoryId = it },
+            isActive = itemIsActive, onActiveChanged = { itemIsActive = it },
             onConfirm = {
                 val priceDouble = itemPrice.toDoubleOrNull() ?: 0.0
                 if (editingItem == null) {
@@ -131,25 +106,20 @@ fun MenuManagementScreen(
 
     MenuManagementContent(
         menuItems = menuItems,
-        onAddItemClick = {
-            clearDialogState()
-            isDialogOpen = true
-        },
+        categories = categories,
+        onAddItemClick = { clearDialogState(); isDialogOpen = true },
         onEditItemClick = { item ->
             editingItem = item
             itemName = item.name
             itemDescription = item.description
             itemPrice = item.price.toString()
-            // FIX: DO NOT parse the URL. Leave selectedImageUri null.
-            // The Dialog will use editingItem.imageUrl to display the current image.
             selectedImageUri = null
             itemCategoryId = item.categoryId
-            itemIsActive = item.isActive
+            itemIsActive = item.isActive  // This must be set BEFORE isDialogOpen = true
             isDialogOpen = true
         },
-        categories = categories,
         onDeleteItemClick = { menuViewModel.deleteMenuItem(it) },
-        onToggleActive = { menuViewModel.toggleItemAvailability(it) }
+        onItemToggleActive = { item, isChecked -> menuViewModel.setMenuItemAvailability(item, isChecked) }
     )
 }
 
@@ -161,14 +131,25 @@ fun MenuManagementContent(
     onAddItemClick: () -> Unit,
     onEditItemClick: (MenuItem) -> Unit,
     onDeleteItemClick: (String) -> Unit,
-    onToggleActive: (MenuItem) -> Unit
+    onItemToggleActive: (MenuItem, Boolean) -> Unit
 ) {
+    // FIX 2: Hoist the item to delete out of the LazyColumn scope
+    var itemToDelete by remember { mutableStateOf<MenuItem?>(null) }
+
+    // Show dialog if itemToDelete is not null
+    if (itemToDelete != null) {
+        ConfirmDialog(
+            showDialog = true,
+            onDismiss = { itemToDelete = null },
+            onConfirm = {
+                onDeleteItemClick(itemToDelete!!.id)
+                itemToDelete = null
+            }
+        )
+    }
+
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Menu Management") }
-            )
-        },
+        topBar = { TopAppBar(title = { Text("Menu Management") }) },
         floatingActionButton = {
             FloatingActionButton(onClick = onAddItemClick) {
                 Icon(Icons.Default.Add, contentDescription = "Add Item")
@@ -176,18 +157,12 @@ fun MenuManagementContent(
         }
     ) { innerPadding ->
         if (menuItems.isEmpty()) {
-            Box(
-                modifier = Modifier.fillMaxSize().padding(innerPadding),
-                contentAlignment = Alignment.Center
-            ) {
+            Box(modifier = Modifier.fillMaxSize().padding(innerPadding), contentAlignment = Alignment.Center) {
                 Text("No menu items yet. Click + to add one!")
             }
         } else {
             LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                modifier = Modifier.fillMaxSize().padding(innerPadding).padding(horizontal = 16.dp, vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(menuItems, key = { it.id }) { item ->
@@ -196,12 +171,11 @@ fun MenuManagementContent(
                         item = item,
                         categoryName = categoryName,
                         onEditClick = { onEditItemClick(item) },
-                        onDeleteClick = { onDeleteItemClick(item.id) },
-                        onToggleActive = { onToggleActive(item) }
+                        onDeleteClick = { itemToDelete = item }, // Set the item to delete
+                        onToggleActive = { isChecked -> onItemToggleActive(item, isChecked) }
                     )
                 }
             }
         }
     }
 }
-

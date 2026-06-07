@@ -1,6 +1,7 @@
 package com.example.foodflow.ui.components.restaurant
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -21,9 +22,14 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -39,6 +45,9 @@ fun MenuItemCard(
     onDeleteClick: () -> Unit,
     onToggleActive: (Boolean) -> Unit
 ) {
+    var isActiveLocal by remember(item.id, item.isActive) {
+        mutableStateOf(item.isActive)
+    }
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
@@ -99,16 +108,23 @@ fun MenuItemCard(
 
             // Actions & Status Section
             Column(horizontalAlignment = Alignment.End) {
-                // Quick availability toggle
-                Switch(
-                    checked = item.isActive,
-                    onCheckedChange = { ischecked -> onToggleActive(ischecked) },
-                    modifier = Modifier.height(24.dp),
-                    colors = SwitchDefaults.colors(
-                        checkedThumbColor = MaterialTheme.colorScheme.primary,
-                        checkedTrackColor = MaterialTheme.colorScheme.primaryContainer
+                Box(
+                    modifier = Modifier.size(48.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Switch(
+                        checked = isActiveLocal,  // ✅ Use local state
+                        onCheckedChange = { isChecked ->
+                            isActiveLocal = isChecked  // ✅ Instant visual feedback
+                            onToggleActive(isChecked)  // Sync to backend
+                        },
+                        modifier = Modifier.scale(0.8f),
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = MaterialTheme.colorScheme.primary,
+                            checkedTrackColor = MaterialTheme.colorScheme.primaryContainer
+                        )
                     )
-                )
+                }
 
                 Spacer(Modifier.height(8.dp))
 

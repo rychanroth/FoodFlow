@@ -74,8 +74,10 @@ class MenuViewModel(application: Application) : AndroidViewModel(application) {
 
     // updateMenuItem already handles full object overwrite, so passing updatedItem with new fields is fine
 
-    fun toggleItemAvailability(item: MenuItem) {
-        viewModelScope.launch { repository.updateMenuItem(item.copy(isActive = !item.isActive)) }
+    fun setMenuItemAvailability(item: MenuItem, isActive: Boolean) {
+        viewModelScope.launch {
+            repository.updateMenuItem(item.copy(isActive = isActive))
+        }
     }
 
     fun updateMenuItem(updatedItem: MenuItem, newImageUri: Uri?) {

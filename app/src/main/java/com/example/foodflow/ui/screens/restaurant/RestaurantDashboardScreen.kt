@@ -39,7 +39,7 @@ import com.example.foodflow.ui.navigation.Route
 import com.example.foodflow.ui.viewmodel.AuthViewModel
 import com.example.foodflow.ui.viewmodel.RestaurantDashboardViewModel
 
-/**/@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RestaurantDashboardScreen(
     navController: NavController,
