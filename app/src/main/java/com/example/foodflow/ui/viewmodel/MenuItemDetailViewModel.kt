@@ -5,12 +5,14 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.example.foodflow.data.repository.MenuRepository
+import com.example.foodflow.data.repository.ProfileRepository
 import com.example.foodflow.data.repository.UserPreferences
 import com.example.foodflow.ui.state.MenuItemDetailState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class MenuItemDetailViewModel(
@@ -19,9 +21,9 @@ class MenuItemDetailViewModel(
 ) : AndroidViewModel(application) {
 
     private val menuRepository = MenuRepository()
+    private val profileRepository = ProfileRepository(application) // NEW
     private val userPreferences = UserPreferences(application)
 
-    // Automatically extract the menuItemId from the navigation arguments
     private val menuItemId: String = savedStateHandle["menuItemId"] ?: ""
 
     private val _state = MutableStateFlow(MenuItemDetailState())
@@ -33,7 +35,6 @@ class MenuItemDetailViewModel(
 
     private fun loadData() {
         viewModelScope.launch {
-            // Combine the Firestore item flow and the DataStore favorites flow
             combine(
                 menuRepository.getMenuItemById(menuItemId),
                 userPreferences.favoritesFlow
@@ -43,7 +44,24 @@ class MenuItemDetailViewModel(
                     isFavorite = favoriteIds.contains(menuItemId),
                     isLoading = false
                 )
-            }.collect { _state.value = it }
+            }.collect { state ->
+                _state.value = state
+
+                // NEW: Fetch restaurant data once we have the item and haven't fetched the restaurant yet
+                if (state.item != null && _state.value.restaurant == null) {
+                    fetchRestaurant(state.item.restaurantId)
+                }
+            }
+        }
+    }
+
+    // NEW
+    private fun fetchRestaurant(restaurantId: String) {
+        viewModelScope.launch {
+            val result = profileRepository.getUserProfile(restaurantId)
+            if (result.isSuccess) {
+                _state.update { it.copy(restaurant = result.getOrNull()) }
+            }
         }
     }
 

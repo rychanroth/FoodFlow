@@ -84,6 +84,7 @@ fun NavGraphBuilder.customerGraph(
             val menuItemId = backStackEntry.arguments?.getString("menuItemId") ?: ""
             // We will create MenuItemDetailScreen in the next steps
             MenuItemDetailScreen(
+                navController = navController,
                 menuItemId = menuItemId,
                 onBackClick = { navController.popBackStack() },
                 cartViewModel = cartViewModel

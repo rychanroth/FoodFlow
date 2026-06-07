@@ -47,14 +47,19 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.example.foodflow.data.model.AppUser
 import com.example.foodflow.data.model.MenuItem
+import com.example.foodflow.ui.components.customer.RestaurantInfoCard
+import com.example.foodflow.ui.navigation.Route
 import com.example.foodflow.ui.viewmodel.CartViewModel
 import com.example.foodflow.ui.viewmodel.MenuItemDetailViewModel
 import kotlinx.coroutines.launch
 
 @Composable
 fun MenuItemDetailScreen(
+    navController: NavController,
     menuItemId: String,
     onBackClick: () -> Unit,
     cartViewModel: CartViewModel,
@@ -64,7 +69,6 @@ fun MenuItemDetailScreen(
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    // Handle Add to Cart with Snackbar feedback
     val onAddToCart: (MenuItem) -> Unit = { item ->
         cartViewModel.addItemToCart(item)
         scope.launch {
@@ -75,38 +79,35 @@ fun MenuItemDetailScreen(
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
-        if (state.isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
-        } else if (state.item == null) {
-            // Error state: Item not found
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("Item not found", style = MaterialTheme.typography.titleMedium)
-                    Spacer(Modifier.height(8.dp))
-                    Button(onClick = onBackClick) { Text("Go Back") }
+        when {
+            state.isLoading -> {
+                Box(modifier = Modifier.fillMaxSize().padding(paddingValues), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
                 }
             }
-        } else {
-            MenuItemDetailContent(
-                item = state.item!!,
-                isFavorite = state.isFavorite,
-                onBackClick = onBackClick,
-                onFavoriteClick = { viewModel.toggleFavorite() },
-                onAddToCartClick = { onAddToCart(state.item!!) },
-                modifier = Modifier.padding(paddingValues)
-            )
+            state.item == null -> {
+                Box(modifier = Modifier.fillMaxSize().padding(paddingValues), contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("Item not found", style = MaterialTheme.typography.titleMedium)
+                        Spacer(Modifier.height(8.dp))
+                        Button(onClick = onBackClick) { Text("Go Back") }
+                    }
+                }
+            }
+            else -> {
+                MenuItemDetailContent(
+                    item = state.item!!,
+                    restaurant = state.restaurant, // NEW
+                    isFavorite = state.isFavorite,
+                    onBackClick = onBackClick,
+                    onFavoriteClick = { viewModel.toggleFavorite() },
+                    onRestaurantClick = { restaurantId ->
+                        navController.navigate(Route.RestaurantDetail.createRoute(restaurantId))
+                    }, // NEW
+                    onAddToCartClick = { onAddToCart(state.item!!) },
+                    modifier = Modifier.padding(paddingValues)
+                )
+            }
         }
     }
 }
@@ -115,9 +116,11 @@ fun MenuItemDetailScreen(
 @Composable
 fun MenuItemDetailContent(
     item: MenuItem,
+    restaurant: AppUser?, // NEW
     isFavorite: Boolean,
     onBackClick: () -> Unit,
     onFavoriteClick: () -> Unit,
+    onRestaurantClick: (String) -> Unit, // NEW
     onAddToCartClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -230,6 +233,17 @@ fun MenuItemDetailContent(
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
+                    }
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    // NEW: Restaurant Info Card
+                    if (restaurant != null) {
+                        RestaurantInfoCard(
+                            restaurant = restaurant,
+                            onClick = { onRestaurantClick(restaurant.uid) }
+                        )
+                        Spacer(Modifier.height(16.dp))
                     }
                 }
             }
