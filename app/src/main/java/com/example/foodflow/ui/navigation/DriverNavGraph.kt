@@ -34,7 +34,10 @@ fun NavGraphBuilder.driverGraph(
             route = Route.OrderDetail.route,
             arguments = listOf(navArgument("orderId") { type = NavType.StringType })
         ) {
-            OrderDetailScreen(navController = navController)
+            OrderDetailScreen(
+                navController = navController,
+                authViewModel = authViewModel
+            )
         }
         composable(Route.Profile.route) {
             ProfileScreen(navController, authViewModel)

@@ -15,6 +15,7 @@ import com.example.foodflow.ui.screens.customer.CartScreen
 import com.example.foodflow.ui.screens.customer.CatalogScreen
 import com.example.foodflow.ui.screens.customer.FavoritesScreen
 import com.example.foodflow.ui.screens.customer.HomeScreen
+import com.example.foodflow.ui.screens.customer.OrderSuccessScreen
 import com.example.foodflow.ui.screens.customer.OrdersScreen
 import com.example.foodflow.ui.screens.customer.PaymentInstructionScreen
 import com.example.foodflow.ui.screens.customer.RestaurantDetailScreen
@@ -114,9 +115,25 @@ fun NavGraphBuilder.customerGraph(
             route = Route.OrderDetail.route,
             arguments = listOf(navArgument("orderId") { type = NavType.StringType })
         ) {
-            OrderDetailScreen(navController = navController)
+            OrderDetailScreen(
+                navController = navController,
+                authViewModel = authViewModel
+            )
         }
-
+        composable(
+            route = Route.OrderSuccess.route,
+            arguments = listOf(navArgument("orderId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val orderId = backStackEntry.arguments?.getString("orderId")
+            OrderSuccessScreen(navController, orderId)
+        }
+        composable(
+            route = Route.OrderSuccess.route,
+            arguments = listOf(navArgument("orderId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val orderId = backStackEntry.arguments?.getString("orderId")
+            OrderSuccessScreen(navController, orderId)
+        }
         composable(Route.Profile.route) {
             ProfileScreen(navController, authViewModel)
         }

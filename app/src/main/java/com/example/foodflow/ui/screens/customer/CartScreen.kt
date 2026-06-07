@@ -69,6 +69,25 @@ fun CartScreen(
     // Check if user has a default address
     val hasValidAddress = user?.addresses?.any { it.isDefault } == true
 
+    LaunchedEffect(checkoutState) {
+        if (checkoutState is CheckoutState.Success) {
+            val orderId = cartViewModel.lastOrderId ?: ""
+
+            if (cartViewModel.lastPaymentMethod == PaymentMethod.BANK_TRANSFER) {
+                // For bank transfer, still go to payment instructions first
+                navController.navigate(Route.PaymentInstruction.route) {
+                    popUpTo(Route.CustomerHome.route) { inclusive = false }
+                }
+            } else {
+                // For COD, go straight to success screen!
+                navController.navigate(Route.OrderSuccess.createRoute(orderId)) {
+                    popUpTo(Route.CustomerHome.route) { inclusive = false }
+                }
+            }
+            cartViewModel.resetCheckoutState()
+        }
+    }
+
     // NEW: Missing Address Dialog
     if (showMissingAddressDialog) {
         AlertDialog(
