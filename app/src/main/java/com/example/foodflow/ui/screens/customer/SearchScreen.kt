@@ -1,13 +1,29 @@
 package com.example.foodflow.ui.screens.customer
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -16,14 +32,16 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.foodflow.data.model.AppUser
 import com.example.foodflow.data.model.MenuItem
-import com.example.foodflow.ui.navigation.Route
-import com.example.foodflow.ui.components.customer.FoodCard
+import com.example.foodflow.ui.components.customer.CustomerMenuItemCard
 import com.example.foodflow.ui.components.customer.RestaurantCard
+import com.example.foodflow.ui.navigation.Route
+import com.example.foodflow.ui.viewmodel.CartViewModel
 import com.example.foodflow.ui.viewmodel.CustomerSearchViewModel
 
 @Composable
 fun SearchScreen(
     navController: NavController,
+    cartViewModel: CartViewModel,
     viewModel: CustomerSearchViewModel = viewModel()
 ) {
     val searchQuery by viewModel.searchQuery.collectAsState()
@@ -38,6 +56,14 @@ fun SearchScreen(
         onBackClick = { navController.popBackStack() },
         onRestaurantClick = { restaurantId ->
             navController.navigate(Route.RestaurantDetail.createRoute(restaurantId))
+        },
+        // ✅ FILLED IN: Handled missing menu item navigation
+        onItemClick = { itemId ->
+            navController.navigate(Route.MenuItemDetail.createRoute(itemId))
+        },
+        // ✅ FILLED IN: Pass this to your cart management logic
+        onAddToCartClick = { item ->
+            cartViewModel.addItemToCart(item)
         }
     )
 }
@@ -50,7 +76,9 @@ fun CustomerSearchContent(
     filteredItems: List<MenuItem>,
     filteredRestaurants: List<AppUser>,
     onBackClick: () -> Unit,
-    onRestaurantClick: (String) -> Unit
+    onRestaurantClick: (String) -> Unit,
+    onItemClick: (String) -> Unit,         // ✅ ADDED callback
+    onAddToCartClick: (MenuItem) -> Unit   // ✅ ADDED callback
 ) {
     Scaffold(
         topBar = {
@@ -98,8 +126,12 @@ fun CustomerSearchContent(
             ) {
                 if (filteredItems.isNotEmpty()) {
                     item { Text("Menu Items", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold) }
-                    items(filteredItems) { item ->
-                        FoodCard(item = item)
+                    items(filteredItems, key = { it.id }) { item ->
+                        CustomerMenuItemCard(
+                            item = item,
+                            onItemClick = { onItemClick(item.id) },         // ✅ FILLED IN
+                            onAddToCartClick = { onAddToCartClick(item) }   // ✅ FILLED IN
+                        )
                     }
                 }
 
