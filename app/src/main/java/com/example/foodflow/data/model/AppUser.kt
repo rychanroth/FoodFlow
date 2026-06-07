@@ -3,11 +3,13 @@ package com.example.foodflow.data.model
 data class AppUser(
     val uid: String = "",
     val email: String = "",
-    val name: String = "", // NEW
-    val phone: String = "", // NEW
+    val name: String = "",
+    val phone: String = "",
     val role: UserRole = UserRole.CUSTOMER,
     val avatarUrl: String = "",
-    val addresses: List<Address> = emptyList()
+    val addresses: List<Address> = emptyList(),
+    val isProfileComplete: Boolean = false, // V3: Onboarding gate
+    val fcmToken: String = ""               // V3: Push notifications
 )
 
 // Placeholder for addresses

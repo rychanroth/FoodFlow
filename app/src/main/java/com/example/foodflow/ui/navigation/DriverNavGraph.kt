@@ -7,11 +7,10 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
-import com.example.foodflow.ui.navigation.Route
 import com.example.foodflow.ui.screens.common.OrderDetailScreen
-import com.example.foodflow.ui.screens.driver.HomeScreen
-import com.example.foodflow.ui.screens.common.SettingsScreen
+import com.example.foodflow.ui.screens.common.ProfileScreen
 import com.example.foodflow.ui.screens.driver.EarningsScreen
+import com.example.foodflow.ui.screens.driver.HomeScreen
 import com.example.foodflow.ui.viewmodel.AuthViewModel
 import com.example.foodflow.ui.viewmodel.SettingsViewModel
 
@@ -37,8 +36,8 @@ fun NavGraphBuilder.driverGraph(
         ) {
             OrderDetailScreen(navController = navController)
         }
-        composable(Route.Settings.route) {
-            SettingsScreen(navController, settingsViewModel)
+        composable(Route.Profile.route) {
+            ProfileScreen(navController, authViewModel)
         }
     }
 }

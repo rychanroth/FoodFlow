@@ -7,7 +7,7 @@ import androidx.navigation.navigation
 import com.example.foodflow.ui.screens.admin.ApplicationScreen
 import com.example.foodflow.ui.screens.admin.DashboardScreen
 import com.example.foodflow.ui.screens.admin.SettingsScreen
-import com.example.foodflow.ui.screens.common.SettingsScreen
+import com.example.foodflow.ui.screens.common.ProfileScreen
 import com.example.foodflow.ui.viewmodel.AuthViewModel
 import com.example.foodflow.ui.viewmodel.SettingsViewModel
 
@@ -29,8 +29,8 @@ fun NavGraphBuilder.adminGraph(
         composable(Route.AdminSettings.route) {
             SettingsScreen()
         }
-        composable(Route.Settings.route) {
-            SettingsScreen(navController, settingsViewModel)
+        composable(Route.Profile.route) {
+            ProfileScreen(navController, authViewModel)
         }
     }
 }
