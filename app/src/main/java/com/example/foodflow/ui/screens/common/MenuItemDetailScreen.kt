@@ -43,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -120,6 +121,10 @@ fun MenuItemDetailContent(
     onAddToCartClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    // tryna simulate vh/vw
+    val configuration = LocalConfiguration.current
+    val vw = configuration.screenWidthDp.dp / 100
+    val vh = configuration.screenHeightDp.dp / 100
     Box(modifier = modifier.fillMaxSize()) {
         // Main Scrollable Content
         LazyColumn(
@@ -132,13 +137,13 @@ fun MenuItemDetailContent(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(250.dp)
+                        .height(vh * 50)
                 ) {
                     AsyncImage(
                         model = item.imageUrl,
                         contentDescription = item.name,
                         modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
+                        contentScale = ContentScale.FillBounds
                     )
 
                     // Overlay gradient for better icon visibility

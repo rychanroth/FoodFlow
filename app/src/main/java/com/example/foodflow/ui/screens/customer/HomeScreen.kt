@@ -2,8 +2,11 @@ package com.example.foodflow.ui.screens.customer
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -31,7 +34,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.foodflow.data.model.AppUser
 import com.example.foodflow.data.model.MenuItem
-import com.example.foodflow.ui.components.customer.FoodCard
+import com.example.foodflow.data.model.MenuItemCategory
+import com.example.foodflow.data.model.Promotion
+import com.example.foodflow.ui.components.customer.CategoryCard
+import com.example.foodflow.ui.components.customer.CustomerMenuItemCard
+import com.example.foodflow.ui.components.customer.PromotionBannerCard
 import com.example.foodflow.ui.components.customer.RestaurantCard
 import com.example.foodflow.ui.navigation.Route
 import com.example.foodflow.ui.state.AuthState
@@ -48,6 +55,8 @@ fun HomeScreen(
 ) {
     val newlyAddedItems by customerViewModel.newlyAddedItems.collectAsState()
     val restaurants by customerViewModel.restaurants.collectAsState()
+    val categories by customerViewModel.categories.collectAsState()
+    val promotions by customerViewModel.promotions.collectAsState()
     val isLoading by customerViewModel.isLoading.collectAsState()
     val authState by authViewModel.authState.collectAsState()
 
@@ -63,31 +72,48 @@ fun HomeScreen(
     }
 
     CustomerHomeContent(
+        categories = categories,
+        promotions = promotions,
         newlyAddedItems = newlyAddedItems,
         restaurants = restaurants,
         isLoading = isLoading,
         cartItemCount = cartItemCount,
         onLogoutClick = { authViewModel.logout() },
+        onCategoryClick = { categoryId, categoryName ->
+            navController.navigate(Route.BrowseByCategory.createRoute(categoryId, categoryName))
+        },
+        onPromoClick = { menuItemId ->
+            if (menuItemId.isNotEmpty()) {
+                navController.navigate(Route.MenuItemDetail.createRoute(menuItemId))
+            }
+        },
+        onMenuItemClick = { menuItemId ->
+            navController.navigate(Route.MenuItemDetail.createRoute(menuItemId))
+        },
+        onAddToCartClick = { item -> cartViewModel.addItemToCart(item) },
         onRestaurantClick = { restaurantId ->
             navController.navigate(Route.RestaurantDetail.createRoute(restaurantId))
         },
-        onNavigateToProfile = { navController.navigate(Route.Profile.route) },
-        onNavigateToApply = { navController.navigate(Route.Apply.route) }
+        onNavigateToProfile = { navController.navigate(Route.Profile.route) }
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CustomerHomeContent(
+    categories: List<MenuItemCategory>,
+    promotions: List<Promotion>,
     newlyAddedItems: List<MenuItem>,
     restaurants: List<AppUser>,
     isLoading: Boolean,
     cartItemCount: Int,
     onLogoutClick: () -> Unit,
+    onCategoryClick: (String, String) -> Unit,
+    onPromoClick: (String) -> Unit,
+    onMenuItemClick: (String) -> Unit,
+    onAddToCartClick: (MenuItem) -> Unit,
     onRestaurantClick: (String) -> Unit,
-    onNavigateToProfile: () -> Unit,
-    onNavigateToApply: () -> Unit
-
+    onNavigateToProfile: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -102,68 +128,111 @@ fun CustomerHomeContent(
         }
     ) { paddingValues ->
         if (isLoading) {
-            // LOADING STATE
-            Box(
-                modifier = Modifier.fillMaxSize().padding(paddingValues),
-                contentAlignment = Alignment.Center
-            ) {
+            Box(modifier = Modifier.fillMaxSize().padding(paddingValues), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
         } else {
-            // LOADED STATE (Proceed as normal)
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
                     .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(24.dp),
+                contentPadding = PaddingValues(vertical = 16.dp)
             ) {
-                item {
-                    Text(
-                        "Newly Added",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(top = 8.dp)
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
+                // --- SECTION 1: CATEGORIES ---
+                if (categories.isNotEmpty()) {
+                    item {
+                        SectionHeader(title = "Browse Categories")
+                        Spacer(modifier = Modifier.height(8.dp))
 
-                    if (newlyAddedItems.isEmpty()) {
-                        Text("No new items yet.", style = MaterialTheme.typography.bodyMedium)
-                    } else {
+                        // 2-Column Grid Layout
+                        categories.chunked(2).forEach { rowCategories ->
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                rowCategories.forEach { category ->
+                                    CategoryCard(
+                                        category = category,
+                                        onClick = { onCategoryClick(category.id, category.name) },
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                }
+                                // If the row has only 1 item, fill the remaining space
+                                if (rowCategories.size < 2) {
+                                    Spacer(modifier = Modifier.weight(1f))
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(12.dp))
+                        }
+                    }
+                }
+
+                // --- SECTION 2: PROMOTIONS ---
+                if (promotions.isNotEmpty()) {
+                    item {
+                        SectionHeader(title = "Deals For You")
+                        Spacer(modifier = Modifier.height(8.dp))
+
                         LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            items(newlyAddedItems) { item ->
-                                FoodCard(item = item)
+                            items(promotions) { promo ->
+                                PromotionBannerCard(
+                                    promotion = promo,
+                                    onClick = { onPromoClick(promo.menuItemId) }
+                                )
                             }
                         }
                     }
                 }
 
+                // --- SECTION 3: NEWLY ADDED ---
                 item {
-                    Text(
-                        "Restaurants",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(top = 8.dp)
-                    )
+                    SectionHeader(title = "Newly Added")
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
+                if (newlyAddedItems.isEmpty()) {
+                    item { Text("No new items yet.", style = MaterialTheme.typography.bodyMedium) }
+                } else {
+                    items(newlyAddedItems) { item ->
+                        CustomerMenuItemCard(
+                            item = item,
+                            onItemClick = { onMenuItemClick(item.id) },
+                            onAddToCartClick = { onAddToCartClick(item) }
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                    }
+                }
+
+                // --- SECTION 4: RESTAURANTS ---
+                item {
+                    SectionHeader(title = "Restaurants")
                     Spacer(modifier = Modifier.height(8.dp))
                 }
 
                 if (restaurants.isEmpty()) {
-                    item {
-                        Text(
-                            "No restaurants available.",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
+                    item { Text("No restaurants available.", style = MaterialTheme.typography.bodyMedium) }
                 } else {
                     items(restaurants) { restaurant ->
                         RestaurantCard(
                             restaurant = restaurant,
                             onClick = { onRestaurantClick(restaurant.uid) }
                         )
+                        Spacer(modifier = Modifier.height(8.dp))
                     }
                 }
             }
         }
     }
+}
+
+// Reusable Section Header Composable
+@Composable
+private fun SectionHeader(title: String) {
+    Text(
+        text = title,
+        style = MaterialTheme.typography.titleLarge,
+        fontWeight = FontWeight.Bold
+    )
 }

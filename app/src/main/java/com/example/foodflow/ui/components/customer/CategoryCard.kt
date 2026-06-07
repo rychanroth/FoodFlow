@@ -26,10 +26,11 @@ import com.example.foodflow.data.model.MenuItemCategory
 @Composable
 fun CategoryCard(
     category: MenuItemCategory,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clickable { onClick() },
         shape = MaterialTheme.shapes.medium,

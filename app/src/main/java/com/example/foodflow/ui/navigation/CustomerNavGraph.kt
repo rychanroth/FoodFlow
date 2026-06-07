@@ -10,6 +10,7 @@ import androidx.navigation.navigation
 import com.example.foodflow.ui.screens.common.MenuItemDetailScreen
 import com.example.foodflow.ui.screens.common.OrderDetailScreen
 import com.example.foodflow.ui.screens.common.ProfileScreen
+import com.example.foodflow.ui.screens.customer.BrowseByCategoryScreen
 import com.example.foodflow.ui.screens.customer.CartScreen
 import com.example.foodflow.ui.screens.customer.HomeScreen
 import com.example.foodflow.ui.screens.customer.OrdersScreen
@@ -42,6 +43,24 @@ fun NavGraphBuilder.customerGraph(
         composable(Route.CustomerSearch.route) {
             SearchScreen(navController = navController)
         }
+        composable(
+            route = Route.BrowseByCategory.route,
+            arguments = listOf(
+                navArgument("categoryId") { type = NavType.StringType },
+                navArgument("categoryName") {
+                    type = NavType.StringType
+                    defaultValue = "" // Required because it's an optional query parameter
+                }
+            )
+        ) {
+            BrowseByCategoryScreen(
+                onBackClick = { navController.popBackStack() },
+                onMenuItemClick = { menuItemId ->
+                    navController.navigate(Route.MenuItemDetail.createRoute(menuItemId))
+                },
+                onAddToCartClick = { item -> cartViewModel.addItemToCart(item) }
+            )
+        }
 
         composable(
             route = Route.RestaurantDetail.route,
@@ -49,6 +68,7 @@ fun NavGraphBuilder.customerGraph(
         ) { backStackEntry ->
             val restaurantId = backStackEntry.arguments?.getString("restaurantId") ?: ""
             RestaurantDetailScreen(
+                navController = navController,
                 restaurantId = restaurantId,
                 restaurantName = "Restaurant Menu",
                 onBackClick = { navController.popBackStack() },
