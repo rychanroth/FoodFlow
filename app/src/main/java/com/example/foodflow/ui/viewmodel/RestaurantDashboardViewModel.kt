@@ -4,6 +4,7 @@ import android.app.Application
 import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.foodflow.data.model.MenuItem
 import com.example.foodflow.data.model.Order
 import com.example.foodflow.data.model.OrderStatus
 import com.example.foodflow.data.model.Promotion
@@ -36,18 +37,28 @@ class RestaurantDashboardViewModel(application: Application) : AndroidViewModel(
     private val _promoState = MutableStateFlow<SubmitPromoState>(SubmitPromoState.Idle)
     val promoState: StateFlow<SubmitPromoState> = _promoState.asStateFlow()
 
-    fun submitPromotion(restaurantId: String, imageUri: Uri) {
+    // NEW V3: Fetch this restaurant's menu items for the dialog dropdown
+    private val _menuItems = MutableStateFlow<List<MenuItem>>(emptyList())
+    val menuItems: StateFlow<List<MenuItem>> = _menuItems.asStateFlow()
+
+    fun loadMenuItems(restaurantId: String) {
+        viewModelScope.launch {
+            menuRepository.getMenuItems(restaurantId).collect { _menuItems.value = it }
+        }
+    }
+
+    // Updated to include menuItemId
+    fun submitPromotion(restaurantId: String, menuItemId: String, imageUri: Uri) {
         viewModelScope.launch {
             _promoState.value = SubmitPromoState.Loading
 
-            // 1. Upload image using our shared ImageUploader
             val uploadResult = ImageUploader.upload(imageUri, getApplication())
 
             if (uploadResult.isSuccess) {
                 val imageUrl = uploadResult.getOrNull()!!
-                // 2. Create Promotion document (isActive = false, awaits Admin approval)
                 val newPromotion = Promotion(
                     restaurantId = restaurantId,
+                    menuItemId = menuItemId, // Save the linked item
                     imageUrl = imageUrl,
                     isActive = false
                 )
