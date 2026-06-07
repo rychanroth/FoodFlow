@@ -71,6 +71,8 @@ fun RestaurantDashboardScreen(
     val pendingOrdersCount by viewModel.pendingOrdersCount.collectAsState()
     val todaysOrders by viewModel.todaysOrders.collectAsState()
 
+    val menuItems by viewModel.menuItems.collectAsState() // NEW
+
     // Promotion State
     val promoState by viewModel.promoState.collectAsState()
     var showPromoDialog by remember { mutableStateOf(false) }
@@ -82,6 +84,13 @@ fun RestaurantDashboardScreen(
         uri?.let {
             promoImageUri = it
             showPromoDialog = true // Open dialog once image is picked
+        }
+    }
+    // Load menu items alongside dashboard data
+    LaunchedEffect(restaurantId) {
+        restaurantId?.let { id ->
+            viewModel.loadDashboard(id)
+            viewModel.loadMenuItems(id) // NEW
         }
     }
 
@@ -108,6 +117,7 @@ fun RestaurantDashboardScreen(
     if (showPromoDialog && restaurantId != null) {
         PromotionDialog(
             imageUri = promoImageUri,
+            menuItems = menuItems,
             state = promoState,
             onDismiss = {
                 showPromoDialog = false
@@ -115,7 +125,9 @@ fun RestaurantDashboardScreen(
                 viewModel.resetPromoState()
             },
             onPickImage = { galleryLauncher.launch("image/*") },
-            onSubmit = { viewModel.submitPromotion(restaurantId, it) }
+            onSubmit = { menuItemId, imageUri -> // UPDATED
+                viewModel.submitPromotion(restaurantId, menuItemId, imageUri)
+            }
         )
     }
 

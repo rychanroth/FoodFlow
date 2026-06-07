@@ -49,7 +49,7 @@ fun AdminDashboardScreen(
     val promotions by adminViewModel.promotions.collectAsState()
     AdminDashboardContent(
         onLogoutClick = { authViewModel.logout() },
-        pendingPromotions = promotions.filter { !it.isActive },
+        pendingPromotions = promotions.filter { !it.isActive && !it.isRejected }, // ✅ Exclude rejected
         onApprovePromotion = { adminViewModel.approvePromotion(it) },
         onRejectPromotion = { adminViewModel.rejectPromotion(it) },
         onNavigateToCategories = { navController.navigate(Route.AdminCategories.route) }

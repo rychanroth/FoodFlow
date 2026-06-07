@@ -1,5 +1,7 @@
 package com.example.foodflow.data.model
 
+import com.google.firebase.firestore.PropertyName
+
 data class MenuItem(
     val id: String = "",
     val restaurantId: String = "",
@@ -9,6 +11,9 @@ data class MenuItem(
     val price: Double = 0.0,
     val imageUrl: String = "",
     val estimatedPrepTime: Int = 0, // NEW V3 (in minutes)
-    val isActive: Boolean = true,   // NEW V3: Availability toggle
+    // ✅ Force Firebase to use "isActive" instead of "active"
+    @get:PropertyName("isActive")
+    @set:PropertyName("isActive")
+    var isActive: Boolean = false,
     val createdAt: Long = System.currentTimeMillis()
 )

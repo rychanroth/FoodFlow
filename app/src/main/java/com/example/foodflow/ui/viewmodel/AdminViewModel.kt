@@ -76,10 +76,15 @@ class AdminViewModel(application: Application) : AndroidViewModel(application) {
 
     // --- Promotions ---
     fun approvePromotion(promotion: Promotion) {
-        viewModelScope.launch { menuRepository.updatePromotion(promotion.copy(isActive = true)) }
+        viewModelScope.launch {
+            menuRepository.updatePromotion(promotion.copy(isActive = true, isRejected = false))
+        }
     }
 
     fun rejectPromotion(promotion: Promotion) {
-        viewModelScope.launch { menuRepository.updatePromotion(promotion.copy(isActive = false)) }
+        viewModelScope.launch {
+            // Set isRejected to true so it leaves the pending list!
+            menuRepository.updatePromotion(promotion.copy(isRejected = true, isActive = false))
+        }
     }
 }
