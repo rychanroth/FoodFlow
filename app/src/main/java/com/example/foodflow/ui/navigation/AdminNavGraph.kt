@@ -24,7 +24,7 @@ fun NavGraphBuilder.adminGraph(
             DashboardScreen(authViewModel)
         }
         composable(Route.AdminApplications.route) {
-            ApplicationScreen()
+            ApplicationScreen(navController)
         }
         composable(Route.AdminSettings.route) {
             SettingsScreen()
