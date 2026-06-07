@@ -1,5 +1,7 @@
 package com.example.foodflow.data.repository
 
+import android.content.Context
+import android.net.Uri
 import com.example.foodflow.data.model.AppUser
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
@@ -25,5 +27,9 @@ class ProfileRepository {
         } catch (e: Exception) {
             Result.failure(e)
         }
+    }
+
+    suspend fun uploadImage(uri: Uri, context: Context): Result<String> {
+        return ImageUploader.upload(uri, context)
     }
 }

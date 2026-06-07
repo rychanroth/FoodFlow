@@ -3,9 +3,9 @@ package com.example.foodflow.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.foodflow.data.model.AppUser
-import com.example.foodflow.ui.state.AuthState
 import com.example.foodflow.data.model.UserRole
 import com.example.foodflow.data.repository.AuthRepository
+import com.example.foodflow.ui.state.AuthState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -130,6 +130,17 @@ class AuthViewModel : ViewModel() {
                 _authState.value = AuthState.Error(result.exceptionOrNull()?.message ?: "Unknown error")
             }
         }
+    }
+
+    suspend fun refreshCurrentUser(): AppUser? {
+        val uid = repository.currentUserId ?: return null
+        val result = repository.getCurrentAppUser(uid)
+        if (result.isSuccess) {
+            val user = result.getOrNull()
+            _currentUser.value = user
+            return user
+        }
+        return null
     }
 
     fun logout() {

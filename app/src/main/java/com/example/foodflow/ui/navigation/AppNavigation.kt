@@ -16,18 +16,18 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.foodflow.ui.state.AuthState
 import com.example.foodflow.data.model.UserRole
-import com.example.foodflow.ui.navigation.Route
 import com.example.foodflow.ui.components.bottombar.AdminBottomBar
 import com.example.foodflow.ui.components.bottombar.CustomerBottomBar
 import com.example.foodflow.ui.components.bottombar.DriverBottomBar
 import com.example.foodflow.ui.components.bottombar.RestaurantBottomBar
+import com.example.foodflow.ui.screens.auth.OnboardingScreen
+import com.example.foodflow.ui.state.AuthState
 import com.example.foodflow.ui.viewmodel.AuthViewModel
 import com.example.foodflow.ui.viewmodel.CartViewModel
-import com.example.foodflow.ui.viewmodel.CustomerOrdersViewModel
 import com.example.foodflow.ui.viewmodel.SettingsViewModel
 
 @Composable
@@ -35,10 +35,10 @@ fun AppNavigation(
     navController: NavHostController = rememberNavController(),
     authViewModel: AuthViewModel = viewModel(),
     settingsViewModel: SettingsViewModel = viewModel(),
-    customerOrdersViewModel: CustomerOrdersViewModel = viewModel(),
     modifier: Modifier = Modifier
 ) {
     val authState by authViewModel.authState.collectAsState()
+    val user by authViewModel.currentUser.collectAsState()
 
     // V2 FIX: Scope CartViewModel to the Activity so it's shared across all screens in CustomerNavGraph!
     val cartViewModel: CartViewModel = viewModel(LocalActivity.current as ComponentActivity)
@@ -52,17 +52,21 @@ fun AppNavigation(
     // Determine start destination based purely on Auth State
     val startDestination = when (authState) {
         is AuthState.Success -> {
-            val role = (authState as AuthState.Success).role
-            when (role) {
-                UserRole.CUSTOMER -> Route.CustomerGraph.route
-                UserRole.RESTAURANT -> Route.RestaurantGraph.route
-                UserRole.DRIVER -> Route.DriverGraph.route
-                UserRole.ADMIN -> Route.AdminGraph.route
-                else -> Route.CustomerGraph.route
+            if (user?.isProfileComplete == false) {
+                Route.Onboarding.route
+            } else {
+                val role = (authState as AuthState.Success).role
+                when (role) {
+                    UserRole.CUSTOMER -> Route.CustomerGraph.route
+                    UserRole.RESTAURANT -> Route.RestaurantGraph.route
+                    UserRole.DRIVER -> Route.DriverGraph.route
+                    UserRole.ADMIN -> Route.AdminGraph.route
+                    else -> Route.CustomerGraph.route
+                }
             }
         }
-        is AuthState.Loading -> null // We don't know yet, show a spinner
-        else -> Route.AuthGraph.route // Idle, Error, PasswordReset -> Show Auth
+        is AuthState.Loading -> null
+        else -> Route.AuthGraph.route
     }
 
     if (startDestination == null) {
@@ -101,6 +105,9 @@ fun AppNavigation(
             startDestination = startDestination,
             modifier = modifier.padding(paddingValues)
         ) {
+            composable(Route.Onboarding.route) {
+                OnboardingScreen(navController, authViewModel)
+            }
             // Delegating all screen routing to their respective graphs!
             authGraph(navController, authViewModel)
             customerGraph(navController, authViewModel, cartViewModel, settingsViewModel)

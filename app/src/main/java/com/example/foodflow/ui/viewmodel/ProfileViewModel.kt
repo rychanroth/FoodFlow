@@ -4,18 +4,12 @@ import android.app.Application
 import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.foodflow.data.model.AppUser
 import com.example.foodflow.data.repository.MenuRepository
 import com.example.foodflow.data.repository.ProfileRepository
+import com.example.foodflow.ui.state.ProfileState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-
-sealed interface ProfileState {
-    data object Loading : ProfileState
-    data class Success(val user: AppUser) : ProfileState
-    data class Error(val message: String) : ProfileState
-}
 
 class ProfileViewModel(application: Application) : AndroidViewModel(application) {
 
