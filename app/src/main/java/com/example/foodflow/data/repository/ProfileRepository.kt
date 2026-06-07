@@ -41,4 +41,16 @@ class ProfileRepository(private val context: Context) {
     suspend fun toggleFavorite(itemId: String) {
         userPreferences.toggleFavorite(itemId)
     }
+
+    // NEW: Specific update for addresses array
+    suspend fun updateAddresses(userId: String, addresses: List<Map<String, Any>>): Result<Unit> {
+        return try {
+            firestore.collection("users").document(userId)
+                .update("addresses", addresses)
+                .await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

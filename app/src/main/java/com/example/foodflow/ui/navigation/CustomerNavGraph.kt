@@ -10,8 +10,9 @@ import androidx.navigation.navigation
 import com.example.foodflow.ui.screens.common.MenuItemDetailScreen
 import com.example.foodflow.ui.screens.common.OrderDetailScreen
 import com.example.foodflow.ui.screens.common.ProfileScreen
-import com.example.foodflow.ui.screens.customer.CatalogScreen
 import com.example.foodflow.ui.screens.customer.CartScreen
+import com.example.foodflow.ui.screens.customer.CatalogScreen
+import com.example.foodflow.ui.screens.customer.FavoritesScreen
 import com.example.foodflow.ui.screens.customer.HomeScreen
 import com.example.foodflow.ui.screens.customer.OrdersScreen
 import com.example.foodflow.ui.screens.customer.PaymentInstructionScreen
@@ -41,7 +42,10 @@ fun NavGraphBuilder.customerGraph(
         }
 
         composable(Route.CustomerSearch.route) {
-            SearchScreen(navController = navController)
+            SearchScreen(
+                navController = navController,
+                cartViewModel = cartViewModel
+            )
         }
         composable(
             route = Route.Catalog.route,
@@ -111,9 +115,16 @@ fun NavGraphBuilder.customerGraph(
             OrderDetailScreen(navController = navController)
         }
 
-
         composable(Route.Profile.route) {
             ProfileScreen(navController, authViewModel)
+        }
+        composable(Route.Favorites.route) {
+            FavoritesScreen(
+                onBackClick = { navController.popBackStack() },
+                onMenuItemClick = { menuItemId ->
+                    navController.navigate(Route.MenuItemDetail.createRoute(menuItemId))
+                }
+            )
         }
     }
 }

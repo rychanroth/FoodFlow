@@ -5,6 +5,7 @@ import android.net.Uri
 import com.example.foodflow.data.model.MenuItem
 import com.example.foodflow.data.model.MenuItemCategory
 import com.example.foodflow.data.model.Promotion
+import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import kotlinx.coroutines.channels.awaitClose
@@ -65,6 +66,33 @@ class MenuRepository {
                 trySend(items)
             }
         awaitClose { subscription.remove() }
+    }
+
+    suspend fun getMenuItemsByIds(itemIds: List<String>): Result<List<MenuItem>> {
+        return try {
+            if (itemIds.isEmpty()) {
+                Result.success(emptyList())
+            } else {
+                // Firestore 'in' queries support a maximum of 30 items in the array
+                val batchedIds = itemIds.chunked(30)
+                val allItems = mutableListOf<MenuItem>()
+
+                for (batch in batchedIds) {
+                    val snapshot = menuCollection
+                        .whereIn(FieldPath.documentId(), batch)
+                        .get()
+                        .await()
+
+                    val items = snapshot.documents.mapNotNull { doc ->
+                        try { doc.toObject(MenuItem::class.java)?.copy(id = doc.id) } catch (e: Exception) { null }
+                    }
+                    allItems.addAll(items)
+                }
+                Result.success(allItems)
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
     // NEW V3: Browse by Category

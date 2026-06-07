@@ -33,9 +33,10 @@ import com.example.foodflow.data.model.UserRole
 import com.example.foodflow.ui.components.common.PreferencesSection
 import com.example.foodflow.ui.components.common.ProfileHeader
 import com.example.foodflow.ui.components.common.RolesSection
+import com.example.foodflow.ui.components.customer.FavoritesNavigationRow
 import com.example.foodflow.ui.navigation.Route
-import com.example.foodflow.ui.state.RoleApplyState
 import com.example.foodflow.ui.state.ProfileState
+import com.example.foodflow.ui.state.RoleApplyState
 import com.example.foodflow.ui.viewmodel.ApplicationViewModel
 import com.example.foodflow.ui.viewmodel.AuthViewModel
 import com.example.foodflow.ui.viewmodel.ProfileViewModel
@@ -80,7 +81,8 @@ fun ProfileScreen(
         onLogout = {
             authViewModel.logout()
             navController.navigate(Route.AuthGraph.route) { popUpTo(0) }
-        }
+        },
+        onNavigateToFavorites = { navController.navigate(Route.Favorites.route) }
     )
 }
 
@@ -100,6 +102,7 @@ fun ProfileContent(
     onSubmitApplication: (UserRole, String) -> Unit,
     onResetApplyState: () -> Unit,
     onLogout: () -> Unit,
+    onNavigateToFavorites: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -141,6 +144,8 @@ fun ProfileContent(
                         onAvatarChange = onAvatarChange,
                         onUpdateProfile = onUpdateProfile
                     )
+
+                    FavoritesNavigationRow(onClick = onNavigateToFavorites)
 
                     // 2. App Preferences
                     PreferencesSection(
