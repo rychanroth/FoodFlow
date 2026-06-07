@@ -32,24 +32,23 @@ class MenuRepository {
         awaitClose { subscription.remove() }
     }
 
-    fun getMenuItemById(menuItemId: String): Flow<MenuItem> = callbackFlow {
-        val subscription = menuCollection.document(menuItemId)
-            .addSnapshotListener { snapshot, error ->
-                if (error != null) { close(error); return@addSnapshotListener }
-
-                val item = try {
-                    snapshot?.toObject(MenuItem::class.java)?.copy(id = snapshot.id)
-                } catch (e: Exception) {
-                    null
-                }
-
-                if (item != null) {
-                    trySend(item)
-                } else {
-                    close(Exception("Menu item not found"))
-                }
+    fun getMenuItemById(id: String): Flow<MenuItem?> = callbackFlow {
+        val docRef = firestore.collection("menu_items").document(id)
+        val listener = docRef.addSnapshotListener { snapshot, error ->
+            if (error != null) {
+                close(error)
+                return@addSnapshotListener
             }
-        awaitClose { subscription.remove() }
+
+            if (snapshot != null && snapshot.exists()) {
+                val item = snapshot.toObject(MenuItem::class.java)?.copy(id = snapshot.id)
+                trySend(item)
+            } else {
+                // ✅ Send null instead of throwing an exception
+                trySend(null)
+            }
+        }
+        awaitClose { listener.remove() }
     }
 
     // NEW V3: Customer query - ONLY active items

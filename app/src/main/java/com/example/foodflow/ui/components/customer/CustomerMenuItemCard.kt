@@ -35,12 +35,13 @@ import com.example.foodflow.data.model.MenuItem
 fun CustomerMenuItemCard(
     item: MenuItem,
     onItemClick: () -> Unit,
-    onAddToCartClick: () -> Unit
+    onAddToCartClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val isAvailable = item.isActive
 
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clickable(enabled = isAvailable) { onItemClick() }, // ✅ Disable click if inactive
         shape = MaterialTheme.shapes.medium,
