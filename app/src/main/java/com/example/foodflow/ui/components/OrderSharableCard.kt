@@ -3,14 +3,18 @@ package com.example.foodflow.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.example.foodflow.data.model.Order
 import com.example.foodflow.data.model.OrderItem
 
@@ -48,14 +52,8 @@ fun OrderShareableCard(
         HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = Color.LightGray)
 
         // Items
-        if (order.items.isEmpty()) {
-            order.itemNames.forEach { name ->
-                Text(text = "• $name", color = Color.Black, style = MaterialTheme.typography.bodyMedium)
-            }
-        } else {
-            order.items.forEach { item ->
-                OrderItemRow(item, textColor = Color.Black)
-            }
+        order.items.forEach { item ->
+            OrderItemRow(item, textColor = Color.Black)
         }
 
         HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = Color.LightGray)
@@ -93,9 +91,30 @@ fun DetailRow(label: String, value: String, labelColor: Color = MaterialTheme.co
 fun OrderItemRow(item: OrderItem, textColor: Color = MaterialTheme.colorScheme.onSurface) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = "${item.quantity}x ${item.name}", style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f), color = textColor)
-        Text(text = "$${"%.2f".format(item.price * item.quantity)}", style = MaterialTheme.typography.bodyMedium, color = textColor)
+        // Optional: Thumbnail
+        if (item.imageUrl.isNotBlank()) {
+            AsyncImage(
+                model = item.imageUrl,
+                contentDescription = item.name,
+                modifier = Modifier.size(32.dp).clip(RoundedCornerShape(4.dp)),
+                contentScale = ContentScale.Crop
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+        }
+
+        Text(
+            text = "${item.quantity}x ${item.name}",
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.weight(1f),
+            color = textColor
+        )
+        Text(
+            text = "$${"%.2f".format(item.price * item.quantity)}",
+            style = MaterialTheme.typography.bodyMedium,
+            color = textColor
+        )
     }
 }

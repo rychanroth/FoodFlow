@@ -8,6 +8,7 @@ import com.example.foodflow.data.model.CartItem
 import com.example.foodflow.ui.state.CheckoutState
 import com.example.foodflow.data.model.MenuItem
 import com.example.foodflow.data.model.Order
+import com.example.foodflow.data.model.OrderItem
 import com.example.foodflow.data.model.OrderStatus
 import com.example.foodflow.data.model.PaymentMethod
 import com.example.foodflow.data.model.PlatformSettings
@@ -106,59 +107,30 @@ class CartViewModel : ViewModel() {
         if (currentItems.isEmpty()) return
 
         viewModelScope.launch {
-            _checkoutState.value = CheckoutState.Loading // Use new state
-
-            // 1. Fetch Live Platform Settings
-            // Refactor: use the init block settings state
-            val settings = _settings.value
-
-            // 2. Calculate the Economics
-            val subtotal = getTotalPrice()
-            val deliveryFee = settings.deliveryFee
-            val platformFee = settings.platformFlatFee
-            val totalAmount = subtotal + deliveryFee + platformFee
-
-            val restaurantEarnings = subtotal - (subtotal * settings.platformCommissionRate)
-            val driverEarnings = deliveryFee * settings.driverCommissionRate
-            val platformEarnings = (subtotal * settings.platformCommissionRate) + (deliveryFee * (1 - settings.driverCommissionRate)) + platformFee
+            _checkoutState.value = CheckoutState.Loading
 
             val restaurantId = currentItems.first().menuItem.restaurantId
-            val itemNames = currentItems.map { it.menuItem.name }
+            val settings = _settings.value
 
-            // Update state
+            // Update state for UI
             lastPaymentMethod = paymentMethod
-            lastOrderTotal = totalAmount
+            lastOrderTotal = currentItems.sumOf { it.menuItem.price * it.quantity } + settings.deliveryFee + settings.platformFlatFee
 
-            // V2 LOGIC: Set status based on payment method
-            val initialStatus = if (paymentMethod == PaymentMethod.BANK_TRANSFER) {
-                OrderStatus.PENDING_PAYMENT_VERIFICATION
-            } else {
-                OrderStatus.PLACED
-            }
-
-            val newOrder = Order(
+            // Delegate everything to the Repository
+            val result = repository.placeOrder(
                 customerId = currentUserId,
                 restaurantId = restaurantId,
-                itemNames = itemNames,
-                status = initialStatus,
+                cartItems = currentItems,
                 paymentMethod = paymentMethod,
-                subtotal = subtotal,
-                deliveryFee = deliveryFee,
-                platformFee = platformFee,
-                totalAmount = totalAmount,
-                restaurantEarnings = restaurantEarnings,
-                driverEarnings = driverEarnings,
-                platformEarnings = platformEarnings
+                platformSettings = settings
             )
 
-            // 4. Save to Firestore
-            val result = repository.placeOrder(newOrder)
             if (result.isSuccess) {
                 lastOrderId = result.getOrNull()
                 clearCart()
-                _checkoutState.value = CheckoutState.Success // Use new state
+                _checkoutState.value = CheckoutState.Success
             } else {
-                _checkoutState.value = CheckoutState.Error(result.exceptionOrNull()?.message ?: "Order failed") // Use new state
+                _checkoutState.value = CheckoutState.Error(result.exceptionOrNull()?.message ?: "Order failed")
             }
         }
     }

@@ -18,6 +18,7 @@ import coil.compose.AsyncImage
 import com.example.foodflow.data.model.Order
 import com.example.foodflow.data.model.OrderStatus
 import com.example.foodflow.ui.components.StatusBadge
+import com.example.foodflow.ui.components.restaurant.RestaurantOrderCard
 import com.example.foodflow.ui.viewmodel.RestaurantOrdersViewModel
 import com.google.firebase.auth.FirebaseAuth
 
@@ -85,7 +86,7 @@ fun RestaurantOrdersContent(
                 contentPadding = PaddingValues(vertical = 16.dp)
             ) {
                 items(orders, key = { it.id }) { order ->
-                    OrderCard(
+                    RestaurantOrderCard(
                         order = order,
                         onVerifyBankPaymentClick = { onVerifyBankPaymentClick(order.id)},
                         onAcceptClick = { onAcceptClick(order.id) },
@@ -98,97 +99,3 @@ fun RestaurantOrdersContent(
     }
 }
 
-@Composable
-fun OrderCard(
-    order: Order,
-    onVerifyBankPaymentClick: () -> Unit,
-    onAcceptClick: () -> Unit,
-    onRejectClick: () -> Unit,
-    onReadyClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            // Header
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text("Order #${order.id.takeLast(5)}", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                StatusBadge(status = order.status)
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Items list
-            Text("Items:", fontWeight = FontWeight.SemiBold)
-            order.itemNames.forEach { itemName ->
-                Text("- $itemName", style = MaterialTheme.typography.bodyMedium)
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-            Text("Total: $${"%.2f".format(order.totalAmount)}", style = MaterialTheme.typography.titleMedium)
-
-            if (order.transactionImageUrl != null) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text("Payment Proof:", fontWeight = FontWeight.SemiBold)
-                Spacer(modifier = Modifier.height(4.dp))
-                Column(
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    AsyncImage(
-                        model = order.transactionImageUrl,
-                        contentDescription = "Payment Proof",
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .clip(MaterialTheme.shapes.medium),
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Action Buttons based on Status
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
-            ) {
-                when (order.status) {
-                    OrderStatus.PENDING_PAYMENT_VERIFICATION -> {
-                        // NEW: Verify payment first
-                        Button(onClick = onVerifyBankPaymentClick ) {
-                            Text("Verify Payment")
-                        }
-                    }
-                    OrderStatus.PLACED -> {
-                        OutlinedButton(
-                            onClick = onRejectClick,
-                            colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
-                        ) {
-                            Text("Reject")
-                        }
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Button(onClick = onAcceptClick) {
-                            Text("Accept")
-                        }
-                    }
-                    OrderStatus.PREPARING -> {
-                        Button(onClick = onReadyClick) {
-                            Text("Mark Ready for Pickup")
-                        }
-                    }
-                    OrderStatus.READY -> {
-                        Text("Waiting for driver...", color = MaterialTheme.colorScheme.primary)
-                    }
-                    else -> {
-                        Text(order.status.name, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
-                }
-            }
-        }
-    }
-}

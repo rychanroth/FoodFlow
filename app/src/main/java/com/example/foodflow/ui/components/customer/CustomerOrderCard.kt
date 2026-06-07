@@ -44,11 +44,16 @@ fun CustomerOrderCard(
             Spacer(modifier = Modifier.height(8.dp))
 
             // Item Summary
-            val itemSummary = if (order.items.isNotEmpty()) {
-                order.items.joinToString(", ") { "${it.quantity}x ${it.name}" }
-            } else {
-                order.itemNames.joinToString(", ") // Fallback for V1 data
-            }
+            val itemSummary = order.items.take(3).joinToString(", ") {
+                "${it.quantity}x ${it.name}"
+            } + if (order.items.size > 3) "..." else ""
+
+            Text(
+                text = itemSummary,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 2
+            )
 
             Text(
                 text = itemSummary,
