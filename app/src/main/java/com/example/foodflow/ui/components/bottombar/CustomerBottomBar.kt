@@ -13,7 +13,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.foodflow.ui.Route
+import com.example.foodflow.ui.navigation.Route
 
 @Composable
 fun CustomerBottomBar(

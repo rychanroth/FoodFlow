@@ -1,4 +1,4 @@
-package com.example.foodflow.ui.components
+package com.example.foodflow.ui.components.customer
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer

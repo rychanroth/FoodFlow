@@ -14,7 +14,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.asAndroidBitmap
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.platform.LocalContext
@@ -23,7 +22,7 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.foodflow.data.model.Order
-import com.example.foodflow.ui.components.OrderShareableCard
+import com.example.foodflow.ui.components.common.OrderShareableCard
 import com.example.foodflow.ui.viewmodel.OrderDetailViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

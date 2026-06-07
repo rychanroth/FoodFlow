@@ -10,9 +10,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.foodflow.data.model.Order
+import com.example.foodflow.data.model.OrderItem
 import com.example.foodflow.data.model.OrderStatus
-import com.example.foodflow.ui.components.OrderStatusTracker
-import com.example.foodflow.ui.components.StatusBadge
+import com.example.foodflow.ui.components.common.OrderStatusTracker
+import com.example.foodflow.ui.components.common.OrderStatusBadge
 
 @Composable
 fun CustomerOrderCard(
@@ -38,7 +39,7 @@ fun CustomerOrderCard(
                     fontWeight = FontWeight.Bold,
                     maxLines = 1
                 )
-                StatusBadge(status = order.status)
+                OrderStatusBadge(status = order.status)
             }
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -47,13 +48,6 @@ fun CustomerOrderCard(
             val itemSummary = order.items.take(3).joinToString(", ") {
                 "${it.quantity}x ${it.name}"
             } + if (order.items.size > 3) "..." else ""
-
-            Text(
-                text = itemSummary,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 2
-            )
 
             Text(
                 text = itemSummary,
@@ -73,6 +67,7 @@ fun CustomerOrderCard(
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
+                Spacer(modifier = Modifier.height(6.dp))
 
                 // Only show the step tracker for active orders to save space
                 if (order.status != OrderStatus.DELIVERED && order.status != OrderStatus.REJECTED) {
@@ -87,7 +82,15 @@ fun CustomerOrderCard(
 @Composable
 fun CustomerOrderCardPreview() {
     CustomerOrderCard(
-        order = TODO(),
-        onClick = TODO()
+        order = Order(
+            restaurantName = "Pizza Palace",
+            status = OrderStatus.ON_THE_WAY ,
+            items = listOf(
+                OrderItem(name = "Margherita Pizza", quantity = 1),
+                OrderItem(name = "Garlic Knots", quantity = 2)
+            ),
+            totalAmount = 24.50
+        ),
+        onClick = {}
     )
 }

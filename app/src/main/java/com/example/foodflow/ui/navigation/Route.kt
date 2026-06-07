@@ -1,4 +1,4 @@
-package com.example.foodflow.ui
+package com.example.foodflow.ui.navigation
 
 sealed class Route(val route: String) {
     // Graph Routes (The Neighborhoods)

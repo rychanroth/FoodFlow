@@ -9,15 +9,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
 import com.example.foodflow.data.model.Order
-import com.example.foodflow.data.model.OrderStatus
-import com.example.foodflow.ui.components.StatusBadge
 import com.example.foodflow.ui.components.restaurant.RestaurantOrderCard
 import com.example.foodflow.ui.viewmodel.RestaurantOrdersViewModel
 import com.google.firebase.auth.FirebaseAuth

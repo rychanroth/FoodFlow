@@ -4,7 +4,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
-import com.example.foodflow.ui.Route
+import com.example.foodflow.ui.navigation.Route
 import com.example.foodflow.ui.screens.admin.ApplicationScreen
 import com.example.foodflow.ui.screens.admin.DashboardScreen
 import com.example.foodflow.ui.screens.admin.SettingsScreen

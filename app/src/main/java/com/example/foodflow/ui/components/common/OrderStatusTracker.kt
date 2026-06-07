@@ -1,4 +1,4 @@
-package com.example.foodflow.ui.components
+package com.example.foodflow.ui.components.common
 
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState

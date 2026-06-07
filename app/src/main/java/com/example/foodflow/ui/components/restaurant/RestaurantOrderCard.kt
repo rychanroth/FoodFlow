@@ -8,13 +8,9 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -24,8 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.foodflow.data.model.Order
-import com.example.foodflow.data.model.OrderStatus
-import com.example.foodflow.ui.components.StatusBadge
+import com.example.foodflow.ui.components.common.OrderStatusBadge
 
 @Composable
 fun RestaurantOrderCard(
@@ -46,7 +41,7 @@ fun RestaurantOrderCard(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text("Order #${order.id.takeLast(5)}", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                StatusBadge(status = order.status)
+                OrderStatusBadge(status = order.status, isCustomerView = false)
             }
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -91,37 +86,13 @@ fun RestaurantOrderCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
             ) {
-                when (order.status) {
-                    OrderStatus.PENDING_PAYMENT_VERIFICATION -> {
-                        // NEW: Verify payment first
-                        Button(onClick = onVerifyBankPaymentClick ) {
-                            Text("Verify Payment")
-                        }
-                    }
-                    OrderStatus.PLACED -> {
-                        OutlinedButton(
-                            onClick = onRejectClick,
-                            colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
-                        ) {
-                            Text("Reject")
-                        }
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Button(onClick = onAcceptClick) {
-                            Text("Accept")
-                        }
-                    }
-                    OrderStatus.PREPARING -> {
-                        Button(onClick = onReadyClick) {
-                            Text("Mark Ready for Pickup")
-                        }
-                    }
-                    OrderStatus.READY -> {
-                        Text("Waiting for driver...", color = MaterialTheme.colorScheme.primary)
-                    }
-                    else -> {
-                        Text(order.status.name, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
-                }
+                RestaurantOrderCardActions(
+                    order = order,
+                    onVerifyBankPaymentClick = onVerifyBankPaymentClick,
+                    onAcceptClick = onAcceptClick,
+                    onRejectClick = onRejectClick,
+                    onReadyClick = onReadyClick
+                )
             }
         }
     }

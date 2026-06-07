@@ -7,7 +7,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
-import com.example.foodflow.ui.Route
+import com.example.foodflow.ui.navigation.Route
 import com.example.foodflow.ui.screens.common.OrderDetailScreen
 import com.example.foodflow.ui.screens.driver.HomeScreen
 import com.example.foodflow.ui.screens.common.SettingsScreen
