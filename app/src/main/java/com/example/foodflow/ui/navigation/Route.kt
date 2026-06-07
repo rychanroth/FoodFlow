@@ -1,5 +1,7 @@
 package com.example.foodflow.ui.navigation
 
+import android.net.Uri
+
 sealed class Route(val route: String) {
     // Graph Routes (The Neighborhoods)
     data object AuthGraph : Route("auth_graph")
@@ -21,6 +23,11 @@ sealed class Route(val route: String) {
 
     // Customer Screens
     data object CustomerHome : Route("customer_home")
+    data object BrowseByCategory : Route("browse_by_category/{categoryId}?categoryName={categoryName}") {
+        fun createRoute(categoryId: String, categoryName: String = ""): String {
+            return "browse_by_category/$categoryId?categoryName=${Uri.encode(categoryName)}"
+        }
+    }
     data object CustomerSearch : Route("customer_search")
     data object Cart : Route("cart")
     data object PaymentInstruction : Route("payment_instruction")
