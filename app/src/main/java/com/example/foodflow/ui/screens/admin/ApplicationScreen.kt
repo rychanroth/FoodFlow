@@ -29,8 +29,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.foodflow.data.model.Application
-import com.example.foodflow.ui.components.customer.ApplicationCard
+import com.example.foodflow.data.model.RoleApplication
+import com.example.foodflow.ui.components.customer.RoleApplicationCard
 import com.example.foodflow.ui.viewmodel.AdminViewModel
 
 @Composable
@@ -51,8 +51,8 @@ fun ApplicationScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ApplicationContent(
-    pendingApps: List<Application>,
-    onApprove: (Application) -> Unit,
+    pendingApps: List<RoleApplication>,
+    onApprove: (RoleApplication) -> Unit,
     onReject: (String) -> Unit,
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -103,7 +103,7 @@ fun ApplicationContent(
                 contentPadding = PaddingValues(vertical = 16.dp)
             ) {
                 items(pendingApps, key = { it.id }) { app ->
-                    ApplicationCard(
+                    RoleApplicationCard(
                         app = app,
                         onApprove = { onApprove(app) },
                         onReject = { onReject(app.id) }

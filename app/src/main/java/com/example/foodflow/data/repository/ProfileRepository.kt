@@ -9,8 +9,10 @@ import kotlinx.coroutines.tasks.await
 
 class ProfileRepository(private val context: Context) {
 
+    // Prevent memory leak by extracting the application context
+    private val appContext = context.applicationContext
     private val firestore = FirebaseFirestore.getInstance()
-    private val userPreferences = UserPreferences(context)
+    private val userPreferences = UserPreferences(appContext)
     val favoritesFlow: Flow<Set<String>> = userPreferences.favoritesFlow
 
     suspend fun getUserProfile(userId: String): Result<AppUser> {
@@ -32,8 +34,8 @@ class ProfileRepository(private val context: Context) {
         }
     }
 
-    suspend fun uploadImage(uri: Uri, context: Context): Result<String> {
-        return ImageUploader.upload(uri, context)
+    suspend fun uploadImage(uri: Uri, appContext: Context): Result<String> {
+        return ImageUploader.upload(uri, appContext)
     }
 
     suspend fun toggleFavorite(itemId: String) {

@@ -32,6 +32,7 @@ sealed class Route(val route: String) {
 
     // Restaurant Screens
     data object RestaurantHome : Route("restaurant_home")
+    data object AdminCategories : Route("admin_categories")
     data object RestaurantMenuManagement : Route("restaurant_menu_management")
     data object RestaurantOrders : Route("restaurant_orders")
 

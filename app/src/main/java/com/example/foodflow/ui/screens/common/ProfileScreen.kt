@@ -34,7 +34,7 @@ import com.example.foodflow.ui.components.common.PreferencesSection
 import com.example.foodflow.ui.components.common.ProfileHeader
 import com.example.foodflow.ui.components.common.RolesSection
 import com.example.foodflow.ui.navigation.Route
-import com.example.foodflow.ui.state.ApplyState
+import com.example.foodflow.ui.state.RoleApplyState
 import com.example.foodflow.ui.state.ProfileState
 import com.example.foodflow.ui.viewmodel.ApplicationViewModel
 import com.example.foodflow.ui.viewmodel.AuthViewModel
@@ -92,7 +92,7 @@ fun ProfileContent(
     currentUserId: String,
     themePreference: ThemePreference,
     dynamicColorEnabled: Boolean,
-    applyState: ApplyState,
+    applyState: RoleApplyState,
     onThemeChange: (ThemePreference) -> Unit,
     onDynamicColorChange: (Boolean) -> Unit,
     onAvatarChange: (Uri) -> Unit,

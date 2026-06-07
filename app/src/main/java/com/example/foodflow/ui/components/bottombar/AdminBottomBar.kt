@@ -2,6 +2,7 @@ package com.example.foodflow.ui.components.bottombar
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Assignment
+import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
@@ -38,6 +39,18 @@ fun AdminBottomBar(navController: NavController, currentRoute: String?) {
             onClick = {
                 if (currentRoute != Route.AdminApplications.route) {
                     navController.navigate(Route.AdminApplications.route) {
+                        launchSingleTop = true
+                    }
+                }
+            }
+        )
+        NavigationBarItem(
+            icon = { Icon(Icons.AutoMirrored.Default.ReceiptLong, contentDescription = "Categories") },
+            label = { Text("Categories") },
+            selected = currentRoute == Route.AdminCategories.route,
+            onClick = {
+                if (currentRoute != Route.AdminCategories.route) {
+                    navController.navigate(Route.AdminCategories.route) {
                         launchSingleTop = true
                     }
                 }

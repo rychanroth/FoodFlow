@@ -20,12 +20,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.foodflow.data.model.UserRole
-import com.example.foodflow.ui.state.ApplyState
+import com.example.foodflow.ui.state.RoleApplyState
 
 @Composable
 fun RolesSection(
     userRole: UserRole,
-    applyState: ApplyState,
+    applyState: RoleApplyState,
     onSubmitApplication: (UserRole, String) -> Unit,
     onResetApplyState: () -> Unit
 ) {
@@ -66,7 +66,7 @@ fun RolesSection(
     }
 
     if (showApplicationDialog) {
-        ApplicationDialog(
+        RoleApplicationDialog(
             requestedRole = selectedRole,
             applyState = applyState,
             onDismiss = {
