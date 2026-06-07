@@ -49,10 +49,15 @@ fun AppNavigation(
     // Get the parent graph route (e.g., "customer_graph")
     val currentGraphRoute = navBackStackEntry?.destination?.parent?.route
 
-    // Determine start destination based purely on Auth State
+    // FIX: Wait for BOTH Auth state AND Firestore user profile before routing.
+    // If authState is Success but user is null, Firestore is still loading.
+    // We must wait so we don't falsely route to Onboarding based on a default isProfileComplete = false.
     val startDestination = when (authState) {
         is AuthState.Success -> {
-            if (user?.isProfileComplete == false) {
+            val currentUser = user // Capture for smart casting
+            if (currentUser == null) {
+                null // Wait! Don't route yet, Firestore profile is still loading.
+            } else if (!currentUser.isProfileComplete) {
                 Route.Onboarding.route
             } else {
                 val role = (authState as AuthState.Success).role
@@ -69,6 +74,7 @@ fun AppNavigation(
         else -> Route.AuthGraph.route
     }
 
+    // Show loading spinner while waiting for Auth and Firestore profile to resolve
     if (startDestination == null) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()

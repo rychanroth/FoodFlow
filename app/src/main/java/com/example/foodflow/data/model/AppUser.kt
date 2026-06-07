@@ -1,5 +1,7 @@
 package com.example.foodflow.data.model
 
+import com.google.firebase.firestore.PropertyName
+
 data class AppUser(
     val uid: String = "",
     val email: String = "",
@@ -8,8 +10,15 @@ data class AppUser(
     val role: UserRole = UserRole.CUSTOMER,
     val avatarUrl: String = "",
     val addresses: List<Address> = emptyList(),
-    val isProfileComplete: Boolean = false, // V3: Onboarding gate
-    val fcmToken: String = ""               // V3: Push notifications
+    // ✅ Force Firebase to use "isProfileComplete" instead of "profileComplete"
+    @get:PropertyName("isProfileComplete")
+    @set:PropertyName("isProfileComplete")
+    var isProfileComplete: Boolean = false,
+
+    // ✅ Force Firebase to use "fcmToken" instead of "fcmtoken"
+    @get:PropertyName("fcmToken")
+    @set:PropertyName("fcmToken")
+    var fcmToken: String = ""
 )
 
 // Placeholder for addresses
