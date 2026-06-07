@@ -23,9 +23,9 @@ sealed class Route(val route: String) {
 
     // Customer Screens
     data object CustomerHome : Route("customer_home")
-    data object BrowseByCategory : Route("browse_by_category/{categoryId}?categoryName={categoryName}") {
-        fun createRoute(categoryId: String, categoryName: String = ""): String {
-            return "browse_by_category/$categoryId?categoryName=${Uri.encode(categoryName)}"
+    data object Catalog : Route("catalog/{categoryId}?categoryName={categoryName}") {
+        fun createRoute(categoryId: String = "", categoryName: String = ""): String {
+            return "catalog/$categoryId?categoryName=${Uri.encode(categoryName)}"
         }
     }
     data object CustomerSearch : Route("customer_search")

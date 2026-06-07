@@ -10,7 +10,7 @@ import androidx.navigation.navigation
 import com.example.foodflow.ui.screens.common.MenuItemDetailScreen
 import com.example.foodflow.ui.screens.common.OrderDetailScreen
 import com.example.foodflow.ui.screens.common.ProfileScreen
-import com.example.foodflow.ui.screens.customer.BrowseByCategoryScreen
+import com.example.foodflow.ui.screens.customer.CatalogScreen
 import com.example.foodflow.ui.screens.customer.CartScreen
 import com.example.foodflow.ui.screens.customer.HomeScreen
 import com.example.foodflow.ui.screens.customer.OrdersScreen
@@ -44,16 +44,19 @@ fun NavGraphBuilder.customerGraph(
             SearchScreen(navController = navController)
         }
         composable(
-            route = Route.BrowseByCategory.route,
+            route = Route.Catalog.route,
             arguments = listOf(
-                navArgument("categoryId") { type = NavType.StringType },
+                navArgument("categoryId") {
+                    type = NavType.StringType
+                    defaultValue = "" // Empty string means "See All"
+                },
                 navArgument("categoryName") {
                     type = NavType.StringType
-                    defaultValue = "" // Required because it's an optional query parameter
+                    defaultValue = ""
                 }
             )
         ) {
-            BrowseByCategoryScreen(
+            CatalogScreen(
                 onBackClick = { navController.popBackStack() },
                 onMenuItemClick = { menuItemId ->
                     navController.navigate(Route.MenuItemDetail.createRoute(menuItemId))

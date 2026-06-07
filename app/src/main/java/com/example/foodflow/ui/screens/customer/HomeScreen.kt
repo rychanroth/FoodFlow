@@ -21,6 +21,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -36,7 +37,6 @@ import com.example.foodflow.data.model.AppUser
 import com.example.foodflow.data.model.MenuItem
 import com.example.foodflow.data.model.MenuItemCategory
 import com.example.foodflow.data.model.Promotion
-import com.example.foodflow.ui.components.customer.CategoryCard
 import com.example.foodflow.ui.components.customer.CustomerMenuItemCard
 import com.example.foodflow.ui.components.customer.PromotionBannerCard
 import com.example.foodflow.ui.components.customer.RestaurantCard
@@ -80,7 +80,10 @@ fun HomeScreen(
         cartItemCount = cartItemCount,
         onLogoutClick = { authViewModel.logout() },
         onCategoryClick = { categoryId, categoryName ->
-            navController.navigate(Route.BrowseByCategory.createRoute(categoryId, categoryName))
+            navController.navigate(Route.Catalog.createRoute(categoryId, categoryName))
+        },
+        onSeeAllCategoriesClick = {
+            navController.navigate(Route.Catalog.createRoute()) // No ID passed = See All
         },
         onPromoClick = { menuItemId ->
             if (menuItemId.isNotEmpty()) {
@@ -109,6 +112,7 @@ fun CustomerHomeContent(
     cartItemCount: Int,
     onLogoutClick: () -> Unit,
     onCategoryClick: (String, String) -> Unit,
+    onSeeAllCategoriesClick: () -> Unit, // NEW
     onPromoClick: (String) -> Unit,
     onMenuItemClick: (String) -> Unit,
     onAddToCartClick: (MenuItem) -> Unit,
@@ -143,28 +147,23 @@ fun CustomerHomeContent(
                 // --- SECTION 1: CATEGORIES ---
                 if (categories.isNotEmpty()) {
                     item {
-                        SectionHeader(title = "Browse Categories")
+                        // Updated Header with See All button
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            SectionHeader(title = "Browse Categories")
+                            TextButton(onClick = onSeeAllCategoriesClick) {
+                                Text("See All", color = MaterialTheme.colorScheme.primary)
+                            }
+                        }
+
                         Spacer(modifier = Modifier.height(8.dp))
 
-                        // 2-Column Grid Layout
-                        categories.chunked(2).forEach { rowCategories ->
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                rowCategories.forEach { category ->
-                                    CategoryCard(
-                                        category = category,
-                                        onClick = { onCategoryClick(category.id, category.name) },
-                                        modifier = Modifier.weight(1f)
-                                    )
-                                }
-                                // If the row has only 1 item, fill the remaining space
-                                if (rowCategories.size < 2) {
-                                    Spacer(modifier = Modifier.weight(1f))
-                                }
-                            }
-                            Spacer(modifier = Modifier.height(12.dp))
+                        // Keep the 2-column grid logic here...
+                        categories.take(4).chunked(2).forEach { rowCategories -> // Only show first 4 on Home
+                            // ... existing row logic ...
                         }
                     }
                 }

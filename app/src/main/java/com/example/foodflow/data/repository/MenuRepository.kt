@@ -189,4 +189,5 @@ class MenuRepository {
     suspend fun deletePromotion(promotionId: String) {
         promotionsCollection.document(promotionId).delete().await()
     }
+
 }
