@@ -55,7 +55,15 @@ class MenuViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     // Update addNewMenuItem signature
-    fun addNewMenuItem(name: String, description: String, price: Double, categoryId: String, isActive: Boolean, imageUri: Uri?) {
+    fun addNewMenuItem(
+        name: String,
+        description: String,
+        price: Double,
+        categoryId: String,
+        isActive: Boolean,
+        estimatedPrepTime: Int,
+        imageUri: Uri?
+    ) {
         val restaurantId = getCurrentUserId() ?: return
         viewModelScope.launch {
             val imageUrl = imageUri?.let { repository.uploadImage(it, context).getOrNull() } ?: ""
@@ -66,6 +74,7 @@ class MenuViewModel(application: Application) : AndroidViewModel(application) {
                 price = price,
                 categoryId = categoryId,
                 isActive = isActive,
+                estimatedPrepTime = estimatedPrepTime, // ✅ ADDED
                 imageUrl = imageUrl
             )
             repository.addMenuItem(newItem)

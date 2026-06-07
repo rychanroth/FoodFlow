@@ -55,6 +55,7 @@ fun MenuManagementScreen(
     var itemName by remember { mutableStateOf("") }
     var itemDescription by remember { mutableStateOf("") }
     var itemPrice by remember { mutableStateOf("") }
+    var itemPrepTime by remember { mutableStateOf("") }
     var itemCategoryId by remember { mutableStateOf("") }
     var itemIsActive by remember { mutableStateOf(true) }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
@@ -76,6 +77,7 @@ fun MenuManagementScreen(
     fun clearDialogState() {
         isDialogOpen = false; editingItem = null; itemName = ""; itemDescription = ""
         itemPrice = ""; selectedImageUri = null; itemCategoryId = ""; itemIsActive = true
+        itemPrepTime = "" // ✅ ADDED
     }
 
     if (isDialogOpen) {
@@ -89,13 +91,27 @@ fun MenuManagementScreen(
             onDismiss = { clearDialogState() },
             categories = categories, selectedCategoryId = itemCategoryId, onCategorySelected = { itemCategoryId = it },
             isActive = itemIsActive, onActiveChanged = { itemIsActive = it },
+            prepTime = itemPrepTime,              // ✅ ADDED
+            onPrepTimeChange = { itemPrepTime = it }, // ✅ ADDED
             onConfirm = {
                 val priceDouble = itemPrice.toDoubleOrNull() ?: 0.0
+                val prepTimeInt = itemPrepTime.toIntOrNull() ?: 0 // ✅ ADDED Parse safely
+
                 if (editingItem == null) {
-                    menuViewModel.addNewMenuItem(itemName, itemDescription, priceDouble, itemCategoryId, itemIsActive, selectedImageUri)
+                    menuViewModel.addNewMenuItem(
+                        itemName, itemDescription, priceDouble, itemCategoryId,
+                        itemIsActive, prepTimeInt, selectedImageUri // ✅ ADDED
+                    )
                 } else {
                     menuViewModel.updateMenuItem(
-                        updatedItem = editingItem!!.copy(name = itemName, description = itemDescription, price = priceDouble, categoryId = itemCategoryId, isActive = itemIsActive),
+                        updatedItem = editingItem!!.copy(
+                            name = itemName,
+                            description = itemDescription,
+                            price = priceDouble,
+                            categoryId = itemCategoryId,
+                            isActive = itemIsActive,
+                            estimatedPrepTime = prepTimeInt // ✅ ADDED
+                        ),
                         newImageUri = selectedImageUri
                     )
                 }
@@ -109,13 +125,10 @@ fun MenuManagementScreen(
         categories = categories,
         onAddItemClick = { clearDialogState(); isDialogOpen = true },
         onEditItemClick = { item ->
-            editingItem = item
-            itemName = item.name
-            itemDescription = item.description
-            itemPrice = item.price.toString()
-            selectedImageUri = null
-            itemCategoryId = item.categoryId
-            itemIsActive = item.isActive  // This must be set BEFORE isDialogOpen = true
+            editingItem = item; itemName = item.name; itemDescription = item.description
+            itemPrice = item.price.toString(); selectedImageUri = null
+            itemCategoryId = item.categoryId; itemIsActive = item.isActive
+            itemPrepTime = if (item.estimatedPrepTime > 0) item.estimatedPrepTime.toString() else "" // ✅ ADDED
             isDialogOpen = true
         },
         onDeleteItemClick = { menuViewModel.deleteMenuItem(it) },

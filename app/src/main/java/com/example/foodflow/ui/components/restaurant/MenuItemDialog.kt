@@ -47,7 +47,9 @@ fun MenuItemDialog(
     onDescriptionChange: (String) -> Unit,
     price: String,
     onPriceChange: (String) -> Unit,
-    imageModel: Any?, // Changed to Any? to accept both local Uri and remote String URL
+    prepTime: String,              // ✅ ADDED
+    onPrepTimeChange: (String) -> Unit, // ✅ ADDED
+    imageModel: Any?,
     onPickImageClick: () -> Unit,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit
@@ -134,6 +136,14 @@ fun MenuItemDialog(
                     value = price,
                     onValueChange = onPriceChange,
                     label = { Text("Price") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                OutlinedTextField(
+                    value = prepTime,
+                    onValueChange = onPrepTimeChange,
+                    label = { Text("Est. Prep Time (mins)") }, // ✅ ADDED
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.fillMaxWidth()
                 )
