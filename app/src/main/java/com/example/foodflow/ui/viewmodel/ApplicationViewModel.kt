@@ -4,18 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.foodflow.data.model.UserRole
 import com.example.foodflow.data.repository.ApplicationRepository
+import com.example.foodflow.ui.state.ApplyState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-
-// UI State for the Apply screen
-sealed interface ApplyState {
-    data object Idle : ApplyState
-    data object Loading : ApplyState
-    data object Success : ApplyState
-    data class Error(val message: String) : ApplyState
-}
 
 class ApplicationViewModel : ViewModel() {
 

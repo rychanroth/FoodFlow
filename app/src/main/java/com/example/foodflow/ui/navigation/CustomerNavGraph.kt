@@ -7,17 +7,14 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
-import com.example.foodflow.ui.navigation.Route
 import com.example.foodflow.ui.screens.common.OrderDetailScreen
-import com.example.foodflow.ui.screens.customer.ApplyScreen
+import com.example.foodflow.ui.screens.common.ProfileScreen
 import com.example.foodflow.ui.screens.customer.CartScreen
 import com.example.foodflow.ui.screens.customer.HomeScreen
 import com.example.foodflow.ui.screens.customer.OrdersScreen
-import com.example.foodflow.ui.screens.customer.SearchScreen
 import com.example.foodflow.ui.screens.customer.PaymentInstructionScreen
-import com.example.foodflow.ui.screens.common.ProfileScreen
 import com.example.foodflow.ui.screens.customer.RestaurantDetailScreen
-import com.example.foodflow.ui.screens.common.SettingsScreen
+import com.example.foodflow.ui.screens.customer.SearchScreen
 import com.example.foodflow.ui.viewmodel.AuthViewModel
 import com.example.foodflow.ui.viewmodel.CartViewModel
 import com.example.foodflow.ui.viewmodel.CustomerHomeViewModel
@@ -79,14 +76,6 @@ fun NavGraphBuilder.customerGraph(
             OrderDetailScreen(navController = navController)
         }
 
-
-        composable(Route.Apply.route) {
-            ApplyScreen(navController)
-        }
-
-        composable(Route.Settings.route) {
-            SettingsScreen(navController, settingsViewModel)
-        }
 
         composable(Route.Profile.route) {
             ProfileScreen(navController, authViewModel)

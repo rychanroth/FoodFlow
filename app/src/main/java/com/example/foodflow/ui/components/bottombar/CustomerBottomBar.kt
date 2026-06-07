@@ -3,10 +3,13 @@ package com.example.foodflow.ui.components.bottombar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material3.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -74,12 +77,12 @@ fun CustomerBottomBar(
             }
         )
         NavigationBarItem(
-            icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
-            label = { Text("Settings") },
-            selected = currentRoute == Route.Settings.route,
+            icon = { Icon(Icons.Filled.Person, contentDescription = "Profile") },
+            label = { Text("Profile") },
+            selected = currentRoute == Route.Profile.route,
             onClick = {
-                if (currentRoute != Route.Settings.route) {
-                    navController.navigate(Route.Settings.route) {
+                if (currentRoute != Route.Profile.route) {
+                    navController.navigate(Route.Profile.route) {
                         launchSingleTop = true
                     }
                 }

@@ -4,10 +4,9 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
-import com.example.foodflow.ui.navigation.Route
+import com.example.foodflow.ui.screens.common.ProfileScreen
 import com.example.foodflow.ui.screens.restaurant.MenuManagementScreen
 import com.example.foodflow.ui.screens.restaurant.OrdersScreen
-import com.example.foodflow.ui.screens.common.SettingsScreen
 import com.example.foodflow.ui.screens.restaurant.RestaurantDashboardScreen
 import com.example.foodflow.ui.viewmodel.AuthViewModel
 import com.example.foodflow.ui.viewmodel.SettingsViewModel
@@ -37,8 +36,8 @@ fun NavGraphBuilder.restaurantGraph(
         composable(Route.RestaurantOrders.route) {
             OrdersScreen(navController)
         }
-        composable(Route.Settings.route) {
-            SettingsScreen(navController, settingsViewModel)
+        composable(Route.Profile.route) {
+            ProfileScreen(navController, authViewModel)
         }
     }
 }
