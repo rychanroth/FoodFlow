@@ -1,5 +1,6 @@
 package com.example.foodflow.ui.navigation
 
+import androidx.compose.material3.SnackbarHostState
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
@@ -27,7 +28,8 @@ fun NavGraphBuilder.customerGraph(
     navController: NavController,
     authViewModel: AuthViewModel,
     cartViewModel: CartViewModel,
-    settingsViewModel: SettingsViewModel
+    settingsViewModel: SettingsViewModel,
+    snackbarHostState: SnackbarHostState
 ) {
     // FIX: Wrap in navigation block
     navigation(
@@ -97,7 +99,7 @@ fun NavGraphBuilder.customerGraph(
         }
 
         composable(Route.Cart.route) {
-            CartScreen(navController, cartViewModel)
+            CartScreen(navController, cartViewModel, authViewModel)
         }
 
         composable(Route.PaymentInstruction.route) {
@@ -125,6 +127,9 @@ fun NavGraphBuilder.customerGraph(
                     navController.navigate(Route.MenuItemDetail.createRoute(menuItemId))
                 }
             )
+        }
+        composable(Route.Cart.route) {
+            CartScreen(navController, cartViewModel, authViewModel) // ADDED authViewModel
         }
     }
 }

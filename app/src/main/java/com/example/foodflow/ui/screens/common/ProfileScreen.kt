@@ -28,11 +28,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.foodflow.data.model.Address
 import com.example.foodflow.data.model.ThemePreference
 import com.example.foodflow.data.model.UserRole
 import com.example.foodflow.ui.components.common.PreferencesSection
 import com.example.foodflow.ui.components.common.ProfileHeader
 import com.example.foodflow.ui.components.common.RolesSection
+import com.example.foodflow.ui.components.customer.AddressDialog
+import com.example.foodflow.ui.components.customer.AddressesSection
 import com.example.foodflow.ui.components.customer.FavoritesNavigationRow
 import com.example.foodflow.ui.navigation.Route
 import com.example.foodflow.ui.state.ProfileState
@@ -56,12 +59,23 @@ fun ProfileScreen(
     LaunchedEffect(currentUserId) { profileViewModel.loadUserProfile(currentUserId) }
 
     val profileState by profileViewModel.profileState.collectAsState()
+    val addressDialogState by profileViewModel.addressDialogState.collectAsState()
     val isUpdating by profileViewModel.isUpdating.collectAsState()
 
     val themePreference by settingsViewModel.themePreferenceState.collectAsState()
     val dynamicColorEnabled by settingsViewModel.dynamicColorState.collectAsState()
 
     val applyState by applicationViewModel.applyState.collectAsState()
+
+    if (addressDialogState != null) {
+        AddressDialog(
+            address = addressDialogState,
+            onDismiss = { profileViewModel.hideAddressDialog() },
+            onSave = { street, city, isDefault, existingId ->
+                profileViewModel.saveAddress(currentUserId, street, city, isDefault, existingId)
+            }
+        )
+    }
 
     ProfileContent(
         profileState = profileState,
@@ -82,7 +96,9 @@ fun ProfileScreen(
             authViewModel.logout()
             navController.navigate(Route.AuthGraph.route) { popUpTo(0) }
         },
-        onNavigateToFavorites = { navController.navigate(Route.Favorites.route) }
+        onNavigateToFavorites = { navController.navigate(Route.Favorites.route) },
+        onShowAddressDialog = { profileViewModel.showAddressDialog(it) },
+        onDeleteAddress = { profileViewModel.deleteAddress(currentUserId, it) }
     )
 }
 
@@ -103,6 +119,8 @@ fun ProfileContent(
     onResetApplyState: () -> Unit,
     onLogout: () -> Unit,
     onNavigateToFavorites: () -> Unit,
+    onShowAddressDialog: (Address?) -> Unit, // NEW
+    onDeleteAddress: (String) -> Unit, // NEW
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -145,6 +163,13 @@ fun ProfileContent(
                         onUpdateProfile = onUpdateProfile
                     )
 
+                    AddressesSection(
+                        addresses = user.addresses,
+                        onAddClick = { onShowAddressDialog(null) },
+                        onEditClick = { onShowAddressDialog(it) },
+                        onDeleteClick = onDeleteAddress
+                    )
+
                     FavoritesNavigationRow(onClick = onNavigateToFavorites)
 
                     // 2. App Preferences
@@ -178,3 +203,4 @@ fun ProfileContent(
         }
     }
 }
+

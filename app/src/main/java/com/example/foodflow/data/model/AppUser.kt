@@ -26,7 +26,9 @@ data class Address(
     val id: String = "",
     val street: String = "",
     val city: String = "",
-    val isDefault: Boolean = false
+    @get:PropertyName("isDefault")
+    @set:PropertyName("isDefault")
+    var isDefault: Boolean = false
 )
 
 enum class UserRole {

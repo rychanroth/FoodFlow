@@ -8,9 +8,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -39,6 +43,9 @@ fun AppNavigation(
 ) {
     val authState by authViewModel.authState.collectAsState()
     val user by authViewModel.currentUser.collectAsState()
+
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     // V2 FIX: Scope CartViewModel to the Activity so it's shared across all screens in CustomerNavGraph!
     val cartViewModel: CartViewModel = viewModel(LocalActivity.current as ComponentActivity)
@@ -104,7 +111,8 @@ fun AppNavigation(
     Scaffold(
         // FIX: remove window insets on parent host
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
-        bottomBar = bottomBar
+        bottomBar = bottomBar,
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
         NavHost(
             navController = navController,
@@ -116,7 +124,7 @@ fun AppNavigation(
             }
             // Delegating all screen routing to their respective graphs!
             authGraph(navController, authViewModel)
-            customerGraph(navController, authViewModel, cartViewModel, settingsViewModel)
+            customerGraph(navController, authViewModel, cartViewModel, settingsViewModel, snackbarHostState)
             restaurantGraph(navController, authViewModel, settingsViewModel)
             driverGraph(navController, authViewModel, settingsViewModel)
             adminGraph(navController, authViewModel, settingsViewModel)

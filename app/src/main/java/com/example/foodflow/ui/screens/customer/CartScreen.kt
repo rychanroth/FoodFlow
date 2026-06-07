@@ -1,12 +1,30 @@
 package com.example.foodflow.ui.screens.customer
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material3.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -20,11 +38,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.foodflow.data.model.CartItem
-import com.example.foodflow.ui.state.CheckoutState
 import com.example.foodflow.data.model.PaymentMethod
-import com.example.foodflow.ui.navigation.Route
-import com.example.foodflow.ui.components.customer.CartItemCard
 import com.example.foodflow.ui.components.common.OrderSummarySheet
+import com.example.foodflow.ui.components.customer.CartItemCard
+import com.example.foodflow.ui.navigation.Route
+import com.example.foodflow.ui.state.CheckoutState
+import com.example.foodflow.ui.viewmodel.AuthViewModel
 import com.example.foodflow.ui.viewmodel.CartViewModel
 import com.google.firebase.auth.FirebaseAuth
 
@@ -32,17 +51,45 @@ import com.google.firebase.auth.FirebaseAuth
 @Composable
 fun CartScreen(
     navController: NavController,
-    cartViewModel: CartViewModel
+    cartViewModel: CartViewModel,
+    authViewModel: AuthViewModel
 ) {
     val cartItems by cartViewModel.cartItems.collectAsState()
     val settings by cartViewModel.settings.collectAsState()
     val checkoutState by cartViewModel.checkoutState.collectAsState()
+    val user by authViewModel.currentUser.collectAsState() // NEW
 
     val subtotal = cartViewModel.getTotalPrice()
     val totalPrice = subtotal + settings.deliveryFee + settings.platformFlatFee
     val currentUser = FirebaseAuth.getInstance().currentUser
 
     var showSummarySheet by remember { mutableStateOf(false) }
+    var showMissingAddressDialog by remember { mutableStateOf(false) } // NEW
+
+    // Check if user has a default address
+    val hasValidAddress = user?.addresses?.any { it.isDefault } == true
+
+    // NEW: Missing Address Dialog
+    if (showMissingAddressDialog) {
+        AlertDialog(
+            onDismissRequest = { showMissingAddressDialog = false },
+            title = { Text("Delivery Address Required") },
+            text = { Text("Please add a default delivery address in your profile before placing an order.") },
+            confirmButton = {
+                Button(onClick = {
+                    showMissingAddressDialog = false
+                    navController.navigate(Route.Profile.route)
+                }) {
+                    Text("Go to Profile")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showMissingAddressDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
 
     if (showSummarySheet) {
         ModalBottomSheet(onDismissRequest = { showSummarySheet = false }) {
@@ -50,10 +97,16 @@ fun CartScreen(
                 cartItems = cartItems,
                 settings = settings,
                 onConfirmOrder = { paymentMethod ->
-                    if (currentUser != null) {
-                        cartViewModel.placeOrder(currentUser.uid, paymentMethod)
+                    // VALIDATION GATE
+                    if (!hasValidAddress) {
+                        showSummarySheet = false // Close sheet
+                        showMissingAddressDialog = true // Show dialog
+                    } else {
+                        if (currentUser != null) {
+                            cartViewModel.placeOrder(currentUser.uid, paymentMethod)
+                        }
+                        showSummarySheet = false
                     }
-                    showSummarySheet = false
                 },
                 onDismiss = { showSummarySheet = false }
             )
