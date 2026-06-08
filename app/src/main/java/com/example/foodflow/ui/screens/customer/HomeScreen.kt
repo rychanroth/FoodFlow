@@ -12,17 +12,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -37,6 +32,7 @@ import com.example.foodflow.data.model.AppUser
 import com.example.foodflow.data.model.MenuItem
 import com.example.foodflow.data.model.MenuItemCategory
 import com.example.foodflow.data.model.Promotion
+import com.example.foodflow.ui.components.common.HomeTopBar
 import com.example.foodflow.ui.components.customer.CategoryCard
 import com.example.foodflow.ui.components.customer.CustomerMenuItemCard
 import com.example.foodflow.ui.components.customer.PromotionBannerCard
@@ -60,6 +56,7 @@ fun HomeScreen(
     val promotions by customerViewModel.promotions.collectAsState()
     val isLoading by customerViewModel.isLoading.collectAsState()
     val authState by authViewModel.authState.collectAsState()
+    val user by authViewModel.currentUser.collectAsState()
 
     val cartItems by cartViewModel.cartItems.collectAsState()
     val cartItemCount = cartItems.sumOf { it.quantity }
@@ -73,6 +70,7 @@ fun HomeScreen(
     }
 
     CustomerHomeContent(
+        user = user,
         categories = categories,
         promotions = promotions,
         newlyAddedItems = newlyAddedItems,
@@ -105,6 +103,7 @@ fun HomeScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CustomerHomeContent(
+    user: AppUser?,
     categories: List<MenuItemCategory>,
     promotions: List<Promotion>,
     newlyAddedItems: List<MenuItem>,
@@ -122,13 +121,9 @@ fun CustomerHomeContent(
 ) {
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("FoodFlow 🍔") },
-                actions = {
-                    IconButton(onClick = onLogoutClick) {
-                        Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Logout")
-                    }
-                }
+            HomeTopBar(
+                userName = user?.name,
+                onLogoutClick = onLogoutClick
             )
         }
     ) { paddingValues ->

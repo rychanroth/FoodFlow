@@ -141,6 +141,7 @@ fun RestaurantDashboardScreen(
         }
     } else {
         RestaurantDashboardContent(
+            user = user,
             snackbarHostState = snackbarHostState,
             todaysOrderCount = todaysOrderCount,
             todaysRevenue = todaysRevenue,
@@ -155,6 +156,7 @@ fun RestaurantDashboardScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RestaurantDashboardContent(
+    user: com.example.foodflow.data.model.AppUser?,
     snackbarHostState: SnackbarHostState,
     todaysOrderCount: Int,
     todaysRevenue: Double,
@@ -169,7 +171,7 @@ fun RestaurantDashboardContent(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text("Restaurant Dashboard") },
+                title = { Text(if (user?.name != null) "Welcome, ${user.name}" else "Restaurant Dashboard") },
                 actions = {
                     IconButton(onClick = onNavigateToRestaurantOrders) {
                         Icon(Icons.AutoMirrored.Filled.ReceiptLong, contentDescription = "Orders")

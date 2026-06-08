@@ -60,8 +60,10 @@ fun AdminDashboardScreen(
     val todayRevenue by adminViewModel.todayRevenue.collectAsState()
     val todayOrders by adminViewModel.todayOrders.collectAsState()
     val totalUsers by adminViewModel.totalUsers.collectAsState()
+    val user by authViewModel.currentUser.collectAsState()
 
     AdminDashboardContent(
+        user = user,
         todayRevenue = todayRevenue,
         todayOrders = todayOrders,
         totalUsers = totalUsers,
@@ -79,6 +81,7 @@ fun AdminDashboardScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdminDashboardContent(
+    user: com.example.foodflow.data.model.AppUser?,
     todayRevenue: Double,
     todayOrders: Int,
     totalUsers: Int,
@@ -94,7 +97,7 @@ fun AdminDashboardContent(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("FoodFlow Admin") },
+                title = { Text(if (user?.name != null) "Admin: ${user.name}" else "FoodFlow Admin") },
                 actions = {
                     TextButton(onClick = onLogoutClick) { Text("Logout") }
                 }

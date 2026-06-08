@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.foodflow.data.model.AppUser
 import com.example.foodflow.data.model.Order
 import com.example.foodflow.ui.components.driver.DeliveryCard
 import com.example.foodflow.ui.viewmodel.AuthViewModel
@@ -29,8 +30,10 @@ fun HomeScreen(
 
     val availableOrders by driverViewModel.availableOrders.collectAsState()
     val myActiveDeliveries by driverViewModel.myActiveDeliveries.collectAsState()
+    val user by authViewModel.currentUser.collectAsState()
 
     DriverHomeContent(
+        user = user,
         availableOrders = availableOrders,
         myActiveDeliveries = myActiveDeliveries,
         onAcceptClick = { orderId -> driverViewModel.acceptOrder(orderId, currentDriverId) },
@@ -42,6 +45,7 @@ fun HomeScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DriverHomeContent(
+    user: AppUser?,
     availableOrders: List<Order>,
     myActiveDeliveries: List<Order>,
     onAcceptClick: (String) -> Unit,
@@ -51,7 +55,7 @@ fun DriverHomeContent(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Driver Dashboard 🛵") },
+                title = { Text(if (user?.name != null) "Welcome, ${user.name} 🛵" else "Driver Dashboard 🛵") },
                 actions = {
                     TextButton(onClick = onLogoutClick) { Text("Logout") }
                 }
