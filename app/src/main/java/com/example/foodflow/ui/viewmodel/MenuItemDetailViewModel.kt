@@ -40,14 +40,14 @@ class MenuItemDetailViewModel(
                 userPreferences.favoritesFlow
             ) { item, favoriteIds ->
                 MenuItemDetailState(
-                    item = item,
-                    isFavorite = favoriteIds.contains(menuItemId),
+                    item = item, // Now safely accepts null
+                    isFavorite = if (item != null) favoriteIds.contains(menuItemId) else false,
                     isLoading = false
                 )
             }.collect { state ->
                 _state.value = state
 
-                // NEW: Fetch restaurant data once we have the item and haven't fetched the restaurant yet
+                // Fetch restaurant data only if we have an item and haven't fetched the restaurant yet
                 if (state.item != null && _state.value.restaurant == null) {
                     fetchRestaurant(state.item.restaurantId)
                 }

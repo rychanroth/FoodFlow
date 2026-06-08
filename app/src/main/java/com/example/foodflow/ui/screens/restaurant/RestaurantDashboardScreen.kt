@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.foodflow.data.model.Order
+import com.example.foodflow.ui.components.common.HomeTopBar
 import com.example.foodflow.ui.components.restaurant.PromotionDialog
 import com.example.foodflow.ui.navigation.Route
 import com.example.foodflow.ui.state.SubmitPromoState
@@ -170,16 +171,9 @@ fun RestaurantDashboardContent(
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            TopAppBar(
-                title = { Text(if (user?.name != null) "Welcome, ${user.name}" else "Restaurant Dashboard") },
-                actions = {
-                    IconButton(onClick = onNavigateToRestaurantOrders) {
-                        Icon(Icons.AutoMirrored.Filled.ReceiptLong, contentDescription = "Orders")
-                    }
-                    IconButton(onClick = onLogoutClick) {
-                        Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Logout")
-                    }
-                }
+            HomeTopBar(
+                userName = user?.name,
+                onLogoutClick = onLogoutClick
             )
         },
         modifier = modifier

@@ -26,8 +26,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -42,6 +40,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.foodflow.data.model.Promotion
+import com.example.foodflow.ui.components.common.HomeTopBar
 import com.example.foodflow.ui.navigation.Route
 import com.example.foodflow.ui.viewmodel.AdminViewModel
 import com.example.foodflow.ui.viewmodel.AuthViewModel
@@ -96,11 +95,9 @@ fun AdminDashboardContent(
 ) {
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(if (user?.name != null) "Admin: ${user.name}" else "FoodFlow Admin") },
-                actions = {
-                    TextButton(onClick = onLogoutClick) { Text("Logout") }
-                }
+            HomeTopBar(
+                userName = user?.name,
+                onLogoutClick = onLogoutClick
             )
         }
     ) { paddingValues ->

@@ -33,23 +33,33 @@ class MenuRepository {
         awaitClose { subscription.remove() }
     }
 
-    fun getMenuItemById(id: String): Flow<MenuItem?> = callbackFlow {
-        val docRef = firestore.collection("menu_items").document(id)
-        val listener = docRef.addSnapshotListener { snapshot, error ->
-            if (error != null) {
-                close(error)
-                return@addSnapshotListener
-            }
-
-            if (snapshot != null && snapshot.exists()) {
-                val item = snapshot.toObject(MenuItem::class.java)?.copy(id = snapshot.id)
-                trySend(item)
-            } else {
-                // ✅ Send null instead of throwing an exception
-                trySend(null)
-            }
+    // Update signature to return Flow<MenuItem?>
+    fun getMenuItemById(menuItemId: String): Flow<MenuItem?> = callbackFlow {
+        // If ID is empty, immediately emit null and close
+        if (menuItemId.isBlank()) {
+            trySend(null)
+            close()
+            awaitClose { }
+            return@callbackFlow
         }
-        awaitClose { listener.remove() }
+
+        val subscription = menuCollection.document(menuItemId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) { close(error); return@addSnapshotListener }
+
+                if (snapshot != null && snapshot.exists()) {
+                    try {
+                        val item = snapshot.toObject(MenuItem::class.java)?.copy(id = snapshot.id)
+                        trySend(item) // Emit the item (or null if parsing failed)
+                    } catch (e: Exception) {
+                        trySend(null) // Emit null instead of crashing on parse error
+                    }
+                } else {
+                    // FIX: Document doesn't exist. Emit null instead of throwing an Exception!
+                    trySend(null)
+                }
+            }
+        awaitClose { subscription.remove() }
     }
 
     // NEW V3: Customer query - ONLY active items
