@@ -14,9 +14,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class RestaurantOrdersViewModel : ViewModel() {
-
-    class RestaurantOrdersViewModel : ViewModel() {
-
     private val repository = OrderRepository()
 
     private val _allOrders = MutableStateFlow<List<Order>>(emptyList())
@@ -73,5 +70,5 @@ class RestaurantOrdersViewModel : ViewModel() {
             repository.updateOrderStatus(orderId, OrderStatus.READY) // Changed
         }
     }
-}
+
 }

@@ -37,6 +37,7 @@ import com.example.foodflow.data.model.AppUser
 import com.example.foodflow.data.model.MenuItem
 import com.example.foodflow.data.model.MenuItemCategory
 import com.example.foodflow.data.model.Promotion
+import com.example.foodflow.ui.components.customer.CategoryCard
 import com.example.foodflow.ui.components.customer.CustomerMenuItemCard
 import com.example.foodflow.ui.components.customer.PromotionBannerCard
 import com.example.foodflow.ui.components.customer.RestaurantCard
@@ -162,8 +163,24 @@ fun CustomerHomeContent(
                         Spacer(modifier = Modifier.height(8.dp))
 
                         // Keep the 2-column grid logic here...
-                        categories.take(4).chunked(2).forEach { rowCategories -> // Only show first 4 on Home
-                            // ... existing row logic ...
+                        categories.take(4).chunked(2).forEach { rowCategories ->
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                rowCategories.forEach { category ->
+                                    CategoryCard(
+                                        category = category,
+                                        onClick = { onCategoryClick(category.id, category.name) },
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                }
+                                // If the row has only 1 item, fill the remaining space to keep alignment
+                                if (rowCategories.size < 2) {
+                                    Spacer(modifier = Modifier.weight(1f))
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(12.dp))
                         }
                     }
                 }

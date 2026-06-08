@@ -5,6 +5,7 @@ import android.net.Uri
 import com.example.foodflow.data.model.PlatformSettings
 import com.example.foodflow.data.model.RoleApplication
 import com.example.foodflow.data.model.RoleApplicationStatus
+import com.google.firebase.firestore.AggregateSource
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -30,6 +31,18 @@ class AdminRepository {
                 trySend(apps)
             }
         awaitClose { subscription.remove() }
+    }
+
+
+    suspend fun getTotalUsersCount(): Result<Int> {
+        return try {
+            val query = firestore.collection("users")
+            val countQuery = query.count()
+            val snapshot = countQuery.get(AggregateSource.SERVER).await()
+            Result.success(snapshot.count.toInt())
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
     // Approve Application: Update App Status + Update User Role
