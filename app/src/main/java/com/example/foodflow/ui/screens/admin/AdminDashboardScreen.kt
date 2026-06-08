@@ -71,7 +71,8 @@ fun AdminDashboardScreen(
         onApprovePromotion = { adminViewModel.approvePromotion(it) },
         onRejectPromotion = { adminViewModel.rejectPromotion(it) },
         onNavigateToCategories = { navController.navigate(Route.AdminCategories.route) },
-        onNavigateToApplications = { navController.navigate(Route.AdminApplications.route) } // NEW
+        onNavigateToApplications = { navController.navigate(Route.AdminApplications.route) },
+        onNavigateToOrders = { navController.navigate(Route.AdminOrders.route) },
     )
 }
 
@@ -87,7 +88,8 @@ fun AdminDashboardContent(
     onApprovePromotion: (Promotion) -> Unit,
     onRejectPromotion: (Promotion) -> Unit,
     onNavigateToCategories: () -> Unit,
-    onNavigateToApplications: () -> Unit
+    onNavigateToApplications: () -> Unit,
+    onNavigateToOrders: () -> Unit, // NEW
 ) {
     Scaffold(
         topBar = {
@@ -124,7 +126,8 @@ fun AdminDashboardContent(
                         value = todayOrders.toString(),
                         modifier = Modifier.weight(1f),
                         containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                        onClick = onNavigateToOrders
                     )
                     DashboardCard(
                         title = "Users",
@@ -223,10 +226,11 @@ private fun DashboardCard(
     value: String,
     modifier: Modifier = Modifier,
     containerColor: Color = MaterialTheme.colorScheme.primaryContainer,
-    contentColor: Color = MaterialTheme.colorScheme.onPrimaryContainer
+    contentColor: Color = MaterialTheme.colorScheme.onPrimaryContainer,
+    onClick: (() -> Unit)? = null // NEW
 ) {
     Card(
-        modifier = modifier,
+        modifier = modifier.then(if (onClick != null) Modifier.clickable { onClick() } else Modifier),
         colors = CardDefaults.cardColors(containerColor = containerColor, contentColor = contentColor),
         shape = MaterialTheme.shapes.large
     ) {

@@ -54,6 +54,7 @@ sealed class Route(val route: String) {
     // Admin Screens
     data object AdminDashboard : Route("admin_dashboard")
     data object AdminApplications : Route("admin_applications")
+    data object AdminOrders : Route("admin_orders")
     data object AdminSettings : Route("admin_settings")
 
     // DETAIL SCREEN

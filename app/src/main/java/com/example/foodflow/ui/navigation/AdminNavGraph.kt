@@ -6,6 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.example.foodflow.ui.screens.admin.AdminCategoryScreen
 import com.example.foodflow.ui.screens.admin.AdminDashboardScreen
+import com.example.foodflow.ui.screens.admin.AdminOrdersScreen
 import com.example.foodflow.ui.screens.admin.ApplicationScreen
 import com.example.foodflow.ui.screens.admin.SettingsScreen
 import com.example.foodflow.ui.screens.common.ProfileScreen
@@ -29,6 +30,9 @@ fun NavGraphBuilder.adminGraph(
         }
         composable(Route.AdminCategories.route) {
             AdminCategoryScreen(navController)
+        }
+        composable(Route.AdminOrders.route) {
+            AdminOrdersScreen(navController = navController)
         }
         composable(Route.AdminSettings.route) {
             SettingsScreen()
