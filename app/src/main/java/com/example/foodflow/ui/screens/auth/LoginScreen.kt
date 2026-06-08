@@ -2,11 +2,15 @@ package com.example.foodflow.ui.screens.auth
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -95,31 +99,69 @@ fun LoginContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
+            .padding(horizontal = 24.dp, vertical = 32.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Welcome Back", style = MaterialTheme.typography.headlineMedium)
-        Spacer(modifier = Modifier.height(24.dp))
+        // ── Branded Header ──
+        // Uses your Theme's displayLarge or headlineLarge (Playfair Display)
+        Text(
+            text = "Welcome Back",
+            style = MaterialTheme.typography.headlineLarge,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(modifier = Modifier.height(4.dp))
 
+        // Uses your Theme's bodyMedium (Open Sans)
+        Text(
+            text = "Sign in to continue ordering your favorites",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // ── Social Login ──
         GoogleSignInButton(
             webClientId = webClientId,
             onTokenReceived = onGoogleSignInTokenReceived,
             onError = onGoogleSignInError
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
-        Text("OR", modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
+        // ── Visual Divider ──
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            HorizontalDivider(
+                modifier = Modifier.weight(1f),
+                color = MaterialTheme.colorScheme.outlineVariant
+            )
+            Text(
+                text = "  OR  ",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            HorizontalDivider(
+                modifier = Modifier.weight(1f),
+                color = MaterialTheme.colorScheme.outlineVariant
+            )
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // ── Input Fields ──
+        // Assuming FoodFlowTextField uses MaterialTheme.typography internally (Open Sans)
         FoodFlowTextField(
             value = email,
             onValueChange = onEmailChange,
-            label = "Email",
+            label = "Email Address",
             keyboardType = KeyboardType.Email,
             imeAction = ImeAction.Next
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         FoodFlowPasswordField(
             value = password,
@@ -127,38 +169,72 @@ fun LoginContent(
             label = "Password",
             imeAction = ImeAction.Done
         )
-        Spacer(modifier = Modifier.height(16.dp))
 
+        // ── Forgot Password (Align End) ──
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End
+        ) {
+            TextButton(onClick = onForgotPasswordClick, contentPadding = PaddingValues(0.dp)) {
+                Text(
+                    text = "Forgot Password?",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary // Brand Red
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // ── Primary CTA ──
+        // FoodFlowLoadingButton should automatically use primary color (Red)
         FoodFlowLoadingButton(
             text = "Login",
             onClick = { onEmailLoginClick(email, password) },
             isLoading = authState is AuthState.Loading
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
-        TextButton(onClick = onForgotPasswordClick) {
-            Text("Forgot Password?")
+        // ── Register Link ──
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = "Don't have an account?",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            TextButton(onClick = onNavigateToRegister, contentPadding = PaddingValues(0.dp)) {
+                Text(
+                    text = "Register",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.primary // Brand Red
+                )
+            }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        TextButton(onClick = onNavigateToRegister) {
-            Text("Don't have an account? Register")
-        }
-
+        // ── Error / Info States ──
         if (authState is AuthState.Error) {
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = (authState as AuthState.Error).message,
-                color = MaterialTheme.colorScheme.error
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                textAlign = TextAlign.Center
             )
         }
 
         if (authState is AuthState.PasswordResetSent) {
+            Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = "Password reset email sent!",
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.primary, // Brand Red
+                style = MaterialTheme.typography.bodySmall,
+                textAlign = TextAlign.Center
             )
         }
     }

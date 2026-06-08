@@ -2,10 +2,16 @@ package com.example.foodflow.ui.screens.auth
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -20,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.foodflow.ui.components.common.FoodFlowLoadingButton
@@ -96,21 +103,38 @@ fun RegisterContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
+            .verticalScroll(rememberScrollState()) // Prevents breaking when keyboard opens
+            .padding(horizontal = 24.dp, vertical = 32.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Create Account", style = MaterialTheme.typography.headlineMedium)
-        Spacer(modifier = Modifier.height(24.dp))
+        // ── Branded Header ──
+        // Uses your Theme's headlineLarge (Playfair Display)
+        Text(
+            text = "Create Account",
+            style = MaterialTheme.typography.headlineLarge,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(modifier = Modifier.height(4.dp))
 
+        // Uses your Theme's bodyMedium (Open Sans)
+        Text(
+            text = "Join us to start ordering your favorites",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // ── Input Fields ──
         FoodFlowTextField(
             value = email,
             onValueChange = onEmailChange,
-            label = "Email",
+            label = "Email Address",
             keyboardType = KeyboardType.Email,
             imeAction = ImeAction.Next
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         FoodFlowPasswordField(
             value = password,
@@ -118,7 +142,7 @@ fun RegisterContent(
             label = "Password",
             imeAction = ImeAction.Next
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         FoodFlowPasswordField(
             value = confirmPassword,
@@ -126,25 +150,48 @@ fun RegisterContent(
             label = "Confirm Password",
             imeAction = ImeAction.Done
         )
-        Spacer(modifier = Modifier.height(16.dp))
 
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // ── Primary CTA ──
         FoodFlowLoadingButton(
             text = "Register",
             onClick = onRegister,
             isLoading = authState is AuthState.Loading
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
-        TextButton(onClick = onNavigateToLogin) {
-            Text("Already have an account? Login")
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // ── Login Link ──
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = "Already have an account?",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            TextButton(onClick = onNavigateToLogin, contentPadding = PaddingValues(0.dp)) {
+                Text(
+                    text = "Login",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.primary // Brand Red
+                )
+            }
         }
 
+        // ── Error Handling ──
         val errorMessage = localError ?: (authState as? AuthState.Error)?.message
         if (errorMessage != null) {
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = errorMessage,
-                color = MaterialTheme.colorScheme.error
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                textAlign = TextAlign.Center
             )
         }
     }
