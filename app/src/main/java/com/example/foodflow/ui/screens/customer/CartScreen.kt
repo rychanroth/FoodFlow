@@ -74,12 +74,10 @@ fun CartScreen(
             val orderId = cartViewModel.lastOrderId ?: ""
 
             if (cartViewModel.lastPaymentMethod == PaymentMethod.BANK_TRANSFER) {
-                // For bank transfer, still go to payment instructions first
                 navController.navigate(Route.PaymentInstruction.route) {
                     popUpTo(Route.CustomerHome.route) { inclusive = false }
                 }
             } else {
-                // For COD, go straight to success screen!
                 navController.navigate(Route.OrderSuccess.createRoute(orderId)) {
                     popUpTo(Route.CustomerHome.route) { inclusive = false }
                 }
@@ -140,19 +138,6 @@ fun CartScreen(
         onIncreaseClick = { cartViewModel.increaseQuantity(it) },
         onDecreaseClick = { cartViewModel.decreaseQuantity(it) }
     )
-
-    LaunchedEffect(checkoutState) {
-        if (checkoutState is CheckoutState.Success) {
-            if (cartViewModel.lastPaymentMethod == PaymentMethod.BANK_TRANSFER) {
-                navController.navigate(Route.PaymentInstruction.route)
-            } else {
-                navController.navigate(Route.CustomerHome.route) {
-                    popUpTo(Route.CustomerHome.route) { inclusive = true }
-                }
-            }
-            cartViewModel.resetCheckoutState()
-        }
-    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
