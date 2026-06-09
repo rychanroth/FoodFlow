@@ -5,8 +5,10 @@ import android.graphics.Bitmap
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -14,12 +16,16 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -43,6 +49,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.foodflow.data.model.AppUser
 import com.example.foodflow.data.model.Order
+import com.example.foodflow.data.model.OrderStatus
 import com.example.foodflow.data.model.UserRole
 import com.example.foodflow.ui.components.common.OrderShareableCard
 import com.example.foodflow.ui.navigation.Route
@@ -52,7 +59,6 @@ import com.example.foodflow.ui.viewmodel.OrderDetailViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
-import androidx.compose.foundation.layout.Row
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -119,7 +125,11 @@ fun OrderDetailScreen(
             onRestaurantClick = { restaurantId ->
                 navController.navigate(Route.RestaurantDetail.createRoute(restaurantId))
             },
-            onDriverClick = { }
+            onDriverClick = { },
+            onVerifyBankPayment = { viewModel.verifyBankPayment(order.id) },
+            onAcceptOrder = { viewModel.acceptOrder(order.id) },
+            onRejectOrder = { viewModel.rejectOrder(order.id) },
+            onMarkReady = { viewModel.markReadyForPickup(order.id) }
         )
     }
 }
@@ -138,6 +148,10 @@ fun OrderDetailContent(
     onCustomerClick: () -> Unit,
     onRestaurantClick: (String) -> Unit,
     onDriverClick: () -> Unit,
+    onVerifyBankPayment: () -> Unit = {},
+    onAcceptOrder: () -> Unit = {},
+    onRejectOrder: () -> Unit = {},
+    onMarkReady: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -155,6 +169,18 @@ fun OrderDetailContent(
                     }
                 }
             )
+        },
+        bottomBar = {
+            if (userRole == UserRole.RESTAURANT || userRole == UserRole.DRIVER) {
+                OrderActionBottomBar(
+                    order = order,
+                    userRole = userRole,
+                    onVerifyBankPayment = onVerifyBankPayment,
+                    onAcceptOrder = onAcceptOrder,
+                    onRejectOrder = onRejectOrder,
+                    onMarkReady = onMarkReady
+                )
+            }
         },
         modifier = modifier
     ) { innerPadding ->
@@ -223,3 +249,64 @@ fun OrderDetailContent(
         }
     }
 }
+
+@Composable
+private fun OrderActionBottomBar(
+    order: Order,
+    userRole: UserRole,
+    onVerifyBankPayment: () -> Unit,
+    onAcceptOrder: () -> Unit,
+    onRejectOrder: () -> Unit,
+    onMarkReady: () -> Unit
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shadowElevation = 16.dp,
+        color = MaterialTheme.colorScheme.surface
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(16.dp)
+                .navigationBarsPadding(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            if (userRole == UserRole.RESTAURANT) {
+                when (order.status) {
+                    OrderStatus.PENDING_PAYMENT_VERIFICATION -> {
+                        OutlinedButton(
+                            onClick = onRejectOrder,
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                        ) { Text("Reject") }
+                        Button(onClick = onVerifyBankPayment, modifier = Modifier.weight(1f)) { Text("Verify Payment") }
+                    }
+                    OrderStatus.PLACED -> {
+                        OutlinedButton(
+                            onClick = onRejectOrder,
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                        ) { Text("Reject") }
+                        Button(onClick = onAcceptOrder, modifier = Modifier.weight(1f)) { Text("Accept Order") }
+                    }
+                    OrderStatus.PREPARING -> {
+                        Button(onClick = onMarkReady, modifier = Modifier.fillMaxWidth()) { Text("Mark Ready for Pickup") }
+                    }
+                    else -> { /* No actions for READY, DELIVERED, REJECTED */ }
+                }
+            }
+
+            // Placeholder for Driver Actions
+            if (userRole == UserRole.DRIVER) {
+                when (order.status) {
+                    OrderStatus.READY -> {
+                        Button(onClick = { /* TODO: Claim Order */ }, modifier = Modifier.fillMaxWidth()) { Text("Accept Delivery") }
+                    }
+                    OrderStatus.ON_THE_WAY -> {
+                        Button(onClick = { /* TODO: Mark Delivered */ }, modifier = Modifier.fillMaxWidth()) { Text("Mark Delivered") }
+                    }
+                    else -> { /* No actions */ }
+                }
+            }
+        }
+    }
+    }

@@ -125,7 +125,6 @@ fun AppNavigation(
                 route = Route.OrderDetail.route,
                 arguments = listOf(navArgument("orderId") { type = NavType.StringType })
             ) {
-                // Pass authViewModel so the screen knows the user's role!
                 OrderDetailScreen(navController = navController, authViewModel = authViewModel)
             }
 

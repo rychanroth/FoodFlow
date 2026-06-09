@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.example.foodflow.data.model.Order
+import com.example.foodflow.data.model.OrderStatus
 import com.example.foodflow.data.repository.OrderRepository
 import com.example.foodflow.data.repository.ProfileRepository
 import com.example.foodflow.ui.state.OrderDetailUiState
@@ -60,5 +61,30 @@ class OrderDetailViewModel(
                 if (result.isSuccess) _state.update { it.copy(driver = result.getOrNull()) }
             }
         }
+    }
+
+    fun verifyBankPayment(orderId: String) {
+        viewModelScope.launch { orderRepository.updateOrderStatus(orderId, OrderStatus.PLACED) }
+    }
+
+    fun acceptOrder(orderId: String) {
+        viewModelScope.launch { orderRepository.updateOrderStatus(orderId, OrderStatus.PREPARING) }
+    }
+
+    fun rejectOrder(orderId: String) {
+        viewModelScope.launch { orderRepository.updateOrderStatus(orderId, OrderStatus.REJECTED) }
+    }
+
+    fun markReadyForPickup(orderId: String) {
+        viewModelScope.launch { orderRepository.updateOrderStatus(orderId, OrderStatus.READY) }
+    }
+
+    // We will implement Driver actions in the Driver module later, but placeholder for now
+    fun claimOrder(orderId: String, driverId: String) {
+        viewModelScope.launch { orderRepository.acceptOrder(orderId, driverId) }
+    }
+
+    fun markAsDelivered(orderId: String) {
+        viewModelScope.launch { orderRepository.markAsDelivered(orderId) }
     }
 }
