@@ -19,16 +19,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.foodflow.data.model.UserRole
 import com.example.foodflow.ui.components.bottombar.AdminBottomBar
 import com.example.foodflow.ui.components.bottombar.CustomerBottomBar
 import com.example.foodflow.ui.components.bottombar.DriverBottomBar
 import com.example.foodflow.ui.components.bottombar.RestaurantBottomBar
 import com.example.foodflow.ui.screens.auth.OnboardingScreen
+import com.example.foodflow.ui.screens.common.OrderDetailScreen
+import com.example.foodflow.ui.screens.common.ProfileScreen
 import com.example.foodflow.ui.state.AuthState
 import com.example.foodflow.ui.viewmodel.AuthViewModel
 import com.example.foodflow.ui.viewmodel.CartViewModel
@@ -90,21 +94,14 @@ fun AppNavigation(
     }
 
     // Determine which Bottom Bar to show based on the PARENT GRAPH
-    val bottomBar: @Composable () -> Unit = when (currentGraphRoute) {
-        Route.CustomerGraph.route -> {
-            { CustomerBottomBar(navController = navController, currentRoute = currentRoute) }
-        }
-        Route.RestaurantGraph.route -> {
-            { RestaurantBottomBar(navController = navController, currentRoute = currentRoute) }
-        }
-        Route.DriverGraph.route -> {
-            { DriverBottomBar(navController = navController, currentRoute = currentRoute) }
-        }
-        Route.AdminGraph.route -> {
-            { AdminBottomBar(navController = navController, currentRoute = currentRoute) }
-        }
-        else -> {
-            { } // No bottom bar for Auth graph
+    val bottomBar: @Composable () -> Unit = {
+        if (authState is AuthState.Success && user != null) {
+            when (user!!.role) {
+                UserRole.CUSTOMER -> CustomerBottomBar(navController, currentRoute)
+                UserRole.RESTAURANT -> RestaurantBottomBar(navController, currentRoute)
+                UserRole.DRIVER -> DriverBottomBar(navController, currentRoute)
+                UserRole.ADMIN -> AdminBottomBar(navController, currentRoute)
+            }
         }
     }
 
@@ -119,9 +116,19 @@ fun AppNavigation(
             startDestination = startDestination,
             modifier = modifier.padding(paddingValues)
         ) {
+            // Global Shared Screens
             composable(Route.Onboarding.route) {
                 OnboardingScreen(navController, authViewModel)
             }
+            composable(Route.Profile.route) { ProfileScreen(navController, authViewModel) }
+            composable(
+                route = Route.OrderDetail.route,
+                arguments = listOf(navArgument("orderId") { type = NavType.StringType })
+            ) {
+                // Pass authViewModel so the screen knows the user's role!
+                OrderDetailScreen(navController = navController, authViewModel = authViewModel)
+            }
+
             // Delegating all screen routing to their respective graphs!
             authGraph(navController, authViewModel)
             customerGraph(navController, authViewModel, cartViewModel, settingsViewModel, snackbarHostState)

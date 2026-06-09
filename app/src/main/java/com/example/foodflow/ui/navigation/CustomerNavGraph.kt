@@ -9,12 +9,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import com.example.foodflow.ui.screens.common.MenuItemDetailScreen
-import com.example.foodflow.ui.screens.common.OrderDetailScreen
-import com.example.foodflow.ui.screens.common.ProfileScreen
 import com.example.foodflow.ui.screens.customer.CartScreen
 import com.example.foodflow.ui.screens.customer.CatalogScreen
+import com.example.foodflow.ui.screens.customer.CustomerHomeScreen
 import com.example.foodflow.ui.screens.customer.FavoritesScreen
-import com.example.foodflow.ui.screens.customer.HomeScreen
 import com.example.foodflow.ui.screens.customer.OrderSuccessScreen
 import com.example.foodflow.ui.screens.customer.OrdersScreen
 import com.example.foodflow.ui.screens.customer.PaymentInstructionScreen
@@ -41,7 +39,7 @@ fun NavGraphBuilder.customerGraph(
 
         composable(Route.CustomerHome.route) {
             val customerViewModel: CustomerHomeViewModel = viewModel()
-            HomeScreen(navController, authViewModel, customerViewModel, cartViewModel)
+            CustomerHomeScreen(navController, authViewModel, customerViewModel, cartViewModel)
         }
 
         composable(Route.CustomerSearch.route) {
@@ -110,16 +108,6 @@ fun NavGraphBuilder.customerGraph(
         composable(Route.CustomerOrders.route) {
             OrdersScreen(navController, authViewModel)
         }
-
-        composable(
-            route = Route.OrderDetail.route,
-            arguments = listOf(navArgument("orderId") { type = NavType.StringType })
-        ) {
-            OrderDetailScreen(
-                navController = navController,
-                authViewModel = authViewModel
-            )
-        }
         composable(
             route = Route.OrderSuccess.route,
             arguments = listOf(navArgument("orderId") { type = NavType.StringType })
@@ -133,9 +121,6 @@ fun NavGraphBuilder.customerGraph(
         ) { backStackEntry ->
             val orderId = backStackEntry.arguments?.getString("orderId")
             OrderSuccessScreen(navController, orderId)
-        }
-        composable(Route.Profile.route) {
-            ProfileScreen(navController, authViewModel)
         }
         composable(Route.Favorites.route) {
             FavoritesScreen(

@@ -109,7 +109,6 @@ fun RegisterContent(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // ── Branded Header ──
-        // Uses your Theme's headlineLarge (Playfair Display)
         Text(
             text = "Create Account",
             style = MaterialTheme.typography.headlineLarge,
@@ -117,7 +116,6 @@ fun RegisterContent(
         )
         Spacer(modifier = Modifier.height(4.dp))
 
-        // Uses your Theme's bodyMedium (Open Sans)
         Text(
             text = "Join us to start ordering your favorites",
             style = MaterialTheme.typography.bodyMedium,

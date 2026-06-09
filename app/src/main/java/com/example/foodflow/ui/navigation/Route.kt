@@ -11,10 +11,12 @@ sealed class Route(val route: String) {
     data object AdminGraph : Route("admin_graph")
 
     // Global Screens
-    data object Settings : Route("settings")
     data object Profile : Route("profile")
     data object Favorites : Route("favorites")
     data object Onboarding : Route("onboarding") // NEW V3
+    data object OrderDetail : Route("customer_order_detail/{orderId}") {
+        fun createRoute(orderId: String) = "customer_order_detail/$orderId"
+    }
 
 
     // Auth Screens
@@ -39,7 +41,6 @@ sealed class Route(val route: String) {
     data object RestaurantDetail : Route("restaurant_detail/{restaurantId}") {
         fun createRoute(restaurantId: String) = "restaurant_detail/$restaurantId"
     }
-    data object Apply : Route("apply")
 
     // Restaurant Screens
     data object RestaurantHome : Route("restaurant_home")
@@ -49,7 +50,7 @@ sealed class Route(val route: String) {
 
     // Driver Screens
     data object DriverHome : Route("driver_home")
-    object DriverEarnings : Route("driver_earnings")
+    data object DriverEarnings : Route("driver_earnings")
 
     // Admin Screens
     data object AdminDashboard : Route("admin_dashboard")
@@ -58,9 +59,6 @@ sealed class Route(val route: String) {
     data object AdminSettings : Route("admin_settings")
 
     // DETAIL SCREEN
-    object OrderDetail : Route("order_detail/{orderId}") {
-        fun createRoute(orderId: String) = "order_detail/$orderId"
-    }
     data object MenuItemDetail : Route("menu_item_detail/{menuItemId}") {
         fun createRoute(menuItemId: String) = "menu_item_detail/$menuItemId"
     }

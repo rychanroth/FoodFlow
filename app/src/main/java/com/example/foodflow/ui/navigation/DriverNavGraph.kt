@@ -3,11 +3,8 @@ package com.example.foodflow.ui.navigation
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavType
 import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
 import androidx.navigation.navigation
-import com.example.foodflow.ui.screens.common.OrderDetailScreen
 import com.example.foodflow.ui.screens.common.ProfileScreen
 import com.example.foodflow.ui.screens.driver.EarningsScreen
 import com.example.foodflow.ui.screens.driver.HomeScreen
@@ -29,15 +26,6 @@ fun NavGraphBuilder.driverGraph(
         }
         composable(Route.DriverEarnings.route) {
             EarningsScreen(navController, authViewModel)
-        }
-        composable(
-            route = Route.OrderDetail.route,
-            arguments = listOf(navArgument("orderId") { type = NavType.StringType })
-        ) {
-            OrderDetailScreen(
-                navController = navController,
-                authViewModel = authViewModel
-            )
         }
         composable(Route.Profile.route) {
             ProfileScreen(navController, authViewModel)
