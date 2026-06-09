@@ -2,6 +2,8 @@ package com.example.foodflow.ui.screens.customer
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -9,8 +11,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -24,6 +29,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -44,7 +50,7 @@ import com.example.foodflow.ui.viewmodel.CartViewModel
 import com.example.foodflow.ui.viewmodel.CustomerHomeViewModel
 
 @Composable
-fun HomeScreen(
+fun CustomerHomeScreen(
     navController: NavController,
     authViewModel: AuthViewModel,
     customerViewModel: CustomerHomeViewModel = viewModel(),
@@ -76,7 +82,6 @@ fun HomeScreen(
         newlyAddedItems = newlyAddedItems,
         restaurants = restaurants,
         isLoading = isLoading,
-        cartItemCount = cartItemCount,
         onLogoutClick = { authViewModel.logout() },
         onCategoryClick = { categoryId, categoryName ->
             navController.navigate(Route.Catalog.createRoute(categoryId, categoryName))
@@ -96,11 +101,10 @@ fun HomeScreen(
         onRestaurantClick = { restaurantId ->
             navController.navigate(Route.RestaurantDetail.createRoute(restaurantId))
         },
-        onNavigateToProfile = { navController.navigate(Route.Profile.route) }
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun CustomerHomeContent(
     user: AppUser?,
@@ -109,16 +113,16 @@ fun CustomerHomeContent(
     newlyAddedItems: List<MenuItem>,
     restaurants: List<AppUser>,
     isLoading: Boolean,
-    cartItemCount: Int,
     onLogoutClick: () -> Unit,
     onCategoryClick: (String, String) -> Unit,
-    onSeeAllCategoriesClick: () -> Unit, // NEW
+    onSeeAllCategoriesClick: () -> Unit,
     onPromoClick: (String) -> Unit,
     onMenuItemClick: (String) -> Unit,
     onAddToCartClick: (MenuItem) -> Unit,
     onRestaurantClick: (String) -> Unit,
-    onNavigateToProfile: () -> Unit
 ) {
+    val columns = rememberGridColumnCount()
+
     Scaffold(
         topBar = {
             HomeTopBar(
@@ -132,18 +136,20 @@ fun CustomerHomeContent(
                 CircularProgressIndicator()
             }
         } else {
-            LazyColumn(
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(columns),
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
                     .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(24.dp),
-                contentPadding = PaddingValues(vertical = 16.dp)
+                contentPadding = PaddingValues(vertical = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 // --- SECTION 1: CATEGORIES ---
                 if (categories.isNotEmpty()) {
-                    item {
-                        // Updated Header with See All button
+                    // Header spans full width
+                    item(span = { GridItemSpan(maxLineSpan) }) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -154,83 +160,75 @@ fun CustomerHomeContent(
                                 Text("See All", color = MaterialTheme.colorScheme.primary)
                             }
                         }
+                    }
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                    // Categories wrapper spans full width
+                    val itemsToShow = if (columns == 6) categories.take(6) else categories.take(4)
 
-                        // Keep the 2-column grid logic here...
-                        categories.take(4).chunked(2).forEach { rowCategories ->
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                rowCategories.forEach { category ->
-                                    CategoryCard(
-                                        category = category,
-                                        onClick = { onCategoryClick(category.id, category.name) },
-                                        modifier = Modifier.weight(1f)
-                                    )
-                                }
-                                // If the row has only 1 item, fill the remaining space to keep alignment
-                                if (rowCategories.size < 2) {
-                                    Spacer(modifier = Modifier.weight(1f))
-                                }
-                            }
-                            Spacer(modifier = Modifier.height(12.dp))
-                        }
+                    items(itemsToShow, key = { it.id }) { category ->
+                        CategoryCard(
+                            category = category,
+                            onClick = { onCategoryClick(category.id, category.name) },
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     }
                 }
 
                 // --- SECTION 2: PROMOTIONS ---
                 if (promotions.isNotEmpty()) {
-                    item {
-                        SectionHeader(title = "Deals For You")
-                        Spacer(modifier = Modifier.height(8.dp))
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        Column {
+                            SectionHeader(title = "Deals For You")
+                            Spacer(modifier = Modifier.height(8.dp))
 
-                        LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            items(promotions) { promo ->
-                                PromotionBannerCard(
-                                    promotion = promo,
-                                    onClick = { onPromoClick(promo.menuItemId) }
-                                )
+                            LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                items(promotions) { promo ->
+                                    PromotionBannerCard(
+                                        promotion = promo,
+                                        onClick = { onPromoClick(promo.menuItemId) }
+                                    )
+                                }
                             }
                         }
                     }
                 }
 
                 // --- SECTION 3: NEWLY ADDED ---
-                item {
+                item(span = { GridItemSpan(maxLineSpan) }) {
                     SectionHeader(title = "Newly Added")
-                    Spacer(modifier = Modifier.height(8.dp))
                 }
 
                 if (newlyAddedItems.isEmpty()) {
-                    item { Text("No new items yet.", style = MaterialTheme.typography.bodyMedium) }
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        Text("No new items yet.", style = MaterialTheme.typography.bodyMedium)
+                    }
                 } else {
-                    items(newlyAddedItems) { item ->
+                    // ✅ GRID ITEMS: Automatically falls into the adaptive columns
+                    items(newlyAddedItems, key = { it.id }, span = { GridItemSpan(maxLineSpan) }) { item ->
                         CustomerMenuItemCard(
                             item = item,
                             onItemClick = { onMenuItemClick(item.id) },
                             onAddToCartClick = { onAddToCartClick(item) }
                         )
-                        Spacer(modifier = Modifier.height(2.dp))
                     }
                 }
 
                 // --- SECTION 4: RESTAURANTS ---
-                item {
+                item(span = { GridItemSpan(maxLineSpan) }) {
                     SectionHeader(title = "Restaurants")
-                    Spacer(modifier = Modifier.height(8.dp))
                 }
 
                 if (restaurants.isEmpty()) {
-                    item { Text("No restaurants available.", style = MaterialTheme.typography.bodyMedium) }
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        Text("No restaurants available.", style = MaterialTheme.typography.bodyMedium)
+                    }
                 } else {
-                    items(restaurants) { restaurant ->
+                    // ✅ GRID ITEMS: Automatically falls into the adaptive columns
+                    items(restaurants, key = { it.uid }) { restaurant ->
                         RestaurantCard(
                             restaurant = restaurant,
                             onClick = { onRestaurantClick(restaurant.uid) }
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
                     }
                 }
             }
@@ -243,7 +241,18 @@ fun CustomerHomeContent(
 private fun SectionHeader(title: String) {
     Text(
         text = title,
-        style = MaterialTheme.typography.titleLarge,
+        style = MaterialTheme.typography.headlineSmall,
         fontWeight = FontWeight.Bold
     )
+}
+
+
+// Use local config to adapt to different screen
+@Composable
+fun rememberGridColumnCount(): Int {
+    val configuration = LocalConfiguration.current
+    return when {
+        configuration.screenWidthDp >= 840 -> 6
+        else -> 2
+    }
 }

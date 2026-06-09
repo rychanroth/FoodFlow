@@ -11,12 +11,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -45,7 +48,6 @@ fun CustomerMenuItemCard(
             .fillMaxWidth()
             .clickable(enabled = isAvailable) { onItemClick() }, // ✅ Disable click if inactive
         shape = MaterialTheme.shapes.medium,
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (isAvailable) MaterialTheme.colorScheme.surface
             else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
@@ -136,19 +138,24 @@ fun CustomerMenuItemCard(
 
             // ── Action Button ──
             if (isAvailable) {
-                FilledTonalButton(onClick = onAddToCartClick) {
-                    Text("Add")
+                FilledTonalIconButton(onClick = onAddToCartClick) {
+                    Icon(
+                        imageVector = Icons.Default.ShoppingCart,
+                        contentDescription = "Add to Cart"
+                    )
                 }
             } else {
-                // ✅ Visually disabled structural equivalent
-                OutlinedButton(
+                OutlinedIconButton(
                     onClick = { /* No-op */ },
                     enabled = false,
-                    colors = ButtonDefaults.outlinedButtonColors(
+                    colors = IconButtonDefaults.outlinedIconButtonColors(
                         disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
                     )
                 ) {
-                    Text("Add")
+                    Icon(
+                        imageVector = Icons.Default.ShoppingCart,
+                        contentDescription = "Sold Out"
+                    )
                 }
             }
         }
