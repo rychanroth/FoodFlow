@@ -1,0 +1,164 @@
+package com.example.foodflow.data.model
+
+import com.google.firebase.firestore.PropertyName
+
+data class AppUser(
+    val uid: String = "",
+    val email: String = "",
+    val name: String = "",
+    val phone: String = "",
+    val role: UserRole = UserRole.CUSTOMER,
+    val avatarUrl: String = "",
+    val addresses: List<Address> = emptyList(),
+    // ✅ Force Firebase to use "isProfileComplete" instead of "profileComplete"
+    @get:PropertyName("isProfileComplete")
+    @set:PropertyName("isProfileComplete")
+    var isProfileComplete: Boolean = false,
+
+    // ✅ Force Firebase to use "fcmToken" instead of "fcmtoken"
+    @get:PropertyName("fcmToken")
+    @set:PropertyName("fcmToken")
+    var fcmToken: String = ""
+)
+
+// Placeholder for addresses
+data class Address(
+    val id: String = "",
+    val street: String = "",
+    val city: String = "",
+    @get:PropertyName("isDefault")
+    @set:PropertyName("isDefault")
+    var isDefault: Boolean = false
+)
+
+enum class UserRole {
+    CUSTOMER,
+    RESTAURANT,
+    DRIVER,
+    ADMIN // NEW: Super Admin
+}package com.example.foodflow.data.model
+
+data class CartItem(
+    val menuItem: MenuItem,
+    val quantity: Int = 1
+)package com.example.foodflow.data.model
+
+data class MenuItemCategory(
+    val id: String = "",
+    val name: String = "",
+    val imageUrl: String = "",
+    val createdAt: Long = System.currentTimeMillis()
+)package com.example.foodflow.data.model
+
+import com.google.firebase.firestore.PropertyName
+
+data class MenuItem(
+    val id: String = "",
+    val restaurantId: String = "",
+    val categoryId: String = "", // NEW V3
+    val name: String = "",
+    val description: String = "",
+    val price: Double = 0.0,
+    val imageUrl: String = "",
+    val estimatedPrepTime: Int = 0, // NEW V3 (in minutes)
+    // ✅ Force Firebase to use "isActive" instead of "active"
+    @get:PropertyName("isActive")
+    @set:PropertyName("isActive")
+    var isActive: Boolean = false,
+    val createdAt: Long = System.currentTimeMillis()
+)
+    package com.example.foodflow.data.model
+
+    data class Order(
+        val id: String = "",
+        val customerId: String = "",
+        val restaurantId: String = "",
+        val driverId: String? = null,
+
+        val items: List<OrderItem> = emptyList(), // Replaces itemNames
+        val status: OrderStatus = OrderStatus.PLACED,
+        val createdAt: Long = System.currentTimeMillis(),
+
+        // Denormalized data for Detail Screens
+        val customerName: String = "Unknown Customer",
+        val restaurantName: String = "Unknown Restaurant",
+        val deliveryAddress: String = "",
+
+        // V2 Payment & Monetization Fields
+        val paymentMethod: PaymentMethod = PaymentMethod.COD,
+        val subtotal: Double = 0.0,
+        val deliveryFee: Double = 0.0,
+        val platformFee: Double = 0.0,
+        val totalAmount: Double = 0.0,
+        val restaurantEarnings: Double = 0.0,
+        val driverEarnings: Double = 0.0,
+        val platformEarnings: Double = 0.0,
+        val transactionImageUrl: String? = null
+    )
+
+    data class OrderItem(
+        val menuItemId: String = "",
+        val name: String = "",
+        val quantity: Int = 0,
+        val price: Double = 0.0,
+        val imageUrl: String = "" // NEW: Snapshot of the image at time of purchase
+    )
+
+    enum class  PaymentMethod {
+        COD,
+        BANK_TRANSFER
+    }
+
+    enum class OrderStatus {
+        PENDING_PAYMENT_VERIFICATION,
+        PLACED,
+        PREPARING,
+        READY,
+        ON_THE_WAY,
+        DELIVERED,
+        REJECTED
+    }package com.example.foodflow.data.model
+
+data class PlatformSettings(
+    val deliveryFee: Double = 2.00,          // Flat fee charged to customer
+    val platformFlatFee: Double = 1.00,       // Flat service fee charged to customer
+    val platformCommissionRate: Double = 0.10, // 10% of subtotal taken by platform
+    val driverCommissionRate: Double = 0.70,   // 70% of delivery fee given to driver
+    val platformBankAccount: String = "ABA Bank - 013572914 - FoodFlow Inc.", // For manual transfer
+    val platformBankAccountUrl: String = "https://link.payway.com.kh/aba?id=DCAA8EB9C3C9&dynamic=true&source_caller=sdk&pid=af_app_invites&link_action=abaqr&shortlink=cgokhc63&amount={amount}&created_from_app=true&acc=013572914&af_siteid=968860649&userid=DCAA8EB9C3C9&code=925945&c=abaqr&af_referrer_uid=1771668317939-0575284 "
+)package com.example.foodflow.data.model
+
+import com.google.firebase.firestore.PropertyName
+
+data class Promotion(
+    val id: String = "",
+    val restaurantId: String = "",
+    val menuItemId: String = "", // NEW V3: Links banner to a specific menu item
+    val imageUrl: String = "",
+    // ✅ Force Firebase to use "isActive" instead of "active"
+    @get:PropertyName("isActive")
+    @set:PropertyName("isActive")
+    var isActive: Boolean = false,
+    @get:PropertyName("isRejected")
+    @set:PropertyName("isRejected")
+    var isRejected: Boolean = false,
+    val createdAt: Long = System.currentTimeMillis()
+)package com.example.foodflow.data.model
+
+enum class RoleApplicationStatus { PENDING, APPROVED, REJECTED }
+
+data class RoleApplication(
+    val id: String = "",
+    val userId: String = "",
+    val userEmail: String = "",
+    val requestedRole: UserRole = UserRole.DRIVER, // Can only request DRIVER or RESTAURANT
+    val status: RoleApplicationStatus = RoleApplicationStatus.PENDING,
+    val businessDetails: String = "", // E.g., Restaurant name, Driver license ID
+    val createdAt: Long = System.currentTimeMillis()
+)package com.example.foodflow.data.model
+
+enum class ThemePreference {
+    LIGHT,
+    DARK,
+    SYSTEM
+}

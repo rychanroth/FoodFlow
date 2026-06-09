@@ -16,6 +16,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,11 +28,14 @@ import coil.compose.AsyncImage
 import com.example.foodflow.data.model.Order
 import com.example.foodflow.data.model.OrderItem
 import com.example.foodflow.data.model.UserRole
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun OrderShareableCard(
     order: Order,
-    userRole: UserRole, // NEW
+    userRole: UserRole,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -49,41 +53,45 @@ fun OrderShareableCard(
                 Text("Order Receipt", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                 OrderStatusBadge(order.status)
             }
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(4.dp))
             Text("Order #${order.id.takeLast(5)}", style = MaterialTheme.typography.bodySmall)
+
+            HorizontalDivider(Modifier.padding(vertical = 8.dp))
+
+            // NEW: Delivery Details Section
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                if (order.restaurantName.isNotBlank() && order.restaurantName != "Unknown Restaurant") {
+                    DetailRow(label = "Restaurant", value = order.restaurantName)
+                }
+                if (order.customerName.isNotBlank() && order.customerName != "Unknown Customer" && userRole != UserRole.CUSTOMER) {
+                    DetailRow(label = "Customer", value = order.customerName)
+                }
+                if (order.deliveryAddress.isNotBlank()) {
+                    DetailRow(label = "Deliver To", value = order.deliveryAddress)
+                }
+                val formattedDate = remember(order.createdAt) {
+                    if (order.createdAt > 0) {
+                        val formatter =
+                            SimpleDateFormat("MMM dd, yyyy, hh:mm a", Locale.getDefault())
+                        formatter.format(Date(order.createdAt))
+                    } else {
+                        ""
+                    }
+                }
+                if (formattedDate.isNotEmpty()) {
+                    DetailRow(
+                        label = "Created at:",
+                        value = formattedDate // ✅ FIXED: Changed from deliveryAddress to your formatted date string
+                    )
+                }
+                DetailRow(label = "Payment", value = order.paymentMethod.name.replace("_", " "))
+            }
+
             HorizontalDivider(Modifier.padding(vertical = 8.dp))
 
             // Items
             order.items.forEach { item ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    if (!item.imageUrl.isNullOrBlank()) {
-                        AsyncImage(
-                            model = item.imageUrl,
-                            contentDescription = item.name,
-                            modifier = Modifier
-                                .size(48.dp)
-                                .clip(MaterialTheme.shapes.small),
-                            contentScale = ContentScale.Crop
-                        )
-                    }
-
-                    Text(
-                        text = "${item.quantity}x ${item.name}",
-                        modifier = Modifier.weight(1f),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-
-                    Text(
-                        text = "$${String.format("%.2f", item.price * item.quantity)}",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
+                OrderItemRow(item = item)
             }
 
             HorizontalDivider(Modifier.padding(vertical = 8.dp))
