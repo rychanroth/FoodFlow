@@ -20,23 +20,23 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.foodflow.data.model.UserRole
-import com.example.foodflow.ui.state.ApplyState
+import com.example.foodflow.ui.state.RoleApplyState
 
 @Composable
-fun ApplicationDialog(
+fun RoleApplicationDialog(
     requestedRole: UserRole,
-    applyState: ApplyState,
+    applyState: RoleApplyState,
     onDismiss: () -> Unit,
     onSubmit: (UserRole, String) -> Unit
 ) {
     var businessDetails by remember { mutableStateOf("") }
-    val isLoading = applyState is ApplyState.Loading
+    val isLoading = applyState is RoleApplyState.Loading
 
     AlertDialog(
         onDismissRequest = { if (!isLoading) onDismiss() },
         title = { Text("Apply for ${requestedRole.name}") },
         text = {
-            if (applyState is ApplyState.Success) {
+            if (applyState is RoleApplyState.Success) {
                 Text("Application submitted! Our team will review it shortly.")
             } else {
                 Column {
@@ -49,7 +49,7 @@ fun ApplicationDialog(
                         modifier = Modifier.fillMaxWidth().height(120.dp),
                         enabled = !isLoading
                     )
-                    if (applyState is ApplyState.Error) {
+                    if (applyState is RoleApplyState.Error) {
                         Text(applyState.message, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
                     }
                 }
@@ -57,7 +57,7 @@ fun ApplicationDialog(
         },
         confirmButton = {
             when (applyState) {
-                is ApplyState.Success -> TextButton(onClick = onDismiss) { Text("Done") }
+                is RoleApplyState.Success -> TextButton(onClick = onDismiss) { Text("Done") }
                 else -> Button(
                     onClick = { onSubmit(requestedRole, businessDetails) },
                     enabled = !isLoading && businessDetails.isNotBlank()
@@ -68,7 +68,7 @@ fun ApplicationDialog(
             }
         },
         dismissButton = {
-            if (applyState !is ApplyState.Success) {
+            if (applyState !is RoleApplyState.Success) {
                 TextButton(onClick = onDismiss, enabled = !isLoading) { Text("Cancel") }
             }
         }

@@ -4,11 +4,16 @@ import android.content.Context
 import android.net.Uri
 import com.example.foodflow.data.model.AppUser
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.tasks.await
 
-class ProfileRepository {
+class ProfileRepository(private val context: Context) {
 
+    // Prevent memory leak by extracting the application context
+    private val appContext = context.applicationContext
     private val firestore = FirebaseFirestore.getInstance()
+    private val userPreferences = UserPreferences(appContext)
+    val favoritesFlow: Flow<Set<String>> = userPreferences.favoritesFlow
 
     suspend fun getUserProfile(userId: String): Result<AppUser> {
         return try {
@@ -29,7 +34,23 @@ class ProfileRepository {
         }
     }
 
-    suspend fun uploadImage(uri: Uri, context: Context): Result<String> {
-        return ImageUploader.upload(uri, context)
+    suspend fun uploadImage(uri: Uri, appContext: Context): Result<String> {
+        return ImageUploader.upload(uri, appContext)
+    }
+
+    suspend fun toggleFavorite(itemId: String) {
+        userPreferences.toggleFavorite(itemId)
+    }
+
+    // NEW: Specific update for addresses array
+    suspend fun updateAddresses(userId: String, addresses: List<Map<String, Any>>): Result<Unit> {
+        return try {
+            firestore.collection("users").document(userId)
+                .update("addresses", addresses)
+                .await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 }

@@ -1,9 +1,12 @@
 package com.example.foodflow.data.repository
 
-import com.google.firebase.firestore.FirebaseFirestore
-import com.example.foodflow.data.model.Application
-import com.example.foodflow.data.model.ApplicationStatus
+import android.content.Context
+import android.net.Uri
 import com.example.foodflow.data.model.PlatformSettings
+import com.example.foodflow.data.model.RoleApplication
+import com.example.foodflow.data.model.RoleApplicationStatus
+import com.google.firebase.firestore.AggregateSource
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -14,20 +17,32 @@ class AdminRepository {
     private val firestore = FirebaseFirestore.getInstance()
 
     // Fetch all PENDING applications in real-time
-    fun getPendingApplications(): Flow<List<Application>> = callbackFlow {
-        val subscription = firestore.collection("applications")
-            .whereEqualTo("status", ApplicationStatus.PENDING.name)
+    fun getPendingApplications(): Flow<List<RoleApplication>> = callbackFlow {
+        val subscription = firestore.collection("role_applications")
+            .whereEqualTo("status", RoleApplicationStatus.PENDING.name)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
                     close(error)
                     return@addSnapshotListener
                 }
                 val apps = snapshot?.documents?.mapNotNull { doc ->
-                    doc.toObject(Application::class.java)?.copy(id = doc.id)
+                    doc.toObject(RoleApplication::class.java)?.copy(id = doc.id)
                 } ?: emptyList()
                 trySend(apps)
             }
         awaitClose { subscription.remove() }
+    }
+
+
+    suspend fun getTotalUsersCount(): Result<Int> {
+        return try {
+            val query = firestore.collection("users")
+            val countQuery = query.count()
+            val snapshot = countQuery.get(AggregateSource.SERVER).await()
+            Result.success(snapshot.count.toInt())
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
     // Approve Application: Update App Status + Update User Role
@@ -35,8 +50,8 @@ class AdminRepository {
         val batch = firestore.batch()
 
         // 1. Update Application Status
-        val appRef = firestore.collection("applications").document(applicationId)
-        batch.update(appRef, "status", ApplicationStatus.APPROVED.name)
+        val appRef = firestore.collection("role_applications").document(applicationId)
+        batch.update(appRef, "status", RoleApplicationStatus.APPROVED.name)
 
         // 2. Update User's Role in Firestore
         val userRef = firestore.collection("users").document(userId)
@@ -48,8 +63,8 @@ class AdminRepository {
 
     // Reject Application: Only update App Status
     suspend fun rejectApplication(applicationId: String) {
-        val appRef = firestore.collection("applications").document(applicationId)
-        appRef.update("status", ApplicationStatus.REJECTED.name).await()
+        val appRef = firestore.collection("role_applications").document(applicationId)
+        appRef.update("status", RoleApplicationStatus.REJECTED.name).await()
     }
 
     // Fetch the current platform settings
@@ -71,5 +86,9 @@ class AdminRepository {
         } catch (e: Exception) {
             Result.failure(e)
         }
+    }
+
+    suspend fun uploadImage(uri: Uri, context: Context): Result<String> {
+        return ImageUploader.upload(uri, context)
     }
 }

@@ -1,13 +1,14 @@
 package com.example.foodflow.ui.viewmodel
 
-import kotlinx.coroutines.Job
 import android.app.Application
 import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.foodflow.data.model.MenuItem
+import com.example.foodflow.data.model.MenuItemCategory
 import com.example.foodflow.data.repository.MenuRepository
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,6 +20,10 @@ class MenuViewModel(application: Application) : AndroidViewModel(application) {
     private val firebaseAuth = FirebaseAuth.getInstance()
     private val context = application
     private var loadJob: Job? = null
+
+    private val _categories = MutableStateFlow<List<MenuItemCategory>>(emptyList())
+    val categories: StateFlow<List<MenuItemCategory>> = _categories.asStateFlow()
+
 
     private val _menuItems = MutableStateFlow<List<MenuItem>>(emptyList())
     val menuItems: StateFlow<List<MenuItem>> = _menuItems.asStateFlow()
@@ -42,22 +47,45 @@ class MenuViewModel(application: Application) : AndroidViewModel(application) {
         return firebaseAuth.currentUser?.uid
     }
 
-    fun addNewMenuItem(name: String, description: String, price: Double, imageUri: Uri?) {
+
+    init {
+        viewModelScope.launch {
+            repository.getCategories().collect { _categories.value = it }
+        }
+    }
+
+    // Update addNewMenuItem signature
+    fun addNewMenuItem(
+        name: String,
+        description: String,
+        price: Double,
+        categoryId: String,
+        isActive: Boolean,
+        estimatedPrepTime: Int,
+        imageUri: Uri?
+    ) {
         val restaurantId = getCurrentUserId() ?: return
         viewModelScope.launch {
-            val imageUrl = imageUri?.let {
-                repository.uploadImage(it, context).getOrNull()
-            } ?: ""
-
+            val imageUrl = imageUri?.let { repository.uploadImage(it, context).getOrNull() } ?: ""
             val newItem = MenuItem(
                 restaurantId = restaurantId,
                 name = name,
                 description = description,
                 price = price,
-                imageUrl = imageUrl,
-                createdAt = System.currentTimeMillis()
+                categoryId = categoryId,
+                isActive = isActive,
+                estimatedPrepTime = estimatedPrepTime, // ✅ ADDED
+                imageUrl = imageUrl
             )
             repository.addMenuItem(newItem)
+        }
+    }
+
+    // updateMenuItem already handles full object overwrite, so passing updatedItem with new fields is fine
+
+    fun setMenuItemAvailability(item: MenuItem, isActive: Boolean) {
+        viewModelScope.launch {
+            repository.updateMenuItem(item.copy(isActive = isActive))
         }
     }
 

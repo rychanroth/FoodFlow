@@ -1,11 +1,22 @@
 package com.example.foodflow.ui.components.common
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -16,60 +27,120 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.foodflow.data.model.Order
 import com.example.foodflow.data.model.OrderItem
+import com.example.foodflow.data.model.UserRole
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun OrderShareableCard(
     order: Order,
+    userRole: UserRole,
     modifier: Modifier = Modifier
 ) {
-    // White background ensures it looks good when exported as an image to WhatsApp/Messenger
-    Column(
-        modifier = modifier
-            .background(Color.White)
-            .padding(24.dp)
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.large,
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Text(
-            text = "FoodFlow Receipt",
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
-            color = Color.Black
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = "Order #${order.id.takeLast(5)}",
-            style = MaterialTheme.typography.bodySmall,
-            color = Color.Gray
-        )
+        Column(modifier = Modifier.padding(16.dp)) {
+            // Header
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("Order Receipt", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                OrderStatusBadge(order.status)
+            }
+            Spacer(Modifier.height(4.dp))
+            Text("Order #${order.id.takeLast(5)}", style = MaterialTheme.typography.bodySmall)
 
-        HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = Color.LightGray)
+            HorizontalDivider(Modifier.padding(vertical = 8.dp))
 
-        // Participants
-        DetailRow("Customer", order.customerName, valueColor = Color.Black, labelColor = Color.Gray)
-        DetailRow("Restaurant", order.restaurantName, valueColor = Color.Black, labelColor = Color.Gray)
-        DetailRow("Status", order.status.name.replace("_", " "), valueColor = Color.Black, labelColor = Color.Gray)
+            // NEW: Delivery Details Section
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                if (order.restaurantName.isNotBlank() && order.restaurantName != "Unknown Restaurant") {
+                    DetailRow(label = "Restaurant", value = order.restaurantName)
+                }
+                if (order.customerName.isNotBlank() && order.customerName != "Unknown Customer" && userRole != UserRole.CUSTOMER) {
+                    DetailRow(label = "Customer", value = order.customerName)
+                }
+                if (order.deliveryAddress.isNotBlank()) {
+                    DetailRow(label = "Deliver To", value = order.deliveryAddress)
+                }
+                val formattedDate = remember(order.createdAt) {
+                    if (order.createdAt > 0) {
+                        val formatter =
+                            SimpleDateFormat("MMM dd, yyyy, hh:mm a", Locale.getDefault())
+                        formatter.format(Date(order.createdAt))
+                    } else {
+                        ""
+                    }
+                }
+                if (formattedDate.isNotEmpty()) {
+                    DetailRow(
+                        label = "Created at:",
+                        value = formattedDate // ✅ FIXED: Changed from deliveryAddress to your formatted date string
+                    )
+                }
+                DetailRow(label = "Payment", value = order.paymentMethod.name.replace("_", " "))
+            }
 
-        HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = Color.LightGray)
+            HorizontalDivider(Modifier.padding(vertical = 8.dp))
 
-        // Items
-        order.items.forEach { item ->
-            OrderItemRow(item, textColor = Color.Black)
-        }
+            // Items
+            order.items.forEach { item ->
+                OrderItemRow(item = item)
+            }
 
-        HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = Color.LightGray)
+            HorizontalDivider(Modifier.padding(vertical = 8.dp))
 
-        // Breakdown
-        DetailRow("Subtotal", "$${"%.2f".format(order.subtotal)}", valueColor = Color.Black, labelColor = Color.Gray)
-        DetailRow("Delivery Fee", "$${"%.2f".format(order.deliveryFee)}", valueColor = Color.Black, labelColor = Color.Gray)
-        DetailRow("Platform Fee", "$${"%.2f".format(order.platformFee)}", valueColor = Color.Black, labelColor = Color.Gray)
+            // Financials - Role Based Visibility
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text("Subtotal"); Text("$${String.format("%.2f", order.subtotal)}")
+            }
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text("Delivery Fee"); Text("$${String.format("%.2f", order.deliveryFee)}")
+            }
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text("Platform Fee"); Text("$${String.format("%.2f", order.platformFee)}")
+            }
 
-        Spacer(modifier = Modifier.height(8.dp))
+            // RESTAURANT & ADMIN ONLY
+            if (userRole == UserRole.RESTAURANT || userRole == UserRole.ADMIN) {
+                HorizontalDivider(Modifier.padding(vertical = 4.dp))
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text("Restaurant Earnings", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                    Text("$${String.format("%.2f", order.restaurantEarnings)}", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                }
+            }
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text("Total", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium, color = Color.Black)
-            Text("$${"%.2f".format(order.totalAmount)}", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium, color = Color.Black)
+            // DRIVER & ADMIN ONLY
+            if (userRole == UserRole.DRIVER || userRole == UserRole.ADMIN) {
+                HorizontalDivider(Modifier.padding(vertical = 4.dp))
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text("Driver Earnings", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                    Text("$${String.format("%.2f", order.driverEarnings)}", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                }
+            }
+
+            // ADMIN ONLY
+            if (userRole == UserRole.ADMIN) {
+                HorizontalDivider(Modifier.padding(vertical = 4.dp))
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text("Platform Earnings", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
+                    Text("$${String.format("%.2f", order.platformEarnings)}", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
+                }
+            }
+
+            HorizontalDivider(Modifier.padding(vertical = 4.dp))
+
+            // Total Paid (Visible to all)
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text("Total", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+                Text("$${String.format("%.2f", order.totalAmount)}", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+            }
         }
     }
 }

@@ -3,8 +3,8 @@ package com.example.foodflow.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.foodflow.data.model.UserRole
-import com.example.foodflow.data.repository.ApplicationRepository
-import com.example.foodflow.ui.state.ApplyState
+import com.example.foodflow.data.repository.RoleApplicationRepository
+import com.example.foodflow.ui.state.RoleApplyState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -12,30 +12,30 @@ import kotlinx.coroutines.launch
 
 class ApplicationViewModel : ViewModel() {
 
-    private val repository = ApplicationRepository()
+    private val repository = RoleApplicationRepository()
 
-    private val _applyState = MutableStateFlow<ApplyState>(ApplyState.Idle)
-    val applyState: StateFlow<ApplyState> = _applyState.asStateFlow()
+    private val _applyState = MutableStateFlow<RoleApplyState>(RoleApplyState.Idle)
+    val applyState: StateFlow<RoleApplyState> = _applyState.asStateFlow()
 
     fun submitApplication(userId: String, userEmail: String, requestedRole: UserRole, businessDetails: String) {
         if (businessDetails.isBlank()) {
-            _applyState.value = ApplyState.Error("Please provide business details")
+            _applyState.value = RoleApplyState.Error("Please provide business details")
             return
         }
 
-        _applyState.value = ApplyState.Loading
+        _applyState.value = RoleApplyState.Loading
 
         viewModelScope.launch {
             val result = repository.submitApplication(userId, userEmail, requestedRole, businessDetails)
             if (result.isSuccess) {
-                _applyState.value = ApplyState.Success
+                _applyState.value = RoleApplyState.Success
             } else {
-                _applyState.value = ApplyState.Error(result.exceptionOrNull()?.message ?: "Submission failed")
+                _applyState.value = RoleApplyState.Error(result.exceptionOrNull()?.message ?: "Submission failed")
             }
         }
     }
 
     fun resetState() {
-        _applyState.value = ApplyState.Idle
+        _applyState.value = RoleApplyState.Idle
     }
 }

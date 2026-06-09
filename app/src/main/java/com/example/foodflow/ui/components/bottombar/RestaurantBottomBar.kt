@@ -1,10 +1,10 @@
 package com.example.foodflow.ui.components.bottombar
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.ReceiptLong
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -45,7 +45,7 @@ fun RestaurantBottomBar(navController: NavController, currentRoute: String?) {
             }
         )
         NavigationBarItem(
-            icon = { Icon(Icons.Default.ReceiptLong, contentDescription = "Orders") },
+            icon = { Icon(Icons.AutoMirrored.Filled.ReceiptLong, contentDescription = "Orders") },
             label = { Text("Orders") },
             selected = currentRoute == Route.RestaurantOrders.route,
             onClick = {

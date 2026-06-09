@@ -1,15 +1,15 @@
 package com.example.foodflow.data.repository
 
-import com.google.firebase.firestore.FirebaseFirestore
-import com.example.foodflow.data.model.Application
-import com.example.foodflow.data.model.ApplicationStatus
+import com.example.foodflow.data.model.RoleApplication
+import com.example.foodflow.data.model.RoleApplicationStatus
 import com.example.foodflow.data.model.UserRole
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 
-class ApplicationRepository {
+class RoleApplicationRepository {
 
     private val firestore = FirebaseFirestore.getInstance()
-    private val applicationsCollection = firestore.collection("applications")
+    private val applicationsCollection = firestore.collection("role_applications")
 
     suspend fun submitApplication(userId: String, userEmail: String, requestedRole: UserRole, businessDetails: String): Result<Unit> {
         return try {
@@ -29,15 +29,15 @@ class ApplicationRepository {
                 throw Exception("You already have a pending application for this role.")
             }
 
-            val newApplication = Application(
+            val newRoleApplication = RoleApplication(
                 userId = userId,
                 userEmail = userEmail,
                 requestedRole = requestedRole,
                 businessDetails = businessDetails,
-                status = ApplicationStatus.PENDING
+                status = RoleApplicationStatus.PENDING
             )
 
-            applicationsCollection.add(newApplication).await()
+            applicationsCollection.add(newRoleApplication).await()
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)

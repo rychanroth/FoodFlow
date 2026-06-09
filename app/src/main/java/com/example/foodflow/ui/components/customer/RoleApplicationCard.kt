@@ -18,10 +18,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.foodflow.data.model.Application
+import com.example.foodflow.data.model.RoleApplication
 
 @Composable
-fun ApplicationCard(app: Application, onApprove: () -> Unit, onReject: () -> Unit) {
+fun RoleApplicationCard(app: RoleApplication, onApprove: () -> Unit, onReject: () -> Unit) {
     Card(modifier = Modifier.fillMaxWidth(), elevation = CardDefaults.cardElevation(2.dp)) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text("Role: ${app.requestedRole.name}", style = MaterialTheme.typography.titleMedium)

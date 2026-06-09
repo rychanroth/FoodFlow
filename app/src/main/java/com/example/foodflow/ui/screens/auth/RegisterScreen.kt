@@ -2,16 +2,17 @@ package com.example.foodflow.ui.screens.auth
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -23,13 +24,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.foodflow.ui.state.AuthState
-import com.example.foodflow.ui.navigation.Route
+import com.example.foodflow.ui.components.common.FoodFlowLoadingButton
+import com.example.foodflow.ui.components.common.FoodFlowPasswordField
+import com.example.foodflow.ui.components.common.FoodFlowTextField
 import com.example.foodflow.ui.components.customer.AwaitingVerificationCard
+import com.example.foodflow.ui.navigation.Route
+import com.example.foodflow.ui.state.AuthState
 import com.example.foodflow.ui.viewmodel.AuthViewModel
+
 
 @Composable
 fun RegisterScreen(
@@ -38,21 +45,16 @@ fun RegisterScreen(
 ) {
     val authState by authViewModel.authState.collectAsState()
 
-    // Hoisted State
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var confirmPassword by remember { mutableStateOf("") } // NEW
+    var confirmPassword by remember { mutableStateOf("") }
 
-    // Local validation error state
     var localError by remember { mutableStateOf<String?>(null) }
-    
+
     LaunchedEffect(authState) {
-        if (authState is AuthState.Success) {
-            // Fix: Remove manual navigation logic, only let it handles UI State
-        }
+        if (authState is AuthState.Success) { }
     }
 
-    // Inside LoginScreen Column UI
     if (authState is AuthState.AwaitingVerification) {
         Column(
             verticalArrangement = Arrangement.Center,
@@ -64,15 +66,14 @@ fun RegisterScreen(
     } else {
         RegisterContent(
             authState = authState,
-            localError = localError, // Pass local error down
+            localError = localError,
             email = email,
             onEmailChange = { email = it; localError = null },
             password = password,
             onPasswordChange = { password = it; localError = null },
-            confirmPassword = confirmPassword, // NEW
-            onConfirmPasswordChange = { confirmPassword = it; localError = null }, // NEW
+            confirmPassword = confirmPassword,
+            onConfirmPasswordChange = { confirmPassword = it; localError = null },
             onRegister = {
-                // V2 UX: Validate locally before hitting Firebase
                 if (password != confirmPassword) {
                     localError = "Passwords do not match"
                 } else if (password.length < 6) {
@@ -86,104 +87,110 @@ fun RegisterScreen(
     }
 }
 
-// Fix: Rendering Problem
-// Problem: You can't preview a function if it has viewModel as the parameter
-// because viewModel.Firebase related instances are not initialized yet
-
 @Composable
 fun RegisterContent(
     authState: AuthState,
-    localError: String?, // NEW
+    localError: String?,
     email: String,
     onEmailChange: (String) -> Unit,
     password: String,
     onPasswordChange: (String) -> Unit,
-    confirmPassword: String, // NEW
-    onConfirmPasswordChange: (String) -> Unit, // NEW
+    confirmPassword: String,
+    onConfirmPasswordChange: (String) -> Unit,
     onRegister: () -> Unit,
     onNavigateToLogin: () -> Unit
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
+            .verticalScroll(rememberScrollState()) // Prevents breaking when keyboard opens
+            .padding(horizontal = 24.dp, vertical = 32.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Create Account", style = MaterialTheme.typography.headlineMedium)
-        Spacer(modifier = Modifier.height(24.dp))
+        // ── Branded Header ──
+        Text(
+            text = "Create Account",
+            style = MaterialTheme.typography.headlineLarge,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(modifier = Modifier.height(4.dp))
 
-        OutlinedTextField(
+        Text(
+            text = "Join us to start ordering your favorites",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // ── Input Fields ──
+        FoodFlowTextField(
             value = email,
             onValueChange = onEmailChange,
-            label = { Text("Email") },
-            modifier = Modifier.fillMaxWidth()
+            label = "Email Address",
+            keyboardType = KeyboardType.Email,
+            imeAction = ImeAction.Next
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
-        OutlinedTextField(
+        FoodFlowPasswordField(
             value = password,
             onValueChange = onPasswordChange,
-            label = { Text("Password") },
-            modifier = Modifier.fillMaxWidth()
+            label = "Password",
+            imeAction = ImeAction.Next
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
-        // NEW Confirm Password Field
-        OutlinedTextField(
+        FoodFlowPasswordField(
             value = confirmPassword,
             onValueChange = onConfirmPasswordChange,
-            label = { Text("Confirm Password") },
-            modifier = Modifier.fillMaxWidth()
+            label = "Confirm Password",
+            imeAction = ImeAction.Done
         )
-        Spacer(modifier = Modifier.height(16.dp))
 
-        Button(
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // ── Primary CTA ──
+        FoodFlowLoadingButton(
+            text = "Register",
             onClick = onRegister,
-            modifier = Modifier.fillMaxWidth(),
-            enabled = authState !is AuthState.Loading
+            isLoading = authState is AuthState.Loading
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // ── Login Link ──
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxWidth()
         ) {
-            if (authState is AuthState.Loading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(24.dp),
-                    color = MaterialTheme.colorScheme.onPrimary
+            Text(
+                text = "Already have an account?",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            TextButton(onClick = onNavigateToLogin, contentPadding = PaddingValues(0.dp)) {
+                Text(
+                    text = "Login",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.primary // Brand Red
                 )
-            } else {
-                Text("Register")
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-        TextButton(onClick = onNavigateToLogin) {
-            Text("Already have an account? Login")
-        }
-
-        // Error Handling (Prioritize local errors, then ViewModel errors)
+        // ── Error Handling ──
         val errorMessage = localError ?: (authState as? AuthState.Error)?.message
         if (errorMessage != null) {
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = errorMessage,
-                color = MaterialTheme.colorScheme.error
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                textAlign = TextAlign.Center
             )
         }
     }
-}
-
-
-@Preview(showBackground = true)
-@Composable
-fun RegisterScreenPreview() {
-    RegisterContent(
-        authState = AuthState.Idle,
-        onRegister = { -> },
-        onNavigateToLogin = {},
-        localError = TODO(),
-        email = TODO(),
-        onEmailChange = TODO(),
-        password = TODO(),
-        onPasswordChange = TODO(),
-        confirmPassword = TODO(),
-        onConfirmPasswordChange = TODO(),
-    )
 }

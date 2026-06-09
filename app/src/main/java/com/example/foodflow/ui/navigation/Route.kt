@@ -1,5 +1,7 @@
 package com.example.foodflow.ui.navigation
 
+import android.net.Uri
+
 sealed class Route(val route: String) {
     // Graph Routes (The Neighborhoods)
     data object AuthGraph : Route("auth_graph")
@@ -9,9 +11,12 @@ sealed class Route(val route: String) {
     data object AdminGraph : Route("admin_graph")
 
     // Global Screens
-    data object Settings : Route("settings")
     data object Profile : Route("profile")
+    data object Favorites : Route("favorites")
     data object Onboarding : Route("onboarding") // NEW V3
+    data object OrderDetail : Route("customer_order_detail/{orderId}") {
+        fun createRoute(orderId: String) = "customer_order_detail/$orderId"
+    }
 
 
     // Auth Screens
@@ -21,31 +26,40 @@ sealed class Route(val route: String) {
 
     // Customer Screens
     data object CustomerHome : Route("customer_home")
+    data object Catalog : Route("catalog/{categoryId}?categoryName={categoryName}") {
+        fun createRoute(categoryId: String = "", categoryName: String = ""): String {
+            return "catalog/$categoryId?categoryName=${Uri.encode(categoryName)}"
+        }
+    }
     data object CustomerSearch : Route("customer_search")
     data object Cart : Route("cart")
     data object PaymentInstruction : Route("payment_instruction")
     data object CustomerOrders : Route("customer_orders")
+    data object OrderSuccess : Route("order_success/{orderId}") {
+        fun createRoute(orderId: String) = "order_success/$orderId"
+    }
     data object RestaurantDetail : Route("restaurant_detail/{restaurantId}") {
         fun createRoute(restaurantId: String) = "restaurant_detail/$restaurantId"
     }
-    data object Apply : Route("apply")
 
     // Restaurant Screens
     data object RestaurantHome : Route("restaurant_home")
+    data object AdminCategories : Route("admin_categories")
     data object RestaurantMenuManagement : Route("restaurant_menu_management")
     data object RestaurantOrders : Route("restaurant_orders")
 
     // Driver Screens
     data object DriverHome : Route("driver_home")
-    object DriverEarnings : Route("driver_earnings")
+    data object DriverEarnings : Route("driver_earnings")
 
     // Admin Screens
     data object AdminDashboard : Route("admin_dashboard")
     data object AdminApplications : Route("admin_applications")
+    data object AdminOrders : Route("admin_orders")
     data object AdminSettings : Route("admin_settings")
 
     // DETAIL SCREEN
-    object OrderDetail : Route("order_detail/{orderId}") {
-        fun createRoute(orderId: String) = "order_detail/$orderId"
+    data object MenuItemDetail : Route("menu_item_detail/{menuItemId}") {
+        fun createRoute(menuItemId: String) = "menu_item_detail/$menuItemId"
     }
 }

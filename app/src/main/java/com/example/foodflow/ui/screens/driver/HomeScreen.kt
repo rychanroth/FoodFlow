@@ -1,15 +1,25 @@
 package com.example.foodflow.ui.screens.driver
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.foodflow.data.model.AppUser
 import com.example.foodflow.data.model.Order
+import com.example.foodflow.ui.components.common.HomeTopBar
 import com.example.foodflow.ui.components.driver.DeliveryCard
 import com.example.foodflow.ui.viewmodel.AuthViewModel
 import com.example.foodflow.ui.viewmodel.DriverOrdersViewModel
@@ -29,8 +39,10 @@ fun HomeScreen(
 
     val availableOrders by driverViewModel.availableOrders.collectAsState()
     val myActiveDeliveries by driverViewModel.myActiveDeliveries.collectAsState()
+    val user by authViewModel.currentUser.collectAsState()
 
     DriverHomeContent(
+        user = user,
         availableOrders = availableOrders,
         myActiveDeliveries = myActiveDeliveries,
         onAcceptClick = { orderId -> driverViewModel.acceptOrder(orderId, currentDriverId) },
@@ -42,6 +54,7 @@ fun HomeScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DriverHomeContent(
+    user: AppUser?,
     availableOrders: List<Order>,
     myActiveDeliveries: List<Order>,
     onAcceptClick: (String) -> Unit,
@@ -50,11 +63,9 @@ fun DriverHomeContent(
 ) {
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Driver Dashboard 🛵") },
-                actions = {
-                    TextButton(onClick = onLogoutClick) { Text("Logout") }
-                }
+            HomeTopBar(
+                userName = user?.name,
+                onLogoutClick = onLogoutClick
             )
         }
     ) { paddingValues ->

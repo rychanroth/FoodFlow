@@ -1,8 +1,9 @@
 package com.example.foodflow.ui.viewmodel
 
+import android.app.Application
 import android.content.Context
 import android.net.Uri
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.foodflow.data.repository.AuthRepository
 import com.example.foodflow.data.repository.ProfileRepository
@@ -12,8 +13,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class OnboardingViewModel : ViewModel() {
-    private val profileRepository = ProfileRepository()
+class OnboardingViewModel(application: Application) : AndroidViewModel(application) {
+    private val profileRepository = ProfileRepository(getApplication())
     private val authRepository = AuthRepository()
 
     private val _onboardingState = MutableStateFlow<OnboardingState>(OnboardingState.Idle)

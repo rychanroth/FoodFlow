@@ -8,23 +8,31 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.foodflow.data.model.UserRole
 import com.example.foodflow.ui.components.bottombar.AdminBottomBar
 import com.example.foodflow.ui.components.bottombar.CustomerBottomBar
 import com.example.foodflow.ui.components.bottombar.DriverBottomBar
 import com.example.foodflow.ui.components.bottombar.RestaurantBottomBar
 import com.example.foodflow.ui.screens.auth.OnboardingScreen
+import com.example.foodflow.ui.screens.common.OrderDetailScreen
+import com.example.foodflow.ui.screens.common.ProfileScreen
 import com.example.foodflow.ui.state.AuthState
 import com.example.foodflow.ui.viewmodel.AuthViewModel
 import com.example.foodflow.ui.viewmodel.CartViewModel
@@ -40,6 +48,9 @@ fun AppNavigation(
     val authState by authViewModel.authState.collectAsState()
     val user by authViewModel.currentUser.collectAsState()
 
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+
     // V2 FIX: Scope CartViewModel to the Activity so it's shared across all screens in CustomerNavGraph!
     val cartViewModel: CartViewModel = viewModel(LocalActivity.current as ComponentActivity)
 
@@ -49,10 +60,15 @@ fun AppNavigation(
     // Get the parent graph route (e.g., "customer_graph")
     val currentGraphRoute = navBackStackEntry?.destination?.parent?.route
 
-    // Determine start destination based purely on Auth State
+    // FIX: Wait for BOTH Auth state AND Firestore user profile before routing.
+    // If authState is Success but user is null, Firestore is still loading.
+    // We must wait so we don't falsely route to Onboarding based on a default isProfileComplete = false.
     val startDestination = when (authState) {
         is AuthState.Success -> {
-            if (user?.isProfileComplete == false) {
+            val currentUser = user // Capture for smart casting
+            if (currentUser == null) {
+                null // Wait! Don't route yet, Firestore profile is still loading.
+            } else if (!currentUser.isProfileComplete) {
                 Route.Onboarding.route
             } else {
                 val role = (authState as AuthState.Success).role
@@ -69,6 +85,7 @@ fun AppNavigation(
         else -> Route.AuthGraph.route
     }
 
+    // Show loading spinner while waiting for Auth and Firestore profile to resolve
     if (startDestination == null) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
@@ -77,40 +94,43 @@ fun AppNavigation(
     }
 
     // Determine which Bottom Bar to show based on the PARENT GRAPH
-    val bottomBar: @Composable () -> Unit = when (currentGraphRoute) {
-        Route.CustomerGraph.route -> {
-            { CustomerBottomBar(navController = navController, currentRoute = currentRoute) }
-        }
-        Route.RestaurantGraph.route -> {
-            { RestaurantBottomBar(navController = navController, currentRoute = currentRoute) }
-        }
-        Route.DriverGraph.route -> {
-            { DriverBottomBar(navController = navController, currentRoute = currentRoute) }
-        }
-        Route.AdminGraph.route -> {
-            { AdminBottomBar(navController = navController, currentRoute = currentRoute) }
-        }
-        else -> {
-            { } // No bottom bar for Auth graph
+    val bottomBar: @Composable () -> Unit = {
+        if (authState is AuthState.Success && user != null) {
+            when (user!!.role) {
+                UserRole.CUSTOMER -> CustomerBottomBar(navController, currentRoute)
+                UserRole.RESTAURANT -> RestaurantBottomBar(navController, currentRoute)
+                UserRole.DRIVER -> DriverBottomBar(navController, currentRoute)
+                UserRole.ADMIN -> AdminBottomBar(navController, currentRoute)
+            }
         }
     }
 
     Scaffold(
         // FIX: remove window insets on parent host
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
-        bottomBar = bottomBar
+        bottomBar = bottomBar,
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
         NavHost(
             navController = navController,
             startDestination = startDestination,
             modifier = modifier.padding(paddingValues)
         ) {
+            // Global Shared Screens
             composable(Route.Onboarding.route) {
                 OnboardingScreen(navController, authViewModel)
             }
+            composable(Route.Profile.route) { ProfileScreen(navController, authViewModel) }
+            composable(
+                route = Route.OrderDetail.route,
+                arguments = listOf(navArgument("orderId") { type = NavType.StringType })
+            ) {
+                OrderDetailScreen(navController = navController, authViewModel = authViewModel)
+            }
+
             // Delegating all screen routing to their respective graphs!
             authGraph(navController, authViewModel)
-            customerGraph(navController, authViewModel, cartViewModel, settingsViewModel)
+            customerGraph(navController, authViewModel, cartViewModel, settingsViewModel, snackbarHostState)
             restaurantGraph(navController, authViewModel, settingsViewModel)
             driverGraph(navController, authViewModel, settingsViewModel)
             adminGraph(navController, authViewModel, settingsViewModel)

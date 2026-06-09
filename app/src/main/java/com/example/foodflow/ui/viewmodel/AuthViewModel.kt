@@ -24,12 +24,17 @@ class AuthViewModel : ViewModel() {
     init {
         val uid = repository.currentUserId
         if (uid != null) {
+            // FIX: Set to Loading immediately so the UI shows a spinner instead of
+            // flashing the Login screen while waiting for Firestore data.
+            _authState.value = AuthState.Loading
+
             viewModelScope.launch {
                 val result = repository.getCurrentAppUser(uid)
                 if (result.isSuccess) {
                     _currentUser.value = result.getOrNull()
                     _authState.value = AuthState.Success(_currentUser.value?.role ?: UserRole.CUSTOMER)
                 } else {
+                    // If fetching profile fails, drop back to Idle (Login screen)
                     _authState.value = AuthState.Idle
                 }
             }
