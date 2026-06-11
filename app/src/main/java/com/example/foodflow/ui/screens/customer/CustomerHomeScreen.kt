@@ -31,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -233,6 +234,83 @@ fun CustomerHomeContent(
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun CustomerHomeContentPreview() {
+    // 1. Mock Data Setup (Adjust properties to match your exact data class definitions)
+    val mockUser = AppUser(
+        uid = "user_01",
+        name = "Alex Johnson",
+        isProfileComplete = true
+    )
+
+    val mockCategories = listOf(
+        MenuItemCategory(id = "cat_1", name = "Burgers", imageUrl = "https://example.com/burger.jpg"),
+        MenuItemCategory(id = "cat_2", name = "Pizza", imageUrl = ""), // Tests your ImageVector fallback fix!
+        MenuItemCategory(id = "cat_3", name = "Sushi", imageUrl = "https://example.com/sushi.jpg"),
+        MenuItemCategory(id = "cat_4", name = "Desserts", imageUrl = "https://example.com/dessert.jpg"),
+        MenuItemCategory(id = "cat_5", name = "Drinks", imageUrl = "https://example.com/drinks.jpg")
+    )
+
+    val mockPromotions = listOf(
+        Promotion(id = "promo_1", menuItemId = "item_1"),
+        Promotion(id = "promo_2", menuItemId = "item_3")
+    )
+
+    val mockMenuItems = listOf(
+        MenuItem(id = "item_1", name = "Classic Smash Burger", price = 9.99, description = "Double patty with cheese"),
+        MenuItem(id = "item_2", name = "Truffle Parmesan Fries", price = 4.99, description = "Crispy golden fries with real truffle oil"),
+        MenuItem(id = "item_3", name = "Spicy Pepperoni Pizza", price = 14.99, description = "Hot honey drizzle and fresh basil")
+    )
+
+    val mockRestaurants = listOf(
+        AppUser(uid = "rest_1", name = "The Burger Joint", isProfileComplete = true),
+        AppUser(uid = "rest_2", name = "Pizza Supreme", isProfileComplete = true),
+        AppUser(uid = "rest_3", name = "Tokyo Sushi Express", isProfileComplete = true)
+    )
+
+    // 2. Render Component Inside Project Theme
+    MaterialTheme {
+        CustomerHomeContent(
+            user = mockUser,
+            categories = mockCategories,
+            promotions = mockPromotions,
+            newlyAddedItems = mockMenuItems,
+            restaurants = mockRestaurants,
+            isLoading = false,
+            onLogoutClick = {},
+            onCategoryClick = { _, _ -> },
+            onSeeAllCategoriesClick = {},
+            onPromoClick = {},
+            onMenuItemClick = {},
+            onAddToCartClick = {},
+            onRestaurantClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Loading State")
+@Composable
+fun CustomerHomeContentLoadingPreview() {
+    MaterialTheme {
+        CustomerHomeContent(
+            user = null,
+            categories = emptyList(),
+            promotions = emptyList(),
+            newlyAddedItems = emptyList(),
+            restaurants = emptyList(),
+            isLoading = true,
+            onLogoutClick = {},
+            onCategoryClick = { _, _ -> },
+            onSeeAllCategoriesClick = {},
+            onPromoClick = {},
+            onMenuItemClick = {},
+            onAddToCartClick = {},
+            onRestaurantClick = {}
+        )
     }
 }
 

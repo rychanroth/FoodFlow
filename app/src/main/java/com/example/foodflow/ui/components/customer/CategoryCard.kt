@@ -1,5 +1,6 @@
 package com.example.foodflow.ui.components.customer
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -37,14 +38,27 @@ fun CategoryCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Box(contentAlignment = Alignment.BottomStart) {
-            AsyncImage(
-                model = category.imageUrl.ifBlank { Icons.Default.Category },
-                contentDescription = category.name,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(100.dp),
-                contentScale = ContentScale.Crop
-            )
+            if (category.imageUrl.isNotBlank()) {
+                AsyncImage(
+                    model = category.imageUrl,
+                    contentDescription = category.name,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(100.dp),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Image(
+                    imageVector = Icons.Default.Category,
+                    contentDescription = category.name,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(100.dp),
+                    contentScale = ContentScale.Crop,
+                    // Optional: Add a color filter if your vector icon needs a specific tint
+                    colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(MaterialTheme.colorScheme.onSurfaceVariant)
+                )
+            }
             // Gradient overlay for text readability
             Box(
                 modifier = Modifier
